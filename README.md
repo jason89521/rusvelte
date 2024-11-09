@@ -15,8 +15,8 @@ Svelte compiler written in Rust.
           - [x] name
           - [ ] attributes
       - [ ] Tag
-      - [ ] Text
+      - [x] Text
         - [x] Raw
-        - [ ] Decoded data
+        - [x] Decoded data
 - [ ] Analyzer
 - [ ] Transformer
