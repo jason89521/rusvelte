@@ -3,6 +3,27 @@ use serde::{ser::SerializeMap, Serialize};
 
 use crate::ast::*;
 
+impl Serialize for Root<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(None)?;
+        let Span { start, end, .. } = self.span;
+        map.serialize_entry("type", "Root")?;
+        map.serialize_entry("start", &start)?;
+        map.serialize_entry("end", &end)?;
+        if self.css.is_none() {
+            map.serialize_entry("css", "null")?;
+        } else {
+            panic!("Have'nt implement css serialize")
+        }
+        map.serialize_entry("fragment", &self.fragment)?;
+
+        map.end()
+    }
+}
+
 impl Serialize for FragmentNode<'_> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

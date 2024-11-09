@@ -1,10 +1,10 @@
-use ast::{Fragment, FragmentNode, SpanOffset};
+use ast::{Fragment, FragmentNode, Root, SpanOffset};
 use error::ParserError;
 use oxc_allocator::Allocator;
 use oxc_ast::{ast::Expression, VisitMut};
 use oxc_diagnostics::OxcDiagnostic;
 use oxc_parser::Parser as OxcParser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::{GetSpan, SourceType, Span};
 
 mod ast;
 mod error;
@@ -36,6 +36,15 @@ impl<'a> Parser<'a> {
         self.offset as usize
     }
 
+    pub fn parse(&mut self) -> anyhow::Result<Root<'a>> {
+        let start = self.source.find(|c: char| !c.is_whitespace()).unwrap_or(0) as u32;
+        Ok(Root {
+            css: None,
+            span: Span::new(start, self.source.len() as u32),
+            fragment: self.parse_fragment(),
+        })
+    }
+
     pub fn is_match(&self, s: &str) -> bool {
         let len = s.len();
         let end = if self.offset_u() + len > self.source.len() {
@@ -47,7 +56,7 @@ impl<'a> Parser<'a> {
         &self.source[self.offset_u()..end] == s
     }
 
-    pub fn parse_fragments(&mut self) -> Vec<FragmentNode<'a>> {
+    pub fn parse_fragment(&mut self) -> Fragment<'a> {
         let mut result = vec![];
         while self.offset_u() < self.source.len() && !self.is_match("</") {
             result.push(
@@ -55,7 +64,7 @@ impl<'a> Parser<'a> {
                     .expect("Failed to parse fragment node"),
             );
         }
-        result
+        Fragment { nodes: result }
     }
 
     pub fn parse_fragment_node(&mut self) -> anyhow::Result<FragmentNode<'a>> {

@@ -39,8 +39,7 @@ impl<'a> Parser<'a> {
             _ => (),
         };
 
-        let nodes = self.parse_fragments();
-        let fragment = Fragment { nodes };
+        let fragment = self.parse_fragment();
         self.eat_until(|ch| ch == '>');
         self.expect('>').unwrap();
         let element = RegularElement {

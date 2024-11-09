@@ -1,10 +1,14 @@
 mod element;
+mod root;
 mod span_offset;
+mod style_sheet;
 mod tag;
 mod text;
 
 pub use element::*;
+pub use root::*;
 pub use span_offset::SpanOffset;
+pub use style_sheet::*;
 pub use tag::*;
 pub use text::*;
 
