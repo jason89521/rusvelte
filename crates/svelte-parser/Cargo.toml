@@ -14,3 +14,4 @@ serde_json = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
 thiserror = { workspace = true }
+htmlize = { workspace = true, features = ["unescape"] }
