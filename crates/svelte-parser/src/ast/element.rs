@@ -1,10 +1,19 @@
 use oxc_span::Span;
 
-use crate::{ast::Fragment, Parser};
+use crate::{ast::Fragment, error::ParserError, Parser};
+
+use std::sync::LazyLock;
+
+use regex::Regex;
+
+static WHITESPACE_OR_SLASH_OR_CLOSING_TAG: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(\s|\/|>)").unwrap());
+static CLOSING_COMMENT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"-->").unwrap());
 
 #[derive(Debug)]
 pub enum Element<'a> {
     RegularElement(RegularElement<'a>),
+    Comment(Comment<'a>),
 }
 
 #[derive(Debug)]
@@ -16,31 +25,48 @@ pub struct RegularElement<'a> {
     pub fragment: Fragment<'a>,
 }
 
+#[derive(Debug)]
+pub struct Comment<'a> {
+    pub span: Span,
+    pub data: &'a str,
+}
+
 impl<'a> Parser<'a> {
     // now can only parse regular element
-    pub fn parse_element(&mut self) -> Element<'a> {
+    pub fn parse_element(&mut self) -> Result<Element<'a>, ParserError> {
         let start = self.offset;
-        self.next();
-        let name = self.eat_until(|ch| ch.is_whitespace() || matches!(ch, '/' | '>'));
+        self.expect('<')?;
 
-        // TODO: attributes
-        self.eat_until(|ch| matches!(ch, '>' | '/'));
+        if self.eat_str("!--").is_some() {
+            let data = self.eat_until(&CLOSING_COMMENT).unwrap_or("");
+            self.expect_str("-->")?;
+
+            return Ok(Element::Comment(Comment {
+                span: Span::new(start, self.offset),
+                data,
+            }));
+        }
+
+        let name = self.eat_until(&WHITESPACE_OR_SLASH_OR_CLOSING_TAG).unwrap();
+
+        // // TODO: attributes, now ignore.
+        self.eat_until(&Regex::new(r"(\s|\/|>)").unwrap());
         match self.next() {
             Some(ch) if ch == '/' => {
                 self.expect('>').unwrap();
                 let span = Span::new(start, self.offset);
                 let fragment = Fragment { nodes: vec![] };
-                return Element::RegularElement(RegularElement {
+                return Ok(Element::RegularElement(RegularElement {
                     span,
                     name,
                     fragment,
-                });
+                }));
             }
             _ => (),
         };
 
         let fragment = self.parse_fragment();
-        self.eat_until(|ch| ch == '>');
+        self.eat_until(&Regex::new(r">").unwrap());
         self.expect('>').unwrap();
         let element = RegularElement {
             fragment,
@@ -48,6 +74,6 @@ impl<'a> Parser<'a> {
             span: Span::new(start, self.offset),
         };
 
-        Element::RegularElement(element)
+        Ok(Element::RegularElement(element))
     }
 }

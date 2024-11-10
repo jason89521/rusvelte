@@ -45,7 +45,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn is_match(&self, s: &str) -> bool {
+    pub fn match_str(&self, s: &str) -> bool {
         let len = s.len();
         let end = if self.offset_u() + len > self.source.len() {
             self.source.len()
@@ -58,7 +58,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_fragment(&mut self) -> Fragment<'a> {
         let mut result = vec![];
-        while self.offset_u() < self.source.len() && !self.is_match("</") {
+        while self.offset_u() < self.source.len() && !self.match_str("</") {
             result.push(
                 self.parse_fragment_node()
                     .expect("Failed to parse fragment node"),
@@ -67,10 +67,10 @@ impl<'a> Parser<'a> {
         Fragment { nodes: result }
     }
 
-    pub fn parse_fragment_node(&mut self) -> anyhow::Result<FragmentNode<'a>> {
-        let node = if self.is_match("<") {
-            FragmentNode::Element(Box::new(self.parse_element()))
-        } else if self.is_match("{") {
+    pub fn parse_fragment_node(&mut self) -> Result<FragmentNode<'a>, ParserError> {
+        let node = if self.match_str("<") {
+            FragmentNode::Element(Box::new(self.parse_element()?))
+        } else if self.match_str("{") {
             FragmentNode::Tag(self.parse_tag()?)
         } else {
             FragmentNode::Text(self.parse_text())
@@ -117,6 +117,10 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn expect_str(&mut self, s: &'a str) -> Result<&'a str, ParserError> {
+        self.eat_str(s).ok_or(ParserError::ExpectStr(s.to_string()))
+    }
+
     fn peek(&self) -> Option<char> {
         let Self { source, .. } = self;
         if self.offset_u() < source.len() {
@@ -126,25 +130,28 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn eat_if<F>(&mut self, check: F) -> Option<char>
-    where
-        F: Fn(char) -> bool,
-    {
-        match self.peek() {
-            Some(ch) if check(ch) => self.next(),
-            _ => None,
+    fn eat_until(&mut self, re: &regex::Regex) -> Option<&'a str> {
+        if let Some(mat) = re.find(self.remain()) {
+            let end = mat.start();
+            let result = &self.remain()[..end];
+            self.offset += end as u32;
+            Some(result)
+        } else {
+            None
         }
     }
 
-    // TODO: can use regex?
-    fn eat_until<F>(&mut self, check: F) -> &'a str
-    where
-        F: Fn(char) -> bool,
-    {
-        let start = self.offset_u();
-        while self.eat_if(|ch| !check(ch)).is_some() {
-            //
+    fn eat_str(&mut self, s: &'a str) -> Option<&'a str> {
+        let end = self.offset_u() + s.len();
+        if end > self.source.len() {
+            return None;
         }
-        &self.source[start..self.offset_u()]
+
+        if &self.source[self.offset_u()..end] == s {
+            self.offset = end as u32;
+            Some(s)
+        } else {
+            None
+        }
     }
 }
