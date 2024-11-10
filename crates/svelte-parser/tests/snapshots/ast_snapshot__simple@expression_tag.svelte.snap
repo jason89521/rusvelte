@@ -1,0 +1,29 @@
+---
+source: crates/svelte-parser/tests/ast_snapshot.rs
+assertion_line: 12
+expression: root
+input_file: crates/svelte-parser/tests/inputs/simple/expression_tag.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "start": 0,
+  "end": 3,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "ExpressionTag",
+        "start": 0,
+        "end": 3,
+        "expression": {
+          "type": "NumericLiteral",
+          "start": 1,
+          "end": 2,
+          "value": 1.0,
+          "raw": "1"
+        }
+      }
+    ]
+  }
+}

@@ -7,8 +7,8 @@ use oxc_span::Span;
 #[derive(Debug, Clone, AstTree)]
 pub struct Text<'a> {
     pub span: Span,
-    pub data: Cow<'a, str>,
     pub raw: &'a str,
+    pub data: Cow<'a, str>,
 }
 
 impl<'a> Parser<'a> {

@@ -17,3 +17,6 @@ thiserror = { workspace = true }
 htmlize = { workspace = true, features = ["unescape"] }
 regex = { workspace = true }
 derive-macro = { path = "../derive-macro" }
+
+[dev-dependencies]
+insta = { workspace = true, features = ["json", "glob"] }
