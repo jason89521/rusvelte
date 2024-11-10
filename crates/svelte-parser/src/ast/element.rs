@@ -1,3 +1,4 @@
+use derive_macro::AstTree;
 use oxc_span::Span;
 
 use crate::{
@@ -9,13 +10,13 @@ use crate::{
 
 use super::attribute::Attribute;
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum Element<'a> {
     RegularElement(RegularElement<'a>),
     Comment(Comment<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub struct RegularElement<'a> {
     pub span: Span,
     pub name: &'a str,
@@ -23,7 +24,7 @@ pub struct RegularElement<'a> {
     pub fragment: Fragment<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub struct Comment<'a> {
     pub span: Span,
     pub data: &'a str,

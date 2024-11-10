@@ -1,9 +1,10 @@
+use derive_macro::AstTree;
 use oxc_span::Span;
 
-use super::{style_sheet::StyleSheet, Fragment};
+use super::Fragment;
 
+#[derive(Debug, AstTree)]
 pub struct Root<'a> {
-    pub css: Option<StyleSheet>,
     pub span: Span,
     pub fragment: Fragment<'a>,
 }

@@ -5,6 +5,7 @@ mod style_sheet;
 mod tag;
 mod text;
 
+use derive_macro::AstTree;
 pub use element::*;
 pub use root::*;
 pub use span_offset::SpanOffset;
@@ -13,7 +14,7 @@ pub use attribute::*;
 pub use tag::*;
 pub use text::*;
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub struct Fragment<'a> {
     pub nodes: Vec<FragmentNode<'a>>,
 }
@@ -24,7 +25,7 @@ impl<'a> Fragment<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum FragmentNode<'a> {
     Text(Text<'a>),
     Element(Box<Element<'a>>),
