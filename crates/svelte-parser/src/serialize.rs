@@ -82,6 +82,22 @@ impl Serialize for RegularElement<'_> {
     }
 }
 
+impl Serialize for Comment<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(None)?;
+        let Span { start, end, .. } = self.span;
+        map.serialize_entry("type", "Comment")?;
+        map.serialize_entry("start", &start)?;
+        map.serialize_entry("end", &end)?;
+        map.serialize_entry("data", &self.data)?;
+
+        map.end()
+    }
+}
+
 impl Serialize for Element<'_> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -89,6 +105,7 @@ impl Serialize for Element<'_> {
     {
         match self {
             Element::RegularElement(x) => Serialize::serialize(x, serializer),
+            Element::Comment(x) => Serialize::serialize(x, serializer),
         }
     }
 }

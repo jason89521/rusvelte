@@ -6,6 +6,8 @@ pub enum ParserError {
     ParseExpression(Vec<OxcDiagnostic>),
     #[error(r#"Expect a "{expected}", but found a "{found}"."#)]
     ExpectChar { expected: char, found: char },
+    #[error(r#"Expect a "{0}" str."#)]
+    ExpectStr(String),
     #[error("Unexpected EOF. {0}")]
     UnexpectedEOF(char),
 }
