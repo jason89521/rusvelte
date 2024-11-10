@@ -76,6 +76,8 @@ impl Serialize for RegularElement<'_> {
         map.serialize_entry("type", "RegularElement")?;
         map.serialize_entry("start", &start)?;
         map.serialize_entry("end", &end)?;
+        map.serialize_entry("name", self.name)?;
+        map.serialize_entry("attributes", &self.attributes)?;
         map.serialize_entry("fragment", &self.fragment)?;
 
         map.end()
@@ -133,6 +135,76 @@ impl Serialize for Tag<'_> {
     {
         match self {
             Tag::ExpressionTag(x) => Serialize::serialize(x, serializer),
+        }
+    }
+}
+
+impl Serialize for NormalAttribute<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(None)?;
+        let Span { start, end, .. } = self.span;
+        map.serialize_entry("type", "Attribute")?;
+        map.serialize_entry("start", &start)?;
+        map.serialize_entry("end", &end)?;
+        map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("value", &self.value)?;
+
+        map.end()
+    }
+}
+
+impl Serialize for AttributeValue<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            AttributeValue::ExpressionTag(x) => Serialize::serialize(x, serializer),
+            AttributeValue::Vec(x) => Serialize::serialize(x, serializer),
+            AttributeValue::True => Serialize::serialize("true", serializer),
+        }
+    }
+}
+
+impl Serialize for QuotedAttributeValue<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            QuotedAttributeValue::ExpressionTag(x) => Serialize::serialize(x, serializer),
+            QuotedAttributeValue::Text(x) => Serialize::serialize(x, serializer),
+        }
+    }
+}
+
+impl Serialize for SpreadAttribute<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(None)?;
+        let Span { start, end, .. } = self.span;
+        map.serialize_entry("type", "SpreadAttribute")?;
+        map.serialize_entry("start", &start)?;
+        map.serialize_entry("end", &end)?;
+        map.serialize_entry("expression", &self.expression)?;
+
+        map.end()
+    }
+}
+
+impl Serialize for Attribute<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            Attribute::NormalAttribute(x) => Serialize::serialize(x, serializer),
+            Attribute::SpreadAttribute(x) => Serialize::serialize(x, serializer),
         }
     }
 }

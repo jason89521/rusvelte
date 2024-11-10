@@ -8,7 +8,8 @@ mod text;
 pub use element::*;
 pub use root::*;
 pub use span_offset::SpanOffset;
-pub use style_sheet::*;
+mod attribute;
+pub use attribute::*;
 pub use tag::*;
 pub use text::*;
 
