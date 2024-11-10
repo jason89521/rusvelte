@@ -1,0 +1,47 @@
+---
+source: crates/svelte-parser/tests/ast_snapshot.rs
+assertion_line: 12
+expression: root
+input_file: crates/svelte-parser/tests/inputs/simple/regular_element.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "start": 0,
+  "end": 20,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 14,
+        "name": "div",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 5,
+              "end": 8,
+              "raw": "foo",
+              "data": "foo"
+            }
+          ]
+        }
+      },
+      {
+        "type": "RegularElement",
+        "start": 14,
+        "end": 20,
+        "name": "br",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  }
+}

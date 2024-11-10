@@ -1,0 +1,24 @@
+---
+source: crates/svelte-parser/tests/ast_snapshot.rs
+assertion_line: 12
+expression: root
+input_file: crates/svelte-parser/tests/inputs/simple/text.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "start": 0,
+  "end": 8,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Text",
+        "start": 0,
+        "end": 8,
+        "raw": "text&lt;",
+        "data": "text<"
+      }
+    ]
+  }
+}

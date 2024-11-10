@@ -1,0 +1,29 @@
+---
+source: crates/svelte-parser/tests/ast_snapshot.rs
+assertion_line: 12
+expression: root
+input_file: crates/svelte-parser/tests/inputs/simple/comment.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "start": 0,
+  "end": 18,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Comment",
+        "start": 0,
+        "end": 7,
+        "data": ""
+      },
+      {
+        "type": "Comment",
+        "start": 7,
+        "end": 18,
+        "data": "data"
+      }
+    ]
+  }
+}
