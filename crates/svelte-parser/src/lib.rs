@@ -10,10 +10,10 @@ use regex_pattern::NON_WHITESPACE;
 mod ast;
 mod error;
 mod regex_pattern;
-mod serialize;
 
 #[derive(Debug, Clone, Default)]
 pub struct Meta {
+    #[allow(dead_code)]
     is_parent_root: bool,
 }
 
@@ -46,7 +46,6 @@ impl<'a> Parser<'a> {
     pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
         let start = self.source.find(|c: char| !c.is_whitespace()).unwrap_or(0) as u32;
         Ok(Root {
-            css: None,
             span: Span::new(start, self.source.len() as u32),
             fragment: self.parse_fragment(&Meta {
                 is_parent_root: true,

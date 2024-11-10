@@ -1,14 +1,15 @@
+use derive_macro::AstTree;
 use oxc_ast::ast::Expression;
 use oxc_span::Span;
 
 use crate::{error::ParserError, Parser};
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum Tag<'a> {
     ExpressionTag(ExpressionTag<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub struct ExpressionTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,

@@ -16,3 +16,4 @@ oxc_diagnostics = { workspace = true }
 thiserror = { workspace = true }
 htmlize = { workspace = true, features = ["unescape"] }
 regex = { workspace = true }
+derive-macro = { path = "../derive-macro" }

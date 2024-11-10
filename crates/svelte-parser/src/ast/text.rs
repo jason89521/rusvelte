@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 
 use crate::Parser;
+use derive_macro::AstTree;
 use oxc_span::Span;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, AstTree)]
 pub struct Text<'a> {
     pub span: Span,
     pub data: Cow<'a, str>,

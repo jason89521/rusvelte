@@ -1,3 +1,4 @@
+use derive_macro::AstTree;
 use oxc_ast::ast::Expression;
 use oxc_span::{GetSpan, Span};
 
@@ -5,33 +6,34 @@ use crate::{error::ParserError, regex_pattern::WHITESPACE_OR_SLASH_OR_CLOSING_TA
 
 use super::{ExpressionTag, Text};
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum Attribute<'a> {
     NormalAttribute(NormalAttribute<'a>),
     SpreadAttribute(SpreadAttribute<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
+#[ast_tree(type = "Attribute")]
 pub struct NormalAttribute<'a> {
     pub span: Span,
     pub name: &'a str,
     pub value: AttributeValue<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum AttributeValue<'a> {
     ExpressionTag(ExpressionTag<'a>),
     Vec(Vec<QuotedAttributeValue<'a>>),
-    True,
+    True(bool),
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub enum QuotedAttributeValue<'a> {
     ExpressionTag(ExpressionTag<'a>),
     Text(Text<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, AstTree)]
 pub struct SpreadAttribute<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
