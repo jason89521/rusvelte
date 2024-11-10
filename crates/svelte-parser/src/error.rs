@@ -10,4 +10,6 @@ pub enum ParserError {
     ExpectStr(String),
     #[error("Unexpected EOF. {0}")]
     UnexpectedEOF(char),
+    #[error("Attribute shorthand cannot be empty")]
+    AttributeEmptyShorthand,
 }

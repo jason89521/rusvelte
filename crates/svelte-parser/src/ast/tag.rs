@@ -19,9 +19,7 @@ impl<'a> Parser<'a> {
         let start = self.offset;
         self.next();
 
-        let expr = self
-            .parse_expression()
-            .map_err(|e| ParserError::ParseExpression(e))?;
+        let expr = self.parse_expression()?;
 
         self.expect('}')?;
 

@@ -1,14 +1,13 @@
 use oxc_span::Span;
 
-use crate::{ast::Fragment, error::ParserError, Parser};
+use crate::{
+    ast::Fragment,
+    error::ParserError,
+    regex_pattern::{CLOSING_COMMENT, LESS_THEN, WHITESPACE_OR_SLASH_OR_CLOSING_TAG},
+    Meta, Parser,
+};
 
-use std::sync::LazyLock;
-
-use regex::Regex;
-
-static WHITESPACE_OR_SLASH_OR_CLOSING_TAG: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(\s|\/|>)").unwrap());
-static CLOSING_COMMENT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"-->").unwrap());
+use super::attribute::Attribute;
 
 #[derive(Debug)]
 pub enum Element<'a> {
@@ -20,8 +19,7 @@ pub enum Element<'a> {
 pub struct RegularElement<'a> {
     pub span: Span,
     pub name: &'a str,
-    // TODO:
-    // pub attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -33,12 +31,12 @@ pub struct Comment<'a> {
 
 impl<'a> Parser<'a> {
     // now can only parse regular element
-    pub fn parse_element(&mut self) -> Result<Element<'a>, ParserError> {
+    pub fn parse_element(&mut self, _meta: &Meta) -> Result<Element<'a>, ParserError> {
         let start = self.offset;
         self.expect('<')?;
 
-        if self.eat_str("!--").is_some() {
-            let data = self.eat_until(&CLOSING_COMMENT).unwrap_or("");
+        if self.eat_str("!--") {
+            let data = self.eat_until(&CLOSING_COMMENT);
             self.expect_str("-->")?;
 
             return Ok(Element::Comment(Comment {
@@ -47,31 +45,35 @@ impl<'a> Parser<'a> {
             }));
         }
 
-        let name = self.eat_until(&WHITESPACE_OR_SLASH_OR_CLOSING_TAG).unwrap();
+        let name = self.eat_until(&WHITESPACE_OR_SLASH_OR_CLOSING_TAG);
+        self.skip_whitespace();
+        // TODO: attributes, now ignore.
+        let attributes = self.parse_attributes()?;
 
-        // // TODO: attributes, now ignore.
-        self.eat_until(&Regex::new(r"(\s|\/|>)").unwrap());
-        match self.next() {
-            Some(ch) if ch == '/' => {
-                self.expect('>').unwrap();
-                let span = Span::new(start, self.offset);
-                let fragment = Fragment { nodes: vec![] };
-                return Ok(Element::RegularElement(RegularElement {
-                    span,
-                    name,
-                    fragment,
-                }));
-            }
-            _ => (),
-        };
+        // self closed element
+        if self.eat('/') {
+            self.expect('>')?;
+            let span = Span::new(start, self.offset);
+            let fragment = Fragment { nodes: vec![] };
+            return Ok(Element::RegularElement(RegularElement {
+                span,
+                name,
+                fragment,
+                attributes,
+            }));
+        }
 
-        let fragment = self.parse_fragment();
-        self.eat_until(&Regex::new(r">").unwrap());
+        self.expect('>')?;
+        let fragment = self.parse_fragment(&Meta {
+            is_parent_root: false,
+        })?;
+        self.eat_until(&LESS_THEN);
         self.expect('>').unwrap();
         let element = RegularElement {
             fragment,
             name,
             span: Span::new(start, self.offset),
+            attributes,
         };
 
         Ok(Element::RegularElement(element))
