@@ -1,9 +1,7 @@
 ---
-source: crates/svelte-parser/tests/ast_snapshot.rs
-assertion_line: 12
+source: crates/svelte-parser/tests/simple/mod.rs
 expression: root
-input_file: crates/svelte-parser/tests/inputs/simple/regular_element.svelte
-snapshot_kind: text
+input_file: crates/svelte-parser/tests/simple/inputs/regular_element.svelte
 ---
 {
   "type": "Root",

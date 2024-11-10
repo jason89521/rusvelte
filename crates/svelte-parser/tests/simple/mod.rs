@@ -1,8 +1,7 @@
 use svelte_parser::Parser;
-
 #[test]
-fn test_simple() {
-    insta::glob!("inputs/simple/*.svelte", |path| {
+fn test() {
+    insta::glob!("inputs/*.svelte", |path| {
         let source = std::fs::read_to_string(path).unwrap();
         let allocator = oxc_allocator::Allocator::default();
         let mut parser = Parser::new(&source, &allocator);
