@@ -1,11 +1,14 @@
-use ast::{Fragment, FragmentNode, Root, SpanOffset};
+use ast::{Element, Fragment, FragmentNode, Root, Script, ScriptContext, SpanOffset};
 use error::ParserError;
 use oxc_allocator::Allocator;
-use oxc_ast::{ast::Expression, VisitMut};
+use oxc_ast::{
+    ast::{Expression, Program},
+    VisitMut,
+};
 use oxc_parser::Parser as OxcParser;
 use oxc_span::{GetSpan, SourceType, Span};
 use oxc_syntax::identifier::is_identifier_name;
-use regex_pattern::NON_WHITESPACE;
+use regex_pattern::REGEX_NON_WHITESPACE;
 
 mod ast;
 mod error;
@@ -13,7 +16,6 @@ mod regex_pattern;
 
 #[derive(Debug, Clone, Default)]
 pub struct Meta {
-    #[allow(dead_code)]
     is_parent_root: bool,
 }
 
@@ -22,6 +24,9 @@ pub struct Parser<'a> {
     offset: u32,
     allocator: &'a Allocator,
     source_type: SourceType,
+    instance: Option<Script<'a>>,
+    module: Option<Script<'a>>,
+    meta_stack: Vec<Meta>,
     pub fragments: Vec<Fragment<'a>>,
 }
 
@@ -36,6 +41,9 @@ impl<'a> Parser<'a> {
             fragments,
             allocator,
             source_type: SourceType::default(),
+            instance: None,
+            module: None,
+            meta_stack: vec![],
         }
     }
 
@@ -44,33 +52,68 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
-        let start = self.source.find(|c: char| !c.is_whitespace()).unwrap_or(0) as u32;
+        self.meta_stack.push(Meta {
+            is_parent_root: true,
+        });
+        let fragment = self.parse_fragment()?;
+        let start = fragment.nodes.iter().next().map_or(0, |node| {
+            let mut start = node.span().start;
+            let mut chars = self.source[start as usize..].chars();
+            while chars.next().map_or(false, char::is_whitespace) {
+                start += 1;
+            }
+            start
+        });
+        let end = fragment.nodes.iter().last().map_or(0, |node| {
+            let mut end = node.span().end;
+            if end == 0 {
+                return end;
+            }
+            let mut chars = self.source[..end as usize].chars().rev();
+            while chars.next().map_or(false, char::is_whitespace) && end > 0 {
+                end -= 1;
+            }
+            end
+        });
+        self.meta_stack.pop();
         Ok(Root {
-            span: Span::new(start, self.source.len() as u32),
-            fragment: self.parse_fragment(&Meta {
-                is_parent_root: true,
-            })?,
+            span: Span::new(start, end),
+            fragment,
+            instance: self.instance.take(),
+            module: self.module.take(),
         })
     }
 
-    pub fn parse_fragment(&mut self, meta: &Meta) -> Result<Fragment<'a>, ParserError> {
+    pub fn parse_fragment(&mut self) -> Result<Fragment<'a>, ParserError> {
         let mut result = vec![];
         while self.offset_u() < self.source.len() && !self.match_str("</") {
-            result.push(self.parse_fragment_node(meta)?);
+            if let Some(node) = self.parse_fragment_node()? {
+                result.push(node)
+            }
         }
         Ok(Fragment { nodes: result })
     }
 
-    pub fn parse_fragment_node(&mut self, meta: &Meta) -> Result<FragmentNode<'a>, ParserError> {
+    pub fn parse_fragment_node(&mut self) -> Result<Option<FragmentNode<'a>>, ParserError> {
         let node = if self.match_str("<") {
-            FragmentNode::Element(Box::new(self.parse_element(meta)?))
+            let element = self.parse_element()?;
+            if self.meta().is_parent_root {
+                if let Element::Script(script) = element {
+                    match &script.context {
+                        &ScriptContext::Default => self.instance = Some(script),
+                        &ScriptContext::Module => self.module = Some(script),
+                    }
+                    return Ok(None);
+                }
+            }
+            FragmentNode::Element(Box::new(element))
         } else if self.match_str("{") {
             FragmentNode::Tag(self.parse_tag()?)
         } else {
             FragmentNode::Text(self.parse_text())
         };
 
-        Ok(node)
+        Ok(Some(node))
     }
 
     pub fn parse_expression(&mut self) -> Result<Expression<'a>, ParserError> {
@@ -95,6 +138,21 @@ impl<'a> Parser<'a> {
         self.offset = end;
 
         Ok(expr)
+    }
+
+    fn parse_program(&self, data: &'a str, start: u32) -> Result<Program<'a>, ParserError> {
+        let parser_return = OxcParser::new(&self.allocator, &data, self.source_type).parse();
+        if parser_return.errors.len() != 0 {
+            return Err(ParserError::ParseProgram(parser_return.errors));
+        }
+        let mut program = parser_return.program;
+        let mut span_offset = SpanOffset(start);
+        span_offset.visit_program(&mut program);
+        Ok(program)
+    }
+
+    fn meta(&self) -> &Meta {
+        self.meta_stack.last().expect("No meta found")
     }
 
     fn remain(&self) -> &'a str {
@@ -129,6 +187,15 @@ impl<'a> Parser<'a> {
             Ok(s)
         } else {
             Err(ParserError::ExpectStr(s.to_string()))
+        }
+    }
+
+    fn expect_regex(&mut self, re: &regex::Regex) -> Result<&'a str, ParserError> {
+        if let Some(mat) = re.find(&self.remain()) {
+            self.offset += mat.len() as u32;
+            Ok(mat.as_str())
+        } else {
+            Err(ParserError::ExpectStr(re.to_string()))
         }
     }
 
@@ -203,14 +270,12 @@ impl<'a> Parser<'a> {
         &self.source[self.offset_u()..end] == s
     }
 
-    fn match_regex(&self, re: &regex::Regex) -> bool {
-        re.find(&self.remain())
-            .map(|mat| mat.start() == 0)
-            .unwrap_or(false)
+    fn match_regex(&self, re: &regex::Regex) -> Option<&'a str> {
+        re.find(&self.remain()).map(|mat| mat.as_str())
     }
 
     fn skip_whitespace(&mut self) {
-        if let Some(mat) = NON_WHITESPACE.find(&self.remain()) {
+        if let Some(mat) = REGEX_NON_WHITESPACE.find(&self.remain()) {
             self.offset += mat.start() as u32;
         }
     }

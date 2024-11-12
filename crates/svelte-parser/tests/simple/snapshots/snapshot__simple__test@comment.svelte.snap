@@ -23,5 +23,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/comment.svelte
         "data": "data"
       }
     ]
-  }
+  },
+  "module": null,
+  "instance": null
 }

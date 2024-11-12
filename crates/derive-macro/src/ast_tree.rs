@@ -93,6 +93,17 @@ fn build_enum(name: &Ident, data_enum: &DataEnum) -> syn::Result<TokenStream> {
         .map(|variant| {
             let variant_ident = &variant.ident;
             match &variant.fields {
+                Fields::Unit => {
+                    let value = match variant_ident.to_string().to_lowercase().as_ref() {
+                        "true" => quote! {
+                            &true
+                        },
+                        v => quote! { #v },
+                    };
+                    Ok(quote! {
+                        #name::#variant_ident => Serialize::serialize(#value, serializer)
+                    })
+                }
                 Fields::Unnamed(fields_unnamed) if fields_unnamed.unnamed.len() == 1 => {
                     Ok(quote! {
                         #name::#variant_ident(x) => Serialize::serialize(x, serializer)

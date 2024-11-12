@@ -1,16 +1,17 @@
 mod element;
 mod root;
+mod script;
 mod span_offset;
 mod style_sheet;
 mod tag;
 mod text;
 
-use derive_macro::AstTree;
+use derive_macro::{AstTree, OxcSpan};
 pub use element::*;
 pub use root::*;
 pub use span_offset::SpanOffset;
 mod attribute;
-pub use attribute::*;
+pub use script::*;
 pub use tag::*;
 pub use text::*;
 
@@ -25,7 +26,7 @@ impl<'a> Fragment<'a> {
     }
 }
 
-#[derive(Debug, AstTree)]
+#[derive(Debug, AstTree, OxcSpan)]
 pub enum FragmentNode<'a> {
     Text(Text<'a>),
     Element(Box<Element<'a>>),

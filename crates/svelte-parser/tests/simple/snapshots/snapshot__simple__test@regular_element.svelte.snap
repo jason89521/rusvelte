@@ -41,5 +41,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/regular_element.svelte
         }
       }
     ]
-  }
+  },
+  "module": null,
+  "instance": null
 }

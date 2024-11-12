@@ -18,5 +18,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/text.svelte
         "data": "text<"
       }
     ]
-  }
+  },
+  "module": null,
+  "instance": null
 }

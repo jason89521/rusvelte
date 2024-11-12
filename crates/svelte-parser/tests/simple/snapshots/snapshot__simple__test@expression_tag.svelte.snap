@@ -23,5 +23,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/expression_tag.svelte
         }
       }
     ]
-  }
+  },
+  "module": null,
+  "instance": null
 }
