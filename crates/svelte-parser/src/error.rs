@@ -1,7 +1,36 @@
 use oxc_diagnostics::OxcDiagnostic;
+use oxc_span::Span;
+
+#[derive(thiserror::Error)]
+pub struct ParserError {
+    pub kind: ParserErrorKind,
+    pub span: Span,
+}
+
+impl ParserError {
+    pub fn new(span: Span, kind: ParserErrorKind) -> Self {
+        Self { span, kind }
+    }
+}
+
+impl std::fmt::Debug for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}]: {}", self.span.start, self.span.end, self.kind)
+    }
+}
+
+impl std::fmt::Display for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Error[{}, {}]: {}",
+            self.span.start, self.span.end, self.kind
+        )
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
-pub enum ParserError {
+pub enum ParserErrorKind {
     #[error("Parse program error: {0:#?}.")]
     ParseProgram(Vec<OxcDiagnostic>),
     #[error("Parse expression error: {0:#?}.")]

@@ -1,6 +1,6 @@
 use svelte_parser::Parser;
 #[test]
-fn test() {
+fn test_success() {
     insta::glob!("inputs/*.svelte", |path| {
         let source = std::fs::read_to_string(path).unwrap();
         let allocator = oxc_allocator::Allocator::default();

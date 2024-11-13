@@ -1,5 +1,5 @@
 use ast::{Element, Fragment, FragmentNode, Root, Script, ScriptContext, SpanOffset};
-use error::ParserError;
+use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
 use oxc_ast::{
     ast::{Expression, Program},
@@ -119,7 +119,12 @@ impl<'a> Parser<'a> {
     pub fn parse_expression(&mut self) -> Result<Expression<'a>, ParserError> {
         let mut expr = OxcParser::new(&self.allocator, &self.remain(), self.source_type)
             .parse_expression()
-            .map_err(|e| ParserError::ParseExpression(e))?;
+            .map_err(|e| {
+                ParserError::new(
+                    Span::empty(self.offset),
+                    ParserErrorKind::ParseExpression(e),
+                )
+            })?;
         let mut span_offset = SpanOffset(self.offset);
         span_offset.visit_expression(&mut expr);
         let end = expr.span().end;
@@ -131,7 +136,12 @@ impl<'a> Parser<'a> {
     fn parse_expression_in(&mut self, text: &'a str) -> Result<Expression<'a>, ParserError> {
         let mut expr = OxcParser::new(&self.allocator, text, self.source_type)
             .parse_expression()
-            .map_err(|e| ParserError::ParseExpression(e))?;
+            .map_err(|e| {
+                ParserError::new(
+                    Span::empty(self.offset),
+                    ParserErrorKind::ParseExpression(e),
+                )
+            })?;
         let mut span_offset = SpanOffset(self.offset);
         span_offset.visit_expression(&mut expr);
         let end = expr.span().end;
@@ -143,7 +153,10 @@ impl<'a> Parser<'a> {
     fn parse_program(&self, data: &'a str, start: u32) -> Result<Program<'a>, ParserError> {
         let parser_return = OxcParser::new(&self.allocator, &data, self.source_type).parse();
         if parser_return.errors.len() != 0 {
-            return Err(ParserError::ParseProgram(parser_return.errors));
+            return Err(ParserError::new(
+                Span::new(start, self.offset),
+                ParserErrorKind::ParseProgram(parser_return.errors),
+            ));
         }
         let mut program = parser_return.program;
         let mut span_offset = SpanOffset(start);
@@ -175,10 +188,16 @@ impl<'a> Parser<'a> {
                 if c == expected {
                     Ok(c)
                 } else {
-                    Err(ParserError::ExpectChar { expected, found: c })
+                    Err(ParserError::new(
+                        Span::empty(self.offset),
+                        ParserErrorKind::ExpectChar { expected, found: c },
+                    ))
                 }
             }
-            None => Err(ParserError::UnexpectedEOF(expected)),
+            None => Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::UnexpectedEOF(expected),
+            )),
         }
     }
 
@@ -186,7 +205,10 @@ impl<'a> Parser<'a> {
         if self.eat_str(s) {
             Ok(s)
         } else {
-            Err(ParserError::ExpectStr(s.to_string()))
+            Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::ExpectStr(s.to_string()),
+            ))
         }
     }
 
@@ -195,7 +217,10 @@ impl<'a> Parser<'a> {
             self.offset += mat.len() as u32;
             Ok(mat.as_str())
         } else {
-            Err(ParserError::ExpectStr(re.to_string()))
+            Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::ExpectStr(re.to_string()),
+            ))
         }
     }
 
@@ -252,7 +277,10 @@ impl<'a> Parser<'a> {
 
         let name = &remain[..i - 1];
         if name == "" {
-            return Err(ParserError::AttributeEmptyShorthand);
+            return Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::AttributeEmptyShorthand,
+            ));
         }
         // TODO: handle unexpected_reserved_word
         let expr = self.parse_expression_in(name)?;

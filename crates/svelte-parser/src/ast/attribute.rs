@@ -1,11 +1,14 @@
 use std::sync::LazyLock;
 
-use derive_macro::AstTree;
+use derive_macro::{AstTree, OxcSpan};
 use oxc_ast::ast::Expression;
-use oxc_span::{GetSpan, Span};
+use oxc_span::{GetSpan, Span, SPAN};
 use regex::Regex;
 
-use crate::{error::ParserError, Parser};
+use crate::{
+    error::{ParserError, ParserErrorKind},
+    Parser,
+};
 
 use super::{ExpressionTag, Text};
 
@@ -37,7 +40,21 @@ pub enum AttributeValue<'a> {
     True,
 }
 
-#[derive(Debug, AstTree)]
+impl oxc_span::GetSpan for AttributeValue<'_> {
+    fn span(&self) -> Span {
+        match self {
+            AttributeValue::ExpressionTag(expression_tag) => expression_tag.span,
+            AttributeValue::Vec(vec) => {
+                let start = vec.iter().next().unwrap().span().start;
+                let end = vec.iter().last().unwrap().span().end;
+                return Span::new(start, end);
+            }
+            AttributeValue::True => SPAN,
+        }
+    }
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
 pub enum QuotedAttributeValue<'a> {
     ExpressionTag(ExpressionTag<'a>),
     Text(Text<'a>),
@@ -161,7 +178,10 @@ impl<'a> Parser<'a> {
             let mut raw = if let Some(raw) = self.match_regex(&REGEX_ATTRIBUTE_VALUE) {
                 raw
             } else {
-                return Err(ParserError::ExpectedAttributeValue);
+                return Err(ParserError::new(
+                    Span::empty(self.offset),
+                    ParserErrorKind::ExpectedAttributeValue,
+                ));
             };
             self.offset += raw.len() as u32;
             let quoted = match raw.chars().next().unwrap() {
@@ -190,7 +210,10 @@ impl<'a> Parser<'a> {
             .match_regex(&REGEX_STARTS_WITH_QUOTE_CHARACTERS)
             .is_some()
         {
-            return Err(ParserError::ExpectedToken('='));
+            return Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::ExpectedToken('='),
+            ));
         }
 
         Ok(Some(Attribute::NormalAttribute(NormalAttribute {

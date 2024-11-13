@@ -1,12 +1,16 @@
 use derive_macro::{AstTree, OxcSpan};
 use oxc_ast::ast::Program;
-use oxc_span::Span;
+use oxc_span::{GetSpan, Span};
 use serde::Serialize;
 use std::sync::LazyLock;
 
 use regex::Regex;
 
-use crate::{ast::attribute::AttributeValue, error::ParserError, Parser};
+use crate::{
+    ast::attribute::AttributeValue,
+    error::{ParserError, ParserErrorKind},
+    Parser,
+};
 
 use super::attribute::Attribute;
 
@@ -53,7 +57,10 @@ impl<'a> Parser<'a> {
         let script_start = self.offset;
         let data = self.eat_until(&REGEX_CLOSING_SCRIPT_TAG);
         if self.remain().len() == 0 {
-            return Err(ParserError::ElementUnclosed(String::from("script")));
+            return Err(ParserError::new(
+                Span::empty(self.offset),
+                ParserErrorKind::ElementUnclosed(String::from("script")),
+            ));
         }
         self.expect_regex(&REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG)?;
         let program = self.parse_program(data, script_start)?;
@@ -63,8 +70,12 @@ impl<'a> Parser<'a> {
                 .fold(Ok(ScriptContext::Default), |context, attribute| {
                     if let Attribute::NormalAttribute(attribute) = attribute {
                         let name = attribute.name;
+                        let attr_start = attribute.span.start;
                         if RESERVED_ATTRIBUTES.contains(&name) {
-                            return Err(ParserError::ScriptReservedAttribute(name.to_string()));
+                            return Err(ParserError::new(
+                                Span::sized(attr_start, name.len() as u32),
+                                ParserErrorKind::ScriptReservedAttribute(name.to_string()),
+                            ));
                         }
                         if !ALLOWED_ATTRIBUTES.contains(&name) {
                             // TODO warning
@@ -73,17 +84,24 @@ impl<'a> Parser<'a> {
                             if let AttributeValue::True = &attribute.value {
                                 return Ok(ScriptContext::Module);
                             } else {
-                                return Err(ParserError::ScriptInvalidAttributeValue(
-                                    name.to_string(),
+                                return Err(ParserError::new(
+                                    Span::sized(attribute.span.start, name.len() as u32),
+                                    ParserErrorKind::ScriptInvalidAttributeValue(name.to_string()),
                                 ));
                             }
                         }
                         if name == "context" {
                             if attribute.value.is_true() || !attribute.value.is_text() {
-                                return Err(ParserError::ScriptInvalidContext);
+                                return Err(ParserError::new(
+                                    attribute.span,
+                                    ParserErrorKind::ScriptInvalidContext,
+                                ));
                             }
                             if attribute.value.as_text().unwrap() != "module" {
-                                return Err(ParserError::ScriptInvalidContext);
+                                return Err(ParserError::new(
+                                    attribute.value.span(),
+                                    ParserErrorKind::ScriptInvalidContext,
+                                ));
                             }
                             return Ok(ScriptContext::Module);
                         }
