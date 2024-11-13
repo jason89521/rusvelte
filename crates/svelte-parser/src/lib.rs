@@ -112,8 +112,24 @@ impl<'a> Parser<'a> {
             if self.meta().is_parent_root {
                 if let Element::Script(script) = element {
                     match &script.context {
-                        &ScriptContext::Default => self.instance = Some(script),
-                        &ScriptContext::Module => self.module = Some(script),
+                        &ScriptContext::Default => {
+                            if self.instance.is_some() {
+                                return Err(ParserError::new(
+                                    script.span,
+                                    ParserErrorKind::ScriptDuplicate,
+                                ));
+                            }
+                            self.instance = Some(script)
+                        }
+                        &ScriptContext::Module => {
+                            if self.module.is_some() {
+                                return Err(ParserError::new(
+                                    script.span,
+                                    ParserErrorKind::ScriptDuplicate,
+                                ));
+                            }
+                            self.module = Some(script)
+                        }
                     }
                     return Ok(None);
                 }

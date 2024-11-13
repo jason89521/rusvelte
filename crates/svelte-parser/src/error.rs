@@ -57,4 +57,6 @@ pub enum ParserErrorKind {
     ExpectedAttributeValue,
     #[error("Expected token {0}")]
     ExpectedToken(char),
+    #[error("A component can have a single top-level `<script>` element and/or a single top-level `<script module>` element")]
+    ScriptDuplicate,
 }
