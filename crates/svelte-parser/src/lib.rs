@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use ast::{Element, Fragment, FragmentNode, Root, Script, ScriptContext, SpanOffset};
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
@@ -8,11 +10,15 @@ use oxc_ast::{
 use oxc_parser::Parser as OxcParser;
 use oxc_span::{GetSpan, SourceType, Span};
 use oxc_syntax::identifier::is_identifier_name;
+use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
 
 mod ast;
 mod error;
 mod regex_pattern;
+
+static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"<script\s+.*?lang="ts".*?\s*>"#).unwrap());
 
 #[derive(Debug, Clone, Default)]
 pub struct Meta {
@@ -35,12 +41,18 @@ impl<'a> Parser<'a> {
         let source = source.trim_end();
         let offset = 0;
         let fragments = vec![Fragment::new()];
+        let source_type = if REGEX_LANG_ATTRIBUTE.is_match(source) {
+            SourceType::ts()
+        } else {
+            SourceType::mjs()
+        };
+
         Self {
             source,
             offset,
             fragments,
             allocator,
-            source_type: SourceType::default(),
+            source_type,
             instance: None,
             module: None,
             meta_stack: vec![],
