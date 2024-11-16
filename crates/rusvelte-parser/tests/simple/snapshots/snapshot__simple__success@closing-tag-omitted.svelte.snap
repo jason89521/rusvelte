@@ -1,0 +1,48 @@
+---
+source: crates/rusvelte-parser/tests/simple/mod.rs
+expression: root
+input_file: crates/rusvelte-parser/tests/simple/inputs/closing-tag-omitted.svelte
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 13,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 6,
+        "name": "p",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 3,
+              "end": 6,
+              "raw": "111",
+              "data": "111"
+            }
+          ]
+        }
+      },
+      {
+        "type": "RegularElement",
+        "start": 6,
+        "end": 13,
+        "name": "p",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

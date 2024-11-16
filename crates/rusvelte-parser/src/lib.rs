@@ -24,6 +24,12 @@ static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =
 static REGEX_START_WHOLE_COMMENT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"(^<!--.*?-->)|(^\/\*.*?\*\/)"#).unwrap());
 
+struct LastAutoClosedTag<'a> {
+    tag: &'a str,
+    reason: &'a str,
+    depth: u8,
+}
+
 pub struct Parser<'a> {
     source: &'a str,
     offset: u32,
@@ -32,8 +38,9 @@ pub struct Parser<'a> {
     instance: Option<Script<'a>>,
     module: Option<Script<'a>>,
     css: Option<StyleSheet<'a>>,
-    context_stack: Vec<Context>,
+    context_stack: Vec<Context<'a>>,
     meta_tags: HashSet<&'a str>,
+    last_auto_closed_tag: Option<LastAutoClosedTag<'a>>,
     pub fragments: Vec<Fragment<'a>>,
 }
 
@@ -58,6 +65,7 @@ impl<'a> Parser<'a> {
             module: None,
             css: None,
             meta_tags: HashSet::new(),
+            last_auto_closed_tag: None,
             context_stack: vec![],
         }
     }

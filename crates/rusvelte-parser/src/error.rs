@@ -81,6 +81,10 @@ pub enum ParserErrorKind {
     SvelteMetaDuplicate(String),
     #[error("`<{0}>` tags cannot be inside elements or blocks")]
     SvelteMetaInvalidPlacement(String),
+    #[error("`</${name}>` attempted to close element that was already automatically closed by `<{reason}>` (cannot nest `<{reason}>` inside `<{name}>`)")]
+    ElementInvalidClosingTagAutoClosed { reason: String, name: String },
+    #[error("`</{0}>` attempted to close an element that was not open")]
+    ElementInvalidClosingTag(String),
 }
 
 impl Parser<'_> {
