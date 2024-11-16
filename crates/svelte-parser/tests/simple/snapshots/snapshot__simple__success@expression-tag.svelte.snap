@@ -1,7 +1,7 @@
 ---
 source: crates/svelte-parser/tests/simple/mod.rs
 expression: root
-input_file: crates/svelte-parser/tests/simple/inputs/expression_tag.svelte
+input_file: crates/svelte-parser/tests/simple/inputs/expression-tag.svelte
 ---
 {
   "type": "Root",

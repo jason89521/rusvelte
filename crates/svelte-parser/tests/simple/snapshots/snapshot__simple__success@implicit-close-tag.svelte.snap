@@ -1,0 +1,56 @@
+---
+source: crates/svelte-parser/tests/simple/mod.rs
+expression: root
+input_file: crates/svelte-parser/tests/simple/inputs/implicit-close-tag.svelte
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 16,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 16,
+        "name": "p",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 3,
+              "end": 5,
+              "raw": "\n\t",
+              "data": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 5,
+              "end": 12,
+              "name": "span",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 11,
+                    "end": 12,
+                    "raw": "\n",
+                    "data": "\n"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

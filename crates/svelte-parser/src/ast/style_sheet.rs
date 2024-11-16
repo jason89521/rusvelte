@@ -236,7 +236,7 @@ impl<'a> Parser<'a> {
 
         Err(ParserError::new(
             Span::empty(self.offset),
-            ParserErrorKind::ExpectStr(String::from("</style")),
+            ParserErrorKind::ExpectedStr(String::from("</style")),
         ))
     }
 

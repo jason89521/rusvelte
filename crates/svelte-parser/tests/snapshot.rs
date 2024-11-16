@@ -12,9 +12,17 @@ macro_rules! test_success {
                 let allocator = oxc_allocator::Allocator::default();
                 let mut parser = Parser::new(&source, &allocator);
                 let result = parser.parse();
-                assert!(result.is_ok());
-                let root = result.unwrap();
-                insta::assert_json_snapshot!(root)
+                match result {
+                    Ok(root) => {
+                        insta::assert_json_snapshot!(root);
+                    }
+                    Err(error) => {
+                        eprintln!("Failed file: {}", path.to_string_lossy());
+                        eprintln!("{}", error);
+
+                        assert!(false);
+                    }
+                }
             });
         }
     };

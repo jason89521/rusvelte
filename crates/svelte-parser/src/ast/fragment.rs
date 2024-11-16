@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
     pub fn parse_fragment_node(&mut self) -> Result<Option<FragmentNode<'a>>, ParserError> {
         let node = if self.match_str("<") {
             let element = self.parse_element()?;
-            if self.meta().is_parent_root {
+            if self.is_parent_root() {
                 if let Element::Script(script) = element {
                     match &script.context {
                         &ScriptContext::Default => {

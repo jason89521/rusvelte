@@ -1,6 +1,7 @@
-use std::sync::LazyLock;
+use std::{collections::HashSet, sync::LazyLock};
 
 use ast::{Fragment, Root, Script, SpanOffset, StyleSheet};
+use context::Context;
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
 use oxc_ast::{
@@ -14,6 +15,7 @@ use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
 
 mod ast;
+mod context;
 mod error;
 mod regex_pattern;
 
@@ -21,11 +23,6 @@ static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<script\s+.*?lang="ts".*?\s*>"#).unwrap());
 static REGEX_START_WHOLE_COMMENT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"(^<!--.*?-->)|(^\/\*.*?\*\/)"#).unwrap());
-
-#[derive(Debug, Clone, Default)]
-pub struct Meta {
-    is_parent_root: bool,
-}
 
 pub struct Parser<'a> {
     source: &'a str,
@@ -35,7 +32,8 @@ pub struct Parser<'a> {
     instance: Option<Script<'a>>,
     module: Option<Script<'a>>,
     css: Option<StyleSheet<'a>>,
-    meta_stack: Vec<Meta>,
+    context_stack: Vec<Context>,
+    meta_tags: HashSet<&'a str>,
     pub fragments: Vec<Fragment<'a>>,
 }
 
@@ -59,7 +57,8 @@ impl<'a> Parser<'a> {
             instance: None,
             module: None,
             css: None,
-            meta_stack: vec![],
+            meta_tags: HashSet::new(),
+            context_stack: vec![],
         }
     }
 
@@ -68,9 +67,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
-        self.meta_stack.push(Meta {
-            is_parent_root: true,
-        });
+        self.context_stack.push(Context::root_context());
         let fragment = self.parse_fragment()?;
         let start = fragment.nodes.iter().next().map_or(0, |node| {
             let mut start = node.span().start;
@@ -91,7 +88,7 @@ impl<'a> Parser<'a> {
             }
             end
         });
-        self.meta_stack.pop();
+        self.context_stack.pop();
         Ok(Root {
             span: Span::new(start, end),
             fragment,
@@ -149,8 +146,8 @@ impl<'a> Parser<'a> {
         Ok(program)
     }
 
-    fn meta(&self) -> &Meta {
-        self.meta_stack.last().expect("No meta found")
+    fn meta_tag_exist(&self, meta_tag: &'a str) -> bool {
+        self.meta_tags.contains(meta_tag)
     }
 
     pub fn remain(&self) -> &'a str {
@@ -175,7 +172,7 @@ impl<'a> Parser<'a> {
                 } else {
                     Err(ParserError::new(
                         Span::empty(self.offset),
-                        ParserErrorKind::ExpectChar { expected, found: c },
+                        ParserErrorKind::ExpectedChar { expected, found: c },
                     ))
                 }
             }
@@ -192,7 +189,7 @@ impl<'a> Parser<'a> {
         } else {
             Err(ParserError::new(
                 Span::empty(self.offset),
-                ParserErrorKind::ExpectStr(s.to_string()),
+                ParserErrorKind::ExpectedStr(s.to_string()),
             ))
         }
     }
@@ -204,7 +201,7 @@ impl<'a> Parser<'a> {
         } else {
             Err(ParserError::new(
                 Span::empty(self.offset),
-                ParserErrorKind::ExpectStr(re.to_string()),
+                ParserErrorKind::ExpectedStr(re.to_string()),
             ))
         }
     }
@@ -308,13 +305,6 @@ impl<'a> Parser<'a> {
         while let Some(s) = self.match_regex(&REGEX_START_WHOLE_COMMENT) {
             self.offset += s.len() as u32;
             self.skip_whitespace();
-        }
-    }
-
-    fn error(&self, kind: ParserErrorKind) -> ParserError {
-        ParserError {
-            span: Span::empty(self.offset),
-            kind,
         }
     }
 }

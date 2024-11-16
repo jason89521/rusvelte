@@ -1,6 +1,8 @@
 use oxc_diagnostics::OxcDiagnostic;
 use oxc_span::Span;
 
+use crate::Parser;
+
 #[derive(thiserror::Error)]
 pub struct ParserError {
     pub kind: ParserErrorKind,
@@ -35,12 +37,14 @@ pub enum ParserErrorKind {
     ParseProgram(Vec<OxcDiagnostic>),
     #[error("Parse expression error: {0:#?}.")]
     ParseExpression(Vec<OxcDiagnostic>),
-    #[error(r#"Expect a "{expected}", but found a "{found}"."#)]
-    ExpectChar { expected: char, found: char },
-    #[error(r#"Expect a "{0}" str."#)]
-    ExpectStr(String),
+    #[error(r#"Expected a "{expected}", but found a "{found}"."#)]
+    ExpectedChar { expected: char, found: char },
+    #[error(r#"Expected a "{0}" str."#)]
+    ExpectedStr(String),
     #[error("Unexpected EOF. {0}")]
     UnexpectedEOFWithChar(char),
+    #[error(r#"Expected closing tag."#)]
+    ExpectedClosingTag,
 
     // From svelte
     #[error("Unexpected EOF.")]
@@ -69,4 +73,28 @@ pub enum ParserErrorKind {
     CssSelectorInvalid,
     #[error("Declaration cannot be empty")]
     CssEmptyDeclaration,
+    #[error("Valid `<svelte:...>` tag names are {0}")]
+    SvelteMetaInvalidTag(String),
+    #[error("Expected a valid element or component name. Components must have a valid variable name or dot notation expression")]
+    TagInvalidName,
+    #[error("A component can only have one `<{0}>` element")]
+    SvelteMetaDuplicate(String),
+    #[error("`<{0}>` tags cannot be inside elements or blocks")]
+    SvelteMetaInvalidPlacement(String),
+}
+
+impl Parser<'_> {
+    pub fn error(&self, kind: ParserErrorKind) -> ParserError {
+        ParserError {
+            span: Span::empty(self.offset),
+            kind,
+        }
+    }
+
+    pub fn error_at(&self, at: u32, kind: ParserErrorKind) -> ParserError {
+        ParserError {
+            span: Span::empty(at),
+            kind,
+        }
+    }
 }
