@@ -605,6 +605,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248"
 
 [[package]]
+name = "rusvelte-parser"
+version = "0.1.0"
+dependencies = [
+ "derive-macro",
+ "htmlize",
+ "insta",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_diagnostics",
+ "oxc_parser",
+ "oxc_span",
+ "oxc_syntax",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.1",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -698,25 +717,6 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
-
-[[package]]
-name = "svelte-parser"
-version = "0.1.0"
-dependencies = [
- "derive-macro",
- "htmlize",
- "insta",
- "oxc_allocator",
- "oxc_ast",
- "oxc_diagnostics",
- "oxc_parser",
- "oxc_span",
- "oxc_syntax",
- "regex",
- "serde",
- "serde_json",
- "thiserror 2.0.1",
-]
 
 [[package]]
 name = "syn"

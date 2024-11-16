@@ -1,6 +1,6 @@
 use std::fs;
 
-use svelte_parser::Parser;
+use rusvelte_parser::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let source =

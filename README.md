@@ -1,4 +1,4 @@
-# svelte-rs
+# rusvelte
 
 Svelte compiler written in Rust.
 
@@ -6,7 +6,7 @@ Svelte compiler written in Rust.
 
 - [ ] Parser
   - [ ] Root
-    - [ ] css
+    - [x] css
     - [ ] js
     - [ ] options
     - [ ] Fragment
