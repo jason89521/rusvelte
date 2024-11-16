@@ -5,6 +5,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/comment.svelte
 ---
 {
   "type": "Root",
+  "css": null,
   "start": 0,
   "end": 18,
   "fragment": {

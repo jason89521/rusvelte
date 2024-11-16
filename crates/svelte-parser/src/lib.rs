@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use ast::{Element, Fragment, FragmentNode, Root, Script, ScriptContext, SpanOffset};
+use ast::{Fragment, Root, Script, SpanOffset, StyleSheet};
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
 use oxc_ast::{
@@ -19,6 +19,8 @@ mod regex_pattern;
 
 static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<script\s+.*?lang="ts".*?\s*>"#).unwrap());
+static REGEX_START_WHOLE_COMMENT: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"(^<!--.*?-->)|(^\/\*.*?\*\/)"#).unwrap());
 
 #[derive(Debug, Clone, Default)]
 pub struct Meta {
@@ -32,6 +34,7 @@ pub struct Parser<'a> {
     source_type: SourceType,
     instance: Option<Script<'a>>,
     module: Option<Script<'a>>,
+    css: Option<StyleSheet<'a>>,
     meta_stack: Vec<Meta>,
     pub fragments: Vec<Fragment<'a>>,
 }
@@ -55,6 +58,7 @@ impl<'a> Parser<'a> {
             source_type,
             instance: None,
             module: None,
+            css: None,
             meta_stack: vec![],
         }
     }
@@ -93,55 +97,8 @@ impl<'a> Parser<'a> {
             fragment,
             instance: self.instance.take(),
             module: self.module.take(),
+            css: self.css.take(),
         })
-    }
-
-    pub fn parse_fragment(&mut self) -> Result<Fragment<'a>, ParserError> {
-        let mut result = vec![];
-        while self.offset_u() < self.source.len() && !self.match_str("</") {
-            if let Some(node) = self.parse_fragment_node()? {
-                result.push(node)
-            }
-        }
-        Ok(Fragment { nodes: result })
-    }
-
-    pub fn parse_fragment_node(&mut self) -> Result<Option<FragmentNode<'a>>, ParserError> {
-        let node = if self.match_str("<") {
-            let element = self.parse_element()?;
-            if self.meta().is_parent_root {
-                if let Element::Script(script) = element {
-                    match &script.context {
-                        &ScriptContext::Default => {
-                            if self.instance.is_some() {
-                                return Err(ParserError::new(
-                                    script.span,
-                                    ParserErrorKind::ScriptDuplicate,
-                                ));
-                            }
-                            self.instance = Some(script)
-                        }
-                        &ScriptContext::Module => {
-                            if self.module.is_some() {
-                                return Err(ParserError::new(
-                                    script.span,
-                                    ParserErrorKind::ScriptDuplicate,
-                                ));
-                            }
-                            self.module = Some(script)
-                        }
-                    }
-                    return Ok(None);
-                }
-            }
-            FragmentNode::Element(Box::new(element))
-        } else if self.match_str("{") {
-            FragmentNode::Tag(self.parse_tag()?)
-        } else {
-            FragmentNode::Text(self.parse_text())
-        };
-
-        Ok(Some(node))
     }
 
     pub fn parse_expression(&mut self) -> Result<Expression<'a>, ParserError> {
@@ -196,7 +153,7 @@ impl<'a> Parser<'a> {
         self.meta_stack.last().expect("No meta found")
     }
 
-    fn remain(&self) -> &'a str {
+    pub fn remain(&self) -> &'a str {
         &self.source[self.offset_u()..]
     }
 
@@ -224,7 +181,7 @@ impl<'a> Parser<'a> {
             }
             None => Err(ParserError::new(
                 Span::empty(self.offset),
-                ParserErrorKind::UnexpectedEOF(expected),
+                ParserErrorKind::UnexpectedEOFWithChar(expected),
             )),
         }
     }
@@ -315,6 +272,16 @@ impl<'a> Parser<'a> {
         Ok((name, expr))
     }
 
+    fn eat_regex(&mut self, re: &regex::Regex) -> Option<&'a str> {
+        let value = re.find(&self.remain()).map(|mat| mat.as_str())?;
+        self.offset += value.len() as u32;
+        Some(value)
+    }
+
+    fn match_ch(&self, ch: char) -> bool {
+        self.peek().map_or(false, |c| c == ch)
+    }
+
     fn match_str(&self, s: &str) -> bool {
         let len = s.len();
         let end = if self.offset_u() + len > self.source.len() {
@@ -333,6 +300,21 @@ impl<'a> Parser<'a> {
     fn skip_whitespace(&mut self) {
         if let Some(mat) = REGEX_NON_WHITESPACE.find(&self.remain()) {
             self.offset += mat.start() as u32;
+        }
+    }
+
+    fn skip_comment_or_whitespace(&mut self) {
+        self.skip_whitespace();
+        while let Some(s) = self.match_regex(&REGEX_START_WHOLE_COMMENT) {
+            self.offset += s.len() as u32;
+            self.skip_whitespace();
+        }
+    }
+
+    fn error(&self, kind: ParserErrorKind) -> ParserError {
+        ParserError {
+            span: Span::empty(self.offset),
+            kind,
         }
     }
 }

@@ -14,9 +14,9 @@ use crate::{
 
 use super::attribute::Attribute;
 
-pub static REGEX_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
+static REGEX_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<\/script\s*>"#).unwrap());
-pub static REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
+static REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^<\/script\s*>"#).unwrap());
 
 const RESERVED_ATTRIBUTES: [&str; 5] = ["server", "client", "worker", "test", "default"];

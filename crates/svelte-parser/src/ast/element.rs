@@ -10,13 +10,14 @@ use crate::{
     Meta, Parser,
 };
 
-use super::{attribute::Attribute, Script};
+use super::{attribute::Attribute, style_sheet::StyleSheet, Script};
 
 #[derive(Debug, AstTree, OxcSpan)]
 pub enum Element<'a> {
     RegularElement(RegularElement<'a>),
     Comment(Comment<'a>),
     Script(Script<'a>),
+    StyleSheet(StyleSheet<'a>),
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -52,6 +53,7 @@ impl<'a> Parser<'a> {
         let name = self.eat_until(&REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG);
         self.skip_whitespace();
         let is_root_script = self.meta().is_parent_root && name == "script";
+        let is_root_style = self.meta().is_parent_root && name == "style";
         let attributes = self.parse_attributes(is_root_script)?;
 
         if is_root_script {
@@ -59,6 +61,13 @@ impl<'a> Parser<'a> {
             let script = self.parse_script(start, attributes)?;
 
             return Ok(Element::Script(script));
+        }
+
+        if is_root_style {
+            self.expect('>')?;
+            let style_sheet = self.parse_style_sheet(start, attributes)?;
+
+            return Ok(Element::StyleSheet(style_sheet));
         }
 
         // self closed element

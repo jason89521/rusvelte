@@ -1,0 +1,415 @@
+---
+source: crates/svelte-parser/tests/css/mod.rs
+expression: root
+input_file: crates/svelte-parser/tests/css/inputs/css-pseudo-classes.svelte
+---
+{
+  "type": "Root",
+  "css": {
+    "type": "StyleSheet",
+    "start": 0,
+    "end": 401,
+    "attributes": [],
+    "children": [
+      {
+        "type": "Rule",
+        "start": 59,
+        "end": 107,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 59,
+          "end": 85,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 59,
+              "end": 85,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 59,
+                  "end": 85,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "PseudoElementSelector",
+                      "start": 59,
+                      "end": 80,
+                      "name": "view-transition-old"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 86,
+          "end": 107,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 92,
+              "end": 102,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Rule",
+        "start": 110,
+        "end": 167,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 110,
+          "end": 145,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 110,
+              "end": 145,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 110,
+                  "end": 145,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "PseudoClassSelector",
+                      "start": 110,
+                      "end": 145,
+                      "name": "global",
+                      "args": {
+                        "type": "SelectorList",
+                        "start": 118,
+                        "end": 144,
+                        "children": [
+                          {
+                            "type": "ComplexSelector",
+                            "start": 118,
+                            "end": 144,
+                            "children": [
+                              {
+                                "type": "RelativeSelector",
+                                "start": 118,
+                                "end": 144,
+                                "combinator": null,
+                                "selectors": [
+                                  {
+                                    "type": "PseudoElementSelector",
+                                    "start": 118,
+                                    "end": 139,
+                                    "name": "view-transition-old"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 146,
+          "end": 167,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 152,
+              "end": 162,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Rule",
+        "start": 170,
+        "end": 220,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 170,
+          "end": 198,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 170,
+              "end": 198,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 170,
+                  "end": 198,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "PseudoElementSelector",
+                      "start": 170,
+                      "end": 181,
+                      "name": "highlight"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 199,
+          "end": 220,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 205,
+              "end": 215,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Rule",
+        "start": 223,
+        "end": 270,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 223,
+          "end": 248,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 223,
+              "end": 248,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 223,
+                  "end": 248,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "TypeSelector",
+                      "start": 223,
+                      "end": 237,
+                      "name": "custom-element"
+                    },
+                    {
+                      "type": "PseudoElementSelector",
+                      "start": 237,
+                      "end": 243,
+                      "name": "part"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 249,
+          "end": 270,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 255,
+              "end": 265,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Rule",
+        "start": 273,
+        "end": 314,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 273,
+          "end": 292,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 273,
+              "end": 292,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 273,
+                  "end": 292,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "PseudoElementSelector",
+                      "start": 273,
+                      "end": 282,
+                      "name": "slotted"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 293,
+          "end": 314,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 299,
+              "end": 309,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Rule",
+        "start": 317,
+        "end": 392,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 317,
+          "end": 370,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 317,
+              "end": 370,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 317,
+                  "end": 370,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "PseudoClassSelector",
+                      "start": 317,
+                      "end": 370,
+                      "name": "is",
+                      "args": {
+                        "type": "SelectorList",
+                        "start": 335,
+                        "end": 366,
+                        "children": [
+                          {
+                            "type": "ComplexSelector",
+                            "start": 335,
+                            "end": 341,
+                            "children": [
+                              {
+                                "type": "RelativeSelector",
+                                "start": 335,
+                                "end": 341,
+                                "combinator": null,
+                                "selectors": [
+                                  {
+                                    "type": "TypeSelector",
+                                    "start": 335,
+                                    "end": 341,
+                                    "name": "button"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "ComplexSelector",
+                            "start": 360,
+                            "end": 366,
+                            "children": [
+                              {
+                                "type": "RelativeSelector",
+                                "start": 360,
+                                "end": 362,
+                                "combinator": null,
+                                "selectors": [
+                                  {
+                                    "type": "TypeSelector",
+                                    "start": 360,
+                                    "end": 362,
+                                    "name": "h1"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "RelativeSelector",
+                                "start": 363,
+                                "end": 366,
+                                "combinator": {
+                                  "type": "Combinator",
+                                  "start": 363,
+                                  "end": 364,
+                                  "name": "+"
+                                },
+                                "selectors": [
+                                  {
+                                    "type": "TypeSelector",
+                                    "start": 365,
+                                    "end": 366,
+                                    "name": "p"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 371,
+          "end": 392,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 377,
+              "end": 387,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      }
+    ],
+    "content": {
+      "type": "StyleSheetContent",
+      "start": 7,
+      "end": 393,
+      "styles": "\n  /* test that all these are parsed correctly */\n  ::view-transition-old(x-y) {\n    color: red;\n  }\n  :global(::view-transition-old(x-y)) {\n    color: red;\n  }\n  ::highlight(rainbow-color-1) {\n    color: red;\n  }\n  custom-element::part(foo) {\n    color: red;\n  }\n  ::slotted(.content) {\n    color: red;\n  }\n  :is( /*button*/\n  button, /*p after h1*/\n  h1 + p\n  ) {\n    color: red;\n  }\n",
+      "comment": null
+    }
+  },
+  "start": 0,
+  "end": 0,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": []
+  },
+  "module": null,
+  "instance": null
+}

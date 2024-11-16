@@ -39,10 +39,12 @@ pub enum ParserErrorKind {
     ExpectChar { expected: char, found: char },
     #[error(r#"Expect a "{0}" str."#)]
     ExpectStr(String),
+    #[error("Unexpected EOF. {0}")]
+    UnexpectedEOFWithChar(char),
 
     // From svelte
-    #[error("Unexpected EOF. {0}")]
-    UnexpectedEOF(char),
+    #[error("Unexpected EOF.")]
+    UnexpectedEOF,
     #[error("Attribute shorthand cannot be empty")]
     AttributeEmptyShorthand,
     #[error("`<{0}>` was left open`")]
@@ -59,4 +61,12 @@ pub enum ParserErrorKind {
     ExpectedToken(char),
     #[error("A component can have a single top-level `<script>` element and/or a single top-level `<script module>` element")]
     ScriptDuplicate,
+    #[error("Expected a valid CSS identifier")]
+    CssExpectedIdentifier,
+    #[error("A component can have a single top-level `<style>` element")]
+    StyleDuplicate,
+    #[error("Invalid selector")]
+    CssSelectorInvalid,
+    #[error("Declaration cannot be empty")]
+    CssEmptyDeclaration,
 }
