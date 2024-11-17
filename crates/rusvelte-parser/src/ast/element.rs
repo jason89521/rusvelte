@@ -200,6 +200,8 @@ impl<'a> Parser<'a> {
             self.meta_tags.insert(name);
         }
 
+        // TODO: implement element
+        #[allow(unused_variables)]
         let element_type = {
             match name {
                 SVELTE_HEAD_TAG => unimplemented!(),
