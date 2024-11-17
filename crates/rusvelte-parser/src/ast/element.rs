@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::Deref, sync::LazyLock};
+use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
 use derive_macro::{AstTree, OxcSpan};
 use oxc_span::{GetSpan, Span};
@@ -13,31 +13,41 @@ use crate::{
     Context, LastAutoClosedTag, Parser,
 };
 
-use super::{attribute::Attribute, style_sheet::StyleSheet, FragmentNode, Script};
+use super::{
+    attribute::Attribute, style_sheet::StyleSheet, ExpressionTag, FragmentNode, Script, Text,
+};
 
-static ROOT_ONLY_META_TAGS: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
-    HashMap::from([
-        ("svelte:head", "SvelteHead"),
-        ("svelte:options", "SvelteOptions"),
-        ("svelte:window", "SvelteWindow"),
-        ("svelte:document", "SvelteDocument"),
-        ("svelte:body", "SvelteBody"),
+const SVELTE_HEAD_TAG: &'static str = "svelte:head";
+const SVELTE_OPTIONS_TAG: &'static str = "svelte:options";
+const SVELTE_WINDOW_TAG: &'static str = "svelte:window";
+const SVELTE_DOCUMENT_TAG: &'static str = "svelte:document";
+const SVELTE_BODY_TAG: &'static str = "svelte:body";
+const SVELTE_ELEMENT_TAG: &'static str = "svelte:element";
+const SVELTE_COMPONENT_TAG: &'static str = "svelte:component";
+const SVELTE_SELF_TAG: &'static str = "svelte:self";
+const SVELTE_FRAGMENT_TAG: &'static str = "svelte:fragment";
+
+static ROOT_ONLY_META_TAGS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+    HashSet::from([
+        SVELTE_HEAD_TAG,
+        SVELTE_OPTIONS_TAG,
+        SVELTE_WINDOW_TAG,
+        SVELTE_DOCUMENT_TAG,
+        SVELTE_BODY_TAG,
     ])
 });
-static META_TAGS: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
-    ROOT_ONLY_META_TAGS
-        .clone()
-        .into_iter()
-        .chain(
-            HashMap::from([
-                ("svelte:element", "SvelteElement"),
-                ("svelte:component", "SvelteComponent"),
-                ("svelte:self", "SvelteSelf"),
-                ("svelte:fragment", "SvelteFragment"),
-            ])
-            .into_iter(),
-        )
-        .collect()
+static META_TAGS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+    HashSet::from([
+        SVELTE_HEAD_TAG,
+        SVELTE_OPTIONS_TAG,
+        SVELTE_WINDOW_TAG,
+        SVELTE_DOCUMENT_TAG,
+        SVELTE_BODY_TAG,
+        SVELTE_ELEMENT_TAG,
+        SVELTE_COMPONENT_TAG,
+        SVELTE_SELF_TAG,
+        SVELTE_FRAGMENT_TAG,
+    ])
 });
 
 static REGEX_VALID_ELEMENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
@@ -48,6 +58,8 @@ static REGEX_VALID_COMPONENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
 });
 static REGEX_CLOSING_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^<\/\s*(\S*)\s*>").unwrap());
+static REGEX_NOT_LOWERCASE_A_TO_Z: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"[^a-z]").unwrap());
 
 #[derive(Debug)]
 pub enum ParseElementReturn<'a> {
@@ -75,6 +87,57 @@ pub struct RegularElement<'a> {
 pub struct Comment<'a> {
     pub span: Span,
     pub data: &'a str,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteHead {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteOptions {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteWindow {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteDocument {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteBody {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteElement {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteComponent {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteSelf {
+    pub span: Span,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SvelteFragment {
+    pub span: Span,
+}
+
+#[derive(Debug)]
+pub enum SequenceValue<'a> {
+    ExpressionTag(ExpressionTag<'a>),
+    Text(Text<'a>),
 }
 
 impl<'a> Parser<'a> {
@@ -107,10 +170,10 @@ impl<'a> Parser<'a> {
             })
         }
 
-        if name.starts_with("svelte:") && !META_TAGS.contains_key(name) {
+        if name.starts_with("svelte:") && !META_TAGS.contains(name) {
             return Err(ParserError::new(
                 Span::new(start + 1, start + 1 + name.len() as u32),
-                ParserErrorKind::SvelteMetaInvalidTag(META_TAGS.keys().map(Deref::deref).collect()),
+                ParserErrorKind::SvelteMetaInvalidTag(META_TAGS.iter().map(Deref::deref).collect()),
             ));
         }
 
@@ -121,7 +184,7 @@ impl<'a> Parser<'a> {
             ));
         }
 
-        if ROOT_ONLY_META_TAGS.contains_key(name) {
+        if ROOT_ONLY_META_TAGS.contains(name) {
             if self.meta_tag_exist(name) {
                 return Err(self.error_at(
                     start,
@@ -136,6 +199,31 @@ impl<'a> Parser<'a> {
             }
             self.meta_tags.insert(name);
         }
+
+        let element_type = {
+            match name {
+                SVELTE_HEAD_TAG => unimplemented!(),
+                SVELTE_OPTIONS_TAG => unimplemented!(),
+                SVELTE_WINDOW_TAG => unimplemented!(),
+                SVELTE_DOCUMENT_TAG => unimplemented!(),
+                SVELTE_BODY_TAG => unimplemented!(),
+                SVELTE_ELEMENT_TAG => unimplemented!(),
+                SVELTE_COMPONENT_TAG => unimplemented!(),
+                SVELTE_SELF_TAG => unimplemented!(),
+                SVELTE_FRAGMENT_TAG => unimplemented!(),
+                _ => (),
+            };
+
+            if REGEX_VALID_COMPONENT_NAME.is_match(name) {
+                // Component
+            }
+
+            if name == "title" {
+                // TitleElement
+            }
+
+            // RegularElement
+        };
 
         self.skip_whitespace();
         let is_root_script = self.is_parent_root() && name == "script";
@@ -254,6 +342,75 @@ impl<'a> Parser<'a> {
         Ok(ParseElementReturn::Element(Element::RegularElement(
             element,
         )))
+    }
+
+    /// Used for parse attribute value and textarea's nodes
+    pub(crate) fn parse_sequence<F>(
+        &mut self,
+        done: F,
+        location: &'static str,
+    ) -> Result<Vec<SequenceValue<'a>>, ParserError>
+    where
+        F: Fn(&Self) -> bool,
+    {
+        let mut text_start = self.offset;
+
+        let mut values = vec![];
+        let mut flush = |value: SequenceValue<'a>| {
+            match &value {
+                SequenceValue::Text(text) if text.raw.is_empty() => (),
+                _ => values.push(value),
+            };
+        };
+
+        while let Some(_) = self.peek() {
+            if done(&self) {
+                flush(SequenceValue::Text(
+                    self.create_text(Span::new(text_start, self.offset)),
+                ));
+                return Ok(values);
+            } else if self.eat('{') {
+                let tag_start = self.offset - 1;
+                if self.eat('#') {
+                    let name = self.eat_until(&REGEX_NOT_LOWERCASE_A_TO_Z);
+                    return Err(self.error_at(
+                        tag_start,
+                        ParserErrorKind::BlockInvalidPlacement {
+                            name: name.to_string(),
+                            location: location.to_string(),
+                        },
+                    ));
+                } else if self.eat('@') {
+                    let name = self.eat_until(&REGEX_NOT_LOWERCASE_A_TO_Z);
+                    return Err(self.error_at(
+                        tag_start,
+                        ParserErrorKind::TagInvalidPlacement {
+                            name: name.to_string(),
+                            location: location.to_string(),
+                        },
+                    ));
+                }
+
+                flush(SequenceValue::Text(
+                    self.create_text(Span::new(text_start, self.offset - 1)),
+                ));
+
+                self.skip_whitespace();
+                let expression = self.parse_expression()?;
+                self.skip_whitespace();
+                self.expect('}')?;
+                flush(SequenceValue::ExpressionTag(ExpressionTag {
+                    span: Span::new(tag_start, self.offset),
+                    expression,
+                }));
+
+                text_start = self.offset;
+            } else {
+                self.next();
+            }
+        }
+
+        Err(self.error(ParserErrorKind::UnexpectedEOF))
     }
 
     fn peek_closing_tag_name(&self) -> Option<&'a str> {

@@ -45,6 +45,10 @@ pub enum ParserErrorKind {
     UnexpectedEOFWithChar(char),
     #[error(r#"Expected closing tag."#)]
     ExpectedClosingTag,
+    #[error(r#"ClassDirective should have expression"#)]
+    ClassDirectiveShouldHaveExpression,
+    #[error(r#"UseDirective should have expression"#)]
+    UseDirectiveShouldHaveExpression,
 
     // From svelte
     #[error("Unexpected EOF.")]
@@ -85,6 +89,16 @@ pub enum ParserErrorKind {
     ElementInvalidClosingTagAutoClosed { reason: String, name: String },
     #[error("`</{0}>` attempted to close an element that was not open")]
     ElementInvalidClosingTag(String),
+    #[error("{{#{name} ...}} block cannot be {location}")]
+    BlockInvalidPlacement { name: String, location: String },
+    #[error("{{@{name} ...}} tag cannot be {location}")]
+    TagInvalidPlacement { name: String, location: String },
+    #[error("`${0}` name cannot be empty")]
+    DirectiveMissingName(String),
+    #[error("Directive value must be a JavaScript expression enclosed in curly braces")]
+    DirectiveInvalidValue,
+    #[error("Attributes need to be unique")]
+    AttributeDuplicate,
 }
 
 impl Parser<'_> {

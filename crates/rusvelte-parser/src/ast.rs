@@ -1,3 +1,4 @@
+mod directive;
 mod element;
 mod fragment;
 mod root;

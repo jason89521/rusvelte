@@ -37,8 +37,10 @@ pub fn ast_tree_builder(input: DeriveInput) -> syn::Result<TokenStream> {
         }
     }?;
 
+    let (impl_generics, ty_generics, ..) = input.generics.split_for_impl();
+
     Ok(quote! {
-        impl serde::Serialize for #name<'_> {
+        impl #impl_generics serde::Serialize for #name #ty_generics {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer,

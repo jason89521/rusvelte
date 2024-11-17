@@ -39,4 +39,8 @@ impl<'a> Parser<'a> {
 
         text
     }
+
+    pub fn create_text(&self, span: Span) -> Text<'a> {
+        Text::new(span, span.source_text(&self.source))
+    }
 }

@@ -123,7 +123,11 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn parse_expression_in(&mut self, text: &'a str) -> Result<Expression<'a>, ParserError> {
+    fn parse_expression_in(
+        &self,
+        text: &'a str,
+        offset: u32,
+    ) -> Result<Expression<'a>, ParserError> {
         let mut expr = OxcParser::new(&self.allocator, text, self.source_type)
             .parse_expression()
             .map_err(|e| {
@@ -132,10 +136,8 @@ impl<'a> Parser<'a> {
                     ParserErrorKind::ParseExpression(e),
                 )
             })?;
-        let mut span_offset = SpanOffset(self.offset);
+        let mut span_offset = SpanOffset(offset);
         span_offset.visit_expression(&mut expr);
-        let end = expr.span().end;
-        self.offset = end;
 
         Ok(expr)
     }
@@ -258,7 +260,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn eat_identifier(&mut self) -> Result<(&'a str, Expression<'a>), ParserError> {
+    fn eat_identifier(&mut self) -> Result<Option<(&'a str, Expression<'a>)>, ParserError> {
         let mut i = 1;
         let remain = self.remain();
         while i < remain.len() && is_identifier_name(&remain[..i]) {
@@ -267,14 +269,12 @@ impl<'a> Parser<'a> {
 
         let name = &remain[..i - 1];
         if name == "" {
-            return Err(ParserError::new(
-                Span::empty(self.offset),
-                ParserErrorKind::AttributeEmptyShorthand,
-            ));
+            return Ok(None);
         }
         // TODO: handle unexpected_reserved_word
-        let expr = self.parse_expression_in(name)?;
-        Ok((name, expr))
+        let expr = self.parse_expression_in(name, self.offset)?;
+        self.offset += expr.span().size();
+        Ok(Some((name, expr)))
     }
 
     fn eat_regex(&mut self, re: &regex::Regex) -> Option<&'a str> {

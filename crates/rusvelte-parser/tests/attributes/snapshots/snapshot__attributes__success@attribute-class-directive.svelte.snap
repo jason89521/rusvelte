@@ -1,0 +1,42 @@
+---
+source: crates/rusvelte-parser/tests/attributes/mod.rs
+expression: root
+input_file: crates/rusvelte-parser/tests/attributes/inputs/attribute-class-directive.svelte
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 29,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 29,
+        "name": "div",
+        "attributes": [
+          {
+            "type": "ClassDirective",
+            "start": 5,
+            "end": 22,
+            "name": "foo",
+            "expression": {
+              "type": "Identifier",
+              "start": 16,
+              "end": 21,
+              "name": "isFoo"
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}
