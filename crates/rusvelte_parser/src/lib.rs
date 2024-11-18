@@ -1,6 +1,5 @@
 use std::{collections::HashSet, sync::LazyLock};
 
-use ast::{Fragment, Root, Script, SpanOffset, StyleSheet};
 use context::Context;
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
@@ -13,10 +12,12 @@ use oxc_span::{GetSpan, SourceType, Span};
 use oxc_syntax::identifier::is_identifier_name;
 use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
+use rusvelte_ast::ast::{Fragment, Root, Script, StyleSheet};
+use rusvelte_ast::span_offset::SpanOffset;
 
-mod ast;
 mod context;
 mod error;
+mod parse_impl;
 mod regex_pattern;
 
 static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =

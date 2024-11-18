@@ -126,15 +126,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive-macro"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -605,11 +596,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248"
 
 [[package]]
-name = "rusvelte-parser"
+name = "rusvelte_ast"
 version = "0.1.0"
 dependencies = [
- "derive-macro",
  "htmlize",
+ "oxc_ast",
+ "oxc_span",
+ "oxc_syntax",
+ "rusvelte_derive",
+ "serde",
+]
+
+[[package]]
+name = "rusvelte_derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "rusvelte_parser"
+version = "0.1.0"
+dependencies = [
  "insta",
  "oxc_allocator",
  "oxc_ast",
@@ -618,11 +628,16 @@ dependencies = [
  "oxc_span",
  "oxc_syntax",
  "regex",
+ "rusvelte_ast",
+ "rusvelte_utils",
  "serde",
  "serde_json",
  "thiserror 2.0.1",
- "utils",
 ]
+
+[[package]]
+name = "rusvelte_utils"
+version = "0.1.0"
 
 [[package]]
 name = "ryu"
@@ -810,10 +825,6 @@ name = "unicode-width"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fc81956842c57dac11422a97c3b8195a1ff727f06e85c84ed2e8aa277c9a0fd"
-
-[[package]]
-name = "utils"
-version = "0.1.0"
 
 [[package]]
 name = "walkdir"

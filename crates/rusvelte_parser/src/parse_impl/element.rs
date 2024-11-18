@@ -1,20 +1,19 @@
 use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
-use derive_macro::{AstTree, OxcSpan};
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
-use utils::closing_tag_omitted;
+use rusvelte_utils::closing_tag_omitted;
 
 use crate::{
-    ast::Fragment,
     context::ParentKind,
     error::{ParserError, ParserErrorKind},
     regex_pattern::{REGEX_CLOSING_COMMENT, REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG},
     Context, LastAutoClosedTag, Parser,
 };
 
-use super::{
-    attribute::Attribute, style_sheet::StyleSheet, ExpressionTag, FragmentNode, Script, Text,
+use rusvelte_ast::ast::{
+    Comment, Element, ExpressionTag, Fragment, FragmentNode, RegularElement, Script, StyleSheet,
+    Text,
 };
 
 const SVELTE_HEAD_TAG: &'static str = "svelte:head";
@@ -68,70 +67,6 @@ pub enum ParseElementReturn<'a> {
     Script(Script<'a>),
     StyleSheet(StyleSheet<'a>),
     Nodes(Vec<FragmentNode<'a>>),
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub enum Element<'a> {
-    RegularElement(RegularElement<'a>),
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct RegularElement<'a> {
-    pub span: Span,
-    pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
-    pub fragment: Fragment<'a>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Comment<'a> {
-    pub span: Span,
-    pub data: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteHead {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteOptions {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteWindow {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteDocument {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteBody {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteElement {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteComponent {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteSelf {
-    pub span: Span,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteFragment {
-    pub span: Span,
 }
 
 #[derive(Debug)]

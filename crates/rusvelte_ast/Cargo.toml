@@ -1,0 +1,12 @@
+[package]
+name = "rusvelte_ast"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+oxc_span = { workspace = true }
+rusvelte_derive = { workspace = true }
+oxc_ast = { workspace = true }
+serde = { workspace = true }
+oxc_syntax = { workspace = true }
+htmlize = { workspace = true, features = ["unescape"] }
