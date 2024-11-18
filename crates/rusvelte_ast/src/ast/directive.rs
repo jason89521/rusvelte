@@ -2,8 +2,6 @@ use derive_macro::{AstTree, OxcSpan};
 use oxc_ast::ast::Expression;
 use oxc_span::Span;
 
-use crate::error::{ParserError, ParserErrorKind};
-
 use super::attribute::AttributeValue;
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -25,7 +23,7 @@ impl<'a> Directive<'a> {
         name: &'a str,
         expression: Option<Expression<'a>>,
         modifiers: Vec<&'a str>,
-    ) -> Result<Self, ParserError> {
+    ) -> Option<Self> {
         let directive = match kind {
             DirectiveKind::AnimateDirective => Directive::AnimateDirective(AnimateDirective {
                 span,
@@ -45,10 +43,7 @@ impl<'a> Directive<'a> {
                         expression,
                     })
                 } else {
-                    return Err(ParserError::new(
-                        span,
-                        ParserErrorKind::ClassDirectiveShouldHaveExpression,
-                    ));
+                    return None;
                 }
             }
             DirectiveKind::LetDirective => Directive::LetDirective(LetDirective {
@@ -88,15 +83,12 @@ impl<'a> Directive<'a> {
                         expression,
                     })
                 } else {
-                    return Err(ParserError::new(
-                        span,
-                        ParserErrorKind::UseDirectiveShouldHaveExpression,
-                    ));
+                    return None;
                 }
             }
         };
 
-        Ok(directive)
+        Some(directive)
     }
 
     /// Only useful when Directive is [TransitionDirective]

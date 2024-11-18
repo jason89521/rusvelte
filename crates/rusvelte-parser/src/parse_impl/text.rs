@@ -1,25 +1,6 @@
-use std::borrow::Cow;
-
 use crate::Parser;
-use derive_macro::{AstTree, OxcSpan};
 use oxc_span::Span;
-
-#[derive(Debug, Clone, AstTree, OxcSpan)]
-pub struct Text<'a> {
-    pub span: Span,
-    pub raw: &'a str,
-    pub data: Cow<'a, str>,
-}
-
-impl<'a> Text<'a> {
-    pub fn new(span: Span, raw: &'a str) -> Self {
-        Self {
-            span,
-            raw,
-            data: htmlize::unescape(raw),
-        }
-    }
-}
+use rusvelte_ast::ast::Text;
 
 impl<'a> Parser<'a> {
     pub fn parse_text(&mut self) -> Text<'a> {

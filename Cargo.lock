@@ -618,9 +618,24 @@ dependencies = [
  "oxc_span",
  "oxc_syntax",
  "regex",
+ "rusvelte_ast",
  "serde",
  "serde_json",
  "thiserror 2.0.1",
+ "utils",
+]
+
+[[package]]
+name = "rusvelte_ast"
+version = "0.1.0"
+dependencies = [
+ "derive-macro",
+ "htmlize",
+ "oxc_ast",
+ "oxc_span",
+ "oxc_syntax",
+ "regex",
+ "serde",
  "utils",
 ]
 

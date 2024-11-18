@@ -17,6 +17,7 @@ htmlize = { workspace = true, features = ["unescape"] }
 regex = { workspace = true }
 derive-macro = { workspace = true }
 utils = { workspace = true }
+rusvelte_ast = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true, features = ["json", "glob"] }

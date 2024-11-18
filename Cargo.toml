@@ -23,3 +23,4 @@ insta = { version = "1.41.1" }
 derive-macro = { path = "crates/derive-macro" }
 utils = { path = "crates/utils" }
 rusvelte-parser = { path = "crates/rusvelte-parser" }
+rusvelte_ast = { path = "crates/rusvelte_ast" }

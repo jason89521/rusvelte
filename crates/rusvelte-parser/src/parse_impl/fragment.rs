@@ -1,31 +1,12 @@
-use derive_macro::{AstTree, OxcSpan};
-
-use super::{Comment, Element, ParseElementReturn, ScriptContext, Tag, Text};
 use crate::{Parser, ParserError, ParserErrorKind};
+use rusvelte_ast::ast::{Fragment, FragmentNode, ScriptContext};
 
-#[derive(Debug, AstTree)]
-pub struct Fragment<'a> {
-    pub nodes: Vec<FragmentNode<'a>>,
-}
-
-impl<'a> Fragment<'a> {
-    pub fn new() -> Self {
-        Self { nodes: vec![] }
-    }
-}
+use super::element::ParseElementReturn;
 
 enum ParseFragmentNodeReturn<'a> {
     Nodes(Vec<FragmentNode<'a>>),
     Node(FragmentNode<'a>),
     None,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub enum FragmentNode<'a> {
-    Text(Text<'a>),
-    Element(Box<Element<'a>>),
-    Tag(Tag<'a>),
-    Comment(Comment<'a>),
 }
 
 impl<'a> Parser<'a> {

@@ -1,18 +1,14 @@
-use derive_macro::{AstTree, OxcSpan};
-use oxc_ast::ast::Program;
 use oxc_span::{GetSpan, Span};
-use serde::Serialize;
 use std::sync::LazyLock;
 
 use regex::Regex;
 
 use crate::{
-    ast::attribute::AttributeValue,
     error::{ParserError, ParserErrorKind},
     Parser,
 };
 
-use super::attribute::Attribute;
+use rusvelte_ast::ast::{Attribute, AttributeValue, Script, ScriptContext};
 
 static REGEX_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<\/script\s*>"#).unwrap());
@@ -21,32 +17,6 @@ static REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
 
 const RESERVED_ATTRIBUTES: [&str; 5] = ["server", "client", "worker", "test", "default"];
 const ALLOWED_ATTRIBUTES: [&str; 4] = ["context", "generics", "lang", "module"];
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Script<'a> {
-    pub span: Span,
-    pub context: ScriptContext,
-    pub content: Program<'a>,
-    pub attributes: Vec<Attribute<'a>>,
-}
-
-#[derive(Debug)]
-pub enum ScriptContext {
-    Default,
-    Module,
-}
-
-impl Serialize for ScriptContext {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match self {
-            ScriptContext::Default => serializer.serialize_str("default"),
-            ScriptContext::Module => serializer.serialize_str("module"),
-        }
-    }
-}
 
 impl<'a> Parser<'a> {
     pub fn parse_script(

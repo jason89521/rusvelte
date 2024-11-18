@@ -1,6 +1,5 @@
 use std::sync::LazyLock;
 
-use derive_macro::{AstTree, OxcSpan};
 use oxc_span::Span;
 use regex::Regex;
 
@@ -9,7 +8,12 @@ use crate::{
     Parser,
 };
 
-use super::{attribute::Attribute, Comment};
+use rusvelte_ast::ast::{
+    AtRule, Attribute, AttributeSelector, Block, BlockChild, ClassSelector, Combinator,
+    ComplexSelector, Declaration, IdSelector, NestingSelector, Nth, Percentage,
+    PseudoClassSelector, PseudoElementSelector, RelativeSelector, Rule, SelectorList,
+    SimpleSelector, StyleSheet, StyleSheetChild, StyleSheetContent, TypeSelector,
+};
 
 static REGEX_START_WITH_CLOSING_STYLE_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^<\/style\s*>"#).unwrap());
@@ -28,168 +32,6 @@ static REGEX_NTH: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^(even|odd|\+?(\d+|\d*n(\s*[+-]\s*\d+)?)|-\d*n(\s*\+\s*\d+))((\s+of\s+)|\s*[,)])")
         .unwrap()
 });
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct StyleSheet<'a> {
-    pub span: Span,
-    pub attributes: Vec<Attribute<'a>>,
-    pub children: Vec<StyleSheetChild<'a>>,
-    pub content: StyleSheetContent<'a>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct StyleSheetContent<'a> {
-    pub span: Span,
-    pub styles: &'a str,
-    pub comment: Option<Comment<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub enum StyleSheetChild<'a> {
-    AtRule(AtRule<'a>),
-    Rule(Rule<'a>),
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct AtRule<'a> {
-    pub span: Span,
-    pub name: &'a str,
-    pub prelude: &'a str,
-    pub block: Option<Block<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct RelativeSelector<'a> {
-    pub span: Span,
-    pub combinator: Option<Combinator<'a>>,
-    pub selectors: Vec<SimpleSelector<'a>>,
-}
-
-impl<'a> RelativeSelector<'a> {
-    fn new(combinator: Option<Combinator<'a>>, start: u32) -> Self {
-        Self {
-            span: Span::empty(start),
-            combinator,
-            selectors: vec![],
-        }
-    }
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct TypeSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct IdSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct ClassSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct AttributeSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-    pub matcher: Option<&'a str>,
-    pub value: Option<&'a str>,
-    pub flags: Option<&'a str>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct PseudoElementSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct PseudoClassSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-    pub args: Option<SelectorList<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Percentage<'a> {
-    pub span: Span,
-    pub value: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct NestingSelector<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Nth<'a> {
-    pub span: Span,
-    pub value: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub enum SimpleSelector<'a> {
-    TypeSelector(TypeSelector<'a>),
-    IdSelector(IdSelector<'a>),
-    ClassSelector(ClassSelector<'a>),
-    AttributeSelector(AttributeSelector<'a>),
-    PseudoElementSelector(PseudoElementSelector<'a>),
-    PseudoClassSelector(PseudoClassSelector<'a>),
-    Percentage(Percentage<'a>),
-    Nth(Nth<'a>),
-    NestingSelector(NestingSelector<'a>),
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct ComplexSelector<'a> {
-    pub span: Span,
-    pub children: Vec<RelativeSelector<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Rule<'a> {
-    pub span: Span,
-    pub prelude: SelectorList<'a>,
-    pub block: Block<'a>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Declaration<'a> {
-    pub span: Span,
-    pub property: &'a str,
-    pub value: &'a str,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub enum BlockChild<'a> {
-    Rule(Rule<'a>),
-    AtRule(AtRule<'a>),
-    Declaration(Declaration<'a>),
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Block<'a> {
-    pub span: Span,
-    pub children: Vec<BlockChild<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct SelectorList<'a> {
-    pub span: Span,
-    pub children: Vec<ComplexSelector<'a>>,
-}
-
-#[derive(Debug, AstTree, OxcSpan)]
-pub struct Combinator<'a> {
-    pub span: Span,
-    pub name: &'a str,
-}
 
 impl<'a> Parser<'a> {
     pub fn parse_style_sheet(
