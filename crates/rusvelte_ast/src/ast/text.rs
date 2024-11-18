@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use derive_macro::{AstTree, OxcSpan};
 use oxc_span::Span;
+use rusvelte_derive::{AstTree, OxcSpan};
 
 #[derive(Debug, Clone, AstTree, OxcSpan)]
 pub struct Text<'a> {

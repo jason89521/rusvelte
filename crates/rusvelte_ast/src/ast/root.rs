@@ -1,5 +1,5 @@
-use derive_macro::AstTree;
 use oxc_span::Span;
+use rusvelte_derive::AstTree;
 
 use super::{style_sheet::StyleSheet, Fragment, Script};
 

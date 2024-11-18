@@ -12,11 +12,7 @@ impl<'a> Parser<'a> {
             self.next();
         }
         let raw = &self.source[start..self.offset_u()];
-        let text = Text {
-            span: Span::new(start as u32, self.offset),
-            raw,
-            data: htmlize::unescape(raw),
-        };
+        let text = Text::new(Span::new(start as u32, self.offset), raw);
 
         text
     }

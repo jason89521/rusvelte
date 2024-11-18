@@ -1,6 +1,6 @@
-use derive_macro::{AstTree, OxcSpan};
 use oxc_ast::ast::Program;
 use oxc_span::Span;
+use rusvelte_derive::{AstTree, OxcSpan};
 use serde::Serialize;
 
 use super::attribute::Attribute;

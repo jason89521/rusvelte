@@ -1,6 +1,6 @@
-use derive_macro::{AstTree, OxcSpan};
 use oxc_ast::ast::Expression;
 use oxc_span::{Span, SPAN};
+use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{directive::Directive, ExpressionTag, Text};
 

@@ -1,4 +1,4 @@
-use derive_macro::{AstTree, OxcSpan};
+use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{Comment, Element, Tag, Text};
 

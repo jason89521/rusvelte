@@ -2,7 +2,7 @@ use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
-use utils::closing_tag_omitted;
+use rusvelte_utils::closing_tag_omitted;
 
 use crate::{
     context::ParentKind,

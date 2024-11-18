@@ -1,5 +1,5 @@
 [package]
-name = "rusvelte-parser"
+name = "rusvelte_parser"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,10 +13,8 @@ serde_json = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
 thiserror = { workspace = true }
-htmlize = { workspace = true, features = ["unescape"] }
 regex = { workspace = true }
-derive-macro = { workspace = true }
-utils = { workspace = true }
+rusvelte_utils = { workspace = true }
 rusvelte_ast = { workspace = true }
 
 [dev-dependencies]

@@ -1,5 +1,5 @@
-use derive_macro::{AstTree, OxcSpan};
 use oxc_span::Span;
+use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{attribute::Attribute, Comment};
 
