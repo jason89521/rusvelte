@@ -7,16 +7,11 @@ pub struct Context<'a> {
     closed_at: Option<u32>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub enum ParentKind {
     RegularElement,
+    #[default]
     Root,
-}
-
-impl Default for ParentKind {
-    fn default() -> Self {
-        ParentKind::Root
-    }
 }
 
 impl<'a> Context<'a> {
@@ -50,7 +45,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parent_name(&self) -> &'a str {
-        &self.expect_context().name
+        self.expect_context().name
     }
 
     pub fn push_context(&mut self, context: Context<'a>) {

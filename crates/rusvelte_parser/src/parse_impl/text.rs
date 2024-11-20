@@ -18,6 +18,6 @@ impl<'a> Parser<'a> {
     }
 
     pub fn create_text(&self, span: Span) -> Text<'a> {
-        Text::new(span, span.source_text(&self.source))
+        Text::new(span, span.source_text(self.source))
     }
 }

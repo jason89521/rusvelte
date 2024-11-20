@@ -49,7 +49,7 @@ impl<'a> Parser<'a> {
     pub fn new(source: &'a str, allocator: &'a Allocator) -> Self {
         let source = source.trim_end();
         let offset = 0;
-        let fragments = vec![Fragment::new()];
+        let fragments = vec![Fragment::default()];
         let source_type = if REGEX_LANG_ATTRIBUTE.is_match(source) {
             SourceType::ts()
         } else {
@@ -78,7 +78,7 @@ impl<'a> Parser<'a> {
     pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
         self.context_stack.push(Context::root_context());
         let fragment = self.parse_fragment()?;
-        let start = fragment.nodes.iter().next().map_or(0, |node| {
+        let start = fragment.nodes.first().map_or(0, |node| {
             let mut start = node.span().start;
             let mut chars = self.source[start as usize..].chars();
             while chars.next().map_or(false, char::is_whitespace) {
@@ -108,7 +108,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_expression(&mut self) -> Result<Expression<'a>, ParserError> {
-        let mut expr = OxcParser::new(&self.allocator, &self.remain(), self.source_type)
+        let mut expr = OxcParser::new(self.allocator, self.remain(), self.source_type)
             .parse_expression()
             .map_err(|e| {
                 ParserError::new(
@@ -129,7 +129,7 @@ impl<'a> Parser<'a> {
         text: &'a str,
         offset: u32,
     ) -> Result<Expression<'a>, ParserError> {
-        let mut expr = OxcParser::new(&self.allocator, text, self.source_type)
+        let mut expr = OxcParser::new(self.allocator, text, self.source_type)
             .parse_expression()
             .map_err(|e| {
                 ParserError::new(
@@ -144,8 +144,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_program(&self, data: &'a str, start: u32) -> Result<Program<'a>, ParserError> {
-        let parser_return = OxcParser::new(&self.allocator, &data, self.source_type).parse();
-        if parser_return.errors.len() != 0 {
+        let parser_return = OxcParser::new(self.allocator, data, self.source_type).parse();
+        if !parser_return.errors.is_empty() {
             return Err(ParserError::new(
                 Span::new(start, self.offset),
                 ParserErrorKind::ParseProgram(parser_return.errors),
@@ -206,7 +206,7 @@ impl<'a> Parser<'a> {
     }
 
     fn expect_regex(&mut self, re: &regex::Regex) -> Result<&'a str, ParserError> {
-        if let Some(mat) = re.find(&self.remain()) {
+        if let Some(mat) = re.find(self.remain()) {
             self.offset += mat.len() as u32;
             Ok(mat.as_str())
         } else {
@@ -269,7 +269,7 @@ impl<'a> Parser<'a> {
         }
 
         let name = &remain[..i - 1];
-        if name == "" {
+        if name.is_empty() {
             return Ok(None);
         }
         // TODO: handle unexpected_reserved_word
@@ -279,7 +279,7 @@ impl<'a> Parser<'a> {
     }
 
     fn eat_regex(&mut self, re: &regex::Regex) -> Option<&'a str> {
-        let value = re.find(&self.remain()).map(|mat| mat.as_str())?;
+        let value = re.find(self.remain()).map(|mat| mat.as_str())?;
         self.offset += value.len() as u32;
         Some(value)
     }
@@ -300,11 +300,11 @@ impl<'a> Parser<'a> {
     }
 
     fn match_regex(&self, re: &regex::Regex) -> Option<&'a str> {
-        re.find(&self.remain()).map(|mat| mat.as_str())
+        re.find(self.remain()).map(|mat| mat.as_str())
     }
 
     fn skip_whitespace(&mut self) {
-        if let Some(mat) = REGEX_NON_WHITESPACE.find(&self.remain()) {
+        if let Some(mat) = REGEX_NON_WHITESPACE.find(self.remain()) {
             self.offset += mat.start() as u32;
         }
     }

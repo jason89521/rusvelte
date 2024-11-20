@@ -114,7 +114,7 @@ impl<'a> Parser<'a> {
         }
 
         let name = self.eat_until(&REGEX_TOKEN_ENDING_CHARACTER);
-        if name == "" {
+        if name.is_empty() {
             return Ok(None);
         }
 
@@ -149,7 +149,7 @@ impl<'a> Parser<'a> {
         });
 
         if let Some((colon_idx, directive_kind, directive_name, modifiers)) = directive_meta {
-            if directive_name == "" {
+            if directive_name.is_empty() {
                 return Err(ParserError::new(
                     Span::new(start, start + colon_idx as u32 + 1),
                     ParserErrorKind::DirectiveMissingName(name.to_string()),
@@ -220,7 +220,7 @@ impl<'a> Parser<'a> {
     fn parse_static_attribute(&mut self) -> Result<Option<Attribute<'a>>, ParserError> {
         let start = self.offset;
         let name = self.eat_until(&REGEX_TOKEN_ENDING_CHARACTER);
-        if name == "" {
+        if name.is_empty() {
             return Ok(None);
         }
         let mut value = AttributeValue::True;
@@ -235,10 +235,7 @@ impl<'a> Parser<'a> {
                 ));
             };
             self.offset += raw.len() as u32;
-            let quoted = match raw.chars().next().unwrap() {
-                '\'' | '"' => true,
-                _ => false,
-            };
+            let quoted = matches!(raw.chars().next().unwrap(), '\'' | '"');
             if quoted {
                 raw = {
                     let mut chars = raw.chars();
@@ -306,7 +303,7 @@ impl<'a> Parser<'a> {
             "in attribute value",
         )?;
 
-        if value.len() == 0 && quote_mark.is_none() {
+        if value.is_empty() && quote_mark.is_none() {
             return Err(self.error(ParserErrorKind::ExpectedAttributeValue));
         }
 
