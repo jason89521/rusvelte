@@ -1,13 +1,14 @@
 ---
-source: crates/rusvelte-parser/tests/attributes/mod.rs
+source: crates/rusvelte_parser/tests/attributes/mod.rs
 expression: root
-input_file: crates/rusvelte-parser/tests/attributes/inputs/attribute-class-directive.svelte
+input_file: crates/rusvelte_parser/tests/attributes/inputs/attribute-class-directive.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
   "css": null,
   "start": 0,
-  "end": 29,
+  "end": 47,
   "fragment": {
     "type": "Fragment",
     "nodes": [
@@ -27,6 +28,37 @@ input_file: crates/rusvelte-parser/tests/attributes/inputs/attribute-class-direc
               "start": 16,
               "end": 21,
               "name": "isFoo"
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      },
+      {
+        "type": "Text",
+        "start": 29,
+        "end": 30,
+        "raw": "\n",
+        "data": "\n"
+      },
+      {
+        "type": "RegularElement",
+        "start": 30,
+        "end": 47,
+        "name": "p",
+        "attributes": [
+          {
+            "type": "ClassDirective",
+            "start": 33,
+            "end": 44,
+            "name": "isRed",
+            "expression": {
+              "type": "Identifier",
+              "start": 39,
+              "end": 44,
+              "name": "isRed"
             }
           }
         ],

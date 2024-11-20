@@ -172,7 +172,7 @@ impl<'a> Parser<'a> {
                     self.error_at(value.span().start, ParserErrorKind::DirectiveInvalidValue)
                 );
             }
-            let expression = match value {
+            let mut expression = match value {
                 AttributeValue::ExpressionTag(expression_tag) => Some(expression_tag.expression),
                 // for "{expr}"
                 AttributeValue::Quoted(mut quoted) if quoted.len() == 1 => {
@@ -186,26 +186,24 @@ impl<'a> Parser<'a> {
                 }
                 _ => None,
             };
-            let mut directive = Directive::create(
-                Span::new(start, end),
-                directive_kind,
-                directive_name,
-                expression,
-                modifiers,
-                // TODO: return parser error
-            )
-            .expect("Unexpected UseDirective or ClassDirective");
 
             // Directive name is expression, e.g. <p class:isRed />
             if matches!(
                 directive_kind,
                 DirectiveKind::BindDirective | DirectiveKind::ClassDirective
-            ) && directive.expression().is_none()
+            ) && expression.is_none()
             {
-                directive.set_expression(
-                    self.parse_expression_in(directive_name, start + colon_idx as u32 + 1)?,
-                );
+                expression =
+                    Some(self.parse_expression_in(directive_name, start + colon_idx as u32 + 1)?)
             }
+
+            let directive = Directive::new(
+                Span::new(start, end),
+                directive_kind,
+                directive_name,
+                expression,
+                modifiers,
+            );
 
             return Ok(Some(Attribute::Directive(directive)));
         }

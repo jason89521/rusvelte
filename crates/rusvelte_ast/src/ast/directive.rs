@@ -17,24 +17,33 @@ pub enum Directive<'a> {
 }
 
 impl<'a> Directive<'a> {
-    pub fn create(
+    /// # Panics
+    ///
+    /// Panics if `expression` is none when trying to construct a ClassDirective or UseDirective.
+    pub fn new(
         span: Span,
         kind: DirectiveKind<'a>,
         name: &'a str,
         expression: Option<Expression<'a>>,
         modifiers: Vec<&'a str>,
-    ) -> Option<Self> {
+    ) -> Self {
         let directive = match kind {
             DirectiveKind::AnimateDirective => Directive::AnimateDirective(AnimateDirective {
                 span,
                 name,
                 expression,
             }),
-            DirectiveKind::BindDirective => Directive::BindDirective(BindDirective {
-                span,
-                name,
-                expression,
-            }),
+            DirectiveKind::BindDirective => {
+                if let Some(expression) = expression {
+                    Directive::BindDirective(BindDirective {
+                        span,
+                        name,
+                        expression,
+                    })
+                } else {
+                    panic!("Trying to construct a BindDirective without expression")
+                }
+            }
             DirectiveKind::ClassDirective => {
                 if let Some(expression) = expression {
                     Directive::ClassDirective(ClassDirective {
@@ -43,7 +52,7 @@ impl<'a> Directive<'a> {
                         expression,
                     })
                 } else {
-                    return None;
+                    panic!("Trying to construct a ClassDirective without expression")
                 }
             }
             DirectiveKind::LetDirective => Directive::LetDirective(LetDirective {
@@ -75,52 +84,20 @@ impl<'a> Directive<'a> {
                     outro,
                 })
             }
-            DirectiveKind::UseDirective => {
-                if let Some(expression) = expression {
-                    Directive::UseDirective(UseDirective {
-                        span,
-                        name,
-                        expression,
-                    })
-                } else {
-                    return None;
-                }
-            }
+            DirectiveKind::UseDirective => Directive::UseDirective(UseDirective {
+                span,
+                name,
+                expression,
+            }),
         };
 
-        Some(directive)
+        directive
     }
 
     /// Only useful when Directive is [TransitionDirective]
     pub fn set_direction(&mut self, direction: &'a str) {
         if let Directive::TransitionDirective(directive) = self {
             directive.intro = direction == "in" || direction == "direction"
-        }
-    }
-
-    pub fn expression(&self) -> Option<&Expression<'a>> {
-        match self {
-            Directive::AnimateDirective(x) => x.expression.as_ref(),
-            Directive::BindDirective(x) => x.expression.as_ref(),
-            Directive::ClassDirective(x) => Some(&x.expression),
-            Directive::LetDirective(x) => x.expression.as_ref(),
-            Directive::OnDirective(x) => x.expression.as_ref(),
-            Directive::StyleDirective(_) => None,
-            Directive::TransitionDirective(x) => x.expression.as_ref(),
-            Directive::UseDirective(x) => Some(&x.expression),
-        }
-    }
-
-    pub fn set_expression(&mut self, expression: Expression<'a>) {
-        match self {
-            Directive::AnimateDirective(x) => x.expression = Some(expression),
-            Directive::BindDirective(x) => x.expression = Some(expression),
-            Directive::ClassDirective(x) => x.expression = expression,
-            Directive::LetDirective(x) => x.expression = Some(expression),
-            Directive::OnDirective(x) => x.expression = Some(expression),
-            Directive::StyleDirective(_) => (),
-            Directive::TransitionDirective(x) => x.expression = Some(expression),
-            Directive::UseDirective(x) => x.expression = expression,
         }
     }
 
@@ -194,7 +171,7 @@ pub struct BindDirective<'a> {
     /// The `x` in `bind:x`
     pub name: &'a str,
     /// The `y` in `bind:x={y}`
-    pub expression: Option<Expression<'a>>,
+    pub expression: Expression<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -252,5 +229,5 @@ pub struct UseDirective<'a> {
     /// The `x` in `use:x`
     pub name: &'a str,
     /// The `y` in `use:x={y}`
-    pub expression: Expression<'a>,
+    pub expression: Option<Expression<'a>>,
 }
