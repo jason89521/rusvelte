@@ -33,8 +33,8 @@ impl<'a> Parser<'a> {
                 ParseElementReturn::Element(element) => FragmentNode::Element(Box::new(element)),
                 ParseElementReturn::Comment(comment) => FragmentNode::Comment(comment),
                 ParseElementReturn::Script(script) => {
-                    match &script.context {
-                        &ScriptContext::Default => {
+                    match script.context {
+                        ScriptContext::Default => {
                             if self.instance.is_some() {
                                 return Err(ParserError::new(
                                     script.span,
@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
                             }
                             self.instance = Some(script)
                         }
-                        &ScriptContext::Module => {
+                        ScriptContext::Module => {
                             if self.module.is_some() {
                                 return Err(ParserError::new(
                                     script.span,

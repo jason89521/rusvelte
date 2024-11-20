@@ -11,9 +11,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match parser.parse() {
         Ok(result) => {
             let json = serde_json::to_string_pretty(&result)
-                .map_err(|_| format!("Cannot convert to json"))?;
+                .map_err(|_| "Cannot convert to json".to_string())?;
 
-            fs::write("output.json", json).map_err(|_| format!("Cannot write to output.json"))?;
+            fs::write("output.json", json)
+                .map_err(|_| "Cannot write to output.json".to_string())?;
         }
         Err(parser_error) => {
             eprintln!("remain: {}", parser.remain());

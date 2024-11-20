@@ -8,7 +8,7 @@ pub fn ast_tree_builder(input: DeriveInput) -> syn::Result<TokenStream> {
         .attrs
         .iter()
         .find(|attr| attr.path().is_ident("ast_tree"))
-        .and_then(|attr| {
+        .map(|attr| {
             let mut type_value = name.to_string();
             if let Meta::List(meta_list) = &attr.meta {
                 let _ = meta_list.parse_nested_meta(|meta| {
@@ -22,7 +22,7 @@ pub fn ast_tree_builder(input: DeriveInput) -> syn::Result<TokenStream> {
                     }
                 });
             };
-            Some(type_value)
+            type_value
         })
         .unwrap_or(name.to_string());
 
@@ -111,12 +111,10 @@ fn build_enum(name: &Ident, data_enum: &DataEnum) -> syn::Result<TokenStream> {
                         #name::#variant_ident(x) => Serialize::serialize(x, serializer)
                     })
                 }
-                _ => {
-                    return Err(syn::Error::new(
-                        variant.span(),
-                        "Only support unnamed field with exactly one field",
-                    ))
-                }
+                _ => Err(syn::Error::new(
+                    variant.span(),
+                    "Only support unnamed field with exactly one field",
+                )),
             }
         })
         .filter_map(|result| result.ok());

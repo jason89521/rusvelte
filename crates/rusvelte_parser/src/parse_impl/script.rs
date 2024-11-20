@@ -26,7 +26,7 @@ impl<'a> Parser<'a> {
     ) -> Result<Script<'a>, ParserError> {
         let script_start = self.offset;
         let data = self.eat_until(&REGEX_CLOSING_SCRIPT_TAG);
-        if self.remain().len() == 0 {
+        if self.remain().is_empty() {
             return Err(ParserError::new(
                 Span::empty(self.offset),
                 ParserErrorKind::ElementUnclosed(String::from("script")),
@@ -37,7 +37,7 @@ impl<'a> Parser<'a> {
         let context =
             attributes
                 .iter()
-                .fold(Ok(ScriptContext::Default), |context, attribute| {
+                .try_fold(ScriptContext::Default, |context, attribute| {
                     if let Attribute::NormalAttribute(attribute) = attribute {
                         let name = attribute.name;
                         let attr_start = attribute.span.start;
@@ -76,7 +76,7 @@ impl<'a> Parser<'a> {
                             return Ok(ScriptContext::Module);
                         }
                     }
-                    context
+                    Ok(context)
                 })?;
 
         Ok(Script {

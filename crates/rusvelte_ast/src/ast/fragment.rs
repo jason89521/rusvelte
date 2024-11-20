@@ -2,15 +2,9 @@ use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{Comment, Element, Tag, Text};
 
-#[derive(Debug, AstTree)]
+#[derive(Debug, AstTree, Default)]
 pub struct Fragment<'a> {
     pub nodes: Vec<FragmentNode<'a>>,
-}
-
-impl<'a> Fragment<'a> {
-    pub fn new() -> Self {
-        Self { nodes: vec![] }
-    }
 }
 
 #[derive(Debug, AstTree, OxcSpan)]

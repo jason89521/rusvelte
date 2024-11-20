@@ -16,15 +16,15 @@ use rusvelte_ast::ast::{
     Text,
 };
 
-const SVELTE_HEAD_TAG: &'static str = "svelte:head";
-const SVELTE_OPTIONS_TAG: &'static str = "svelte:options";
-const SVELTE_WINDOW_TAG: &'static str = "svelte:window";
-const SVELTE_DOCUMENT_TAG: &'static str = "svelte:document";
-const SVELTE_BODY_TAG: &'static str = "svelte:body";
-const SVELTE_ELEMENT_TAG: &'static str = "svelte:element";
-const SVELTE_COMPONENT_TAG: &'static str = "svelte:component";
-const SVELTE_SELF_TAG: &'static str = "svelte:self";
-const SVELTE_FRAGMENT_TAG: &'static str = "svelte:fragment";
+const SVELTE_HEAD_TAG: &str = "svelte:head";
+const SVELTE_OPTIONS_TAG: &str = "svelte:options";
+const SVELTE_WINDOW_TAG: &str = "svelte:window";
+const SVELTE_DOCUMENT_TAG: &str = "svelte:document";
+const SVELTE_BODY_TAG: &str = "svelte:body";
+const SVELTE_ELEMENT_TAG: &str = "svelte:element";
+const SVELTE_COMPONENT_TAG: &str = "svelte:component";
+const SVELTE_SELF_TAG: &str = "svelte:self";
+const SVELTE_FRAGMENT_TAG: &str = "svelte:fragment";
 
 static ROOT_ONLY_META_TAGS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
     HashSet::from([
@@ -99,7 +99,7 @@ impl<'a> Parser<'a> {
         {
             self.set_parent_closed_at(start);
             self.last_auto_closed_tag = Some(LastAutoClosedTag {
-                tag: &self.parent_name(),
+                tag: self.parent_name(),
                 reason: name,
                 depth: self.context_stack.len() as u8,
             })
@@ -136,8 +136,7 @@ impl<'a> Parser<'a> {
         }
 
         // TODO: implement element
-        #[allow(unused_variables)]
-        let element_type = {
+        {
             match name {
                 SVELTE_HEAD_TAG => unimplemented!(),
                 SVELTE_OPTIONS_TAG => unimplemented!(),
@@ -160,7 +159,7 @@ impl<'a> Parser<'a> {
             }
 
             // RegularElement
-        };
+        }
 
         self.skip_whitespace();
         let is_root_script = self.is_parent_root() && name == "script";
@@ -300,8 +299,8 @@ impl<'a> Parser<'a> {
             };
         };
 
-        while let Some(_) = self.peek() {
-            if done(&self) {
+        while self.peek().is_some() {
+            if done(self) {
                 flush(SequenceValue::Text(
                     self.create_text(Span::new(text_start, self.offset)),
                 ));
@@ -352,7 +351,7 @@ impl<'a> Parser<'a> {
 
     fn peek_closing_tag_name(&self) -> Option<&'a str> {
         REGEX_CLOSING_TAG
-            .captures(&self.remain())
+            .captures(self.remain())
             .and_then(|caps| caps.get(1).map(|mat| mat.as_str()))
     }
 }

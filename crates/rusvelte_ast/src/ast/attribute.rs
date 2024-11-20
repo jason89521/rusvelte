@@ -33,7 +33,7 @@ impl oxc_span::GetSpan for AttributeValue<'_> {
             AttributeValue::Quoted(vec) => {
                 let start = vec.iter().next().unwrap().span().start;
                 let end = vec.iter().last().unwrap().span().end;
-                return Span::new(start, end);
+                Span::new(start, end)
             }
             AttributeValue::True => SPAN,
         }
@@ -63,20 +63,12 @@ impl<'a> Attribute<'a> {
 
 impl<'a> AttributeValue<'a> {
     pub fn is_true(&self) -> bool {
-        match self {
-            AttributeValue::True => true,
-            _ => false,
-        }
+        matches!(self, AttributeValue::True)
     }
 
     pub fn is_text(&self) -> bool {
         if let AttributeValue::Quoted(values) = self {
-            values.len() == 1
-                && if let QuotedAttributeValue::Text(_) = &values[0] {
-                    true
-                } else {
-                    false
-                }
+            values.len() == 1 && matches!(&values[0], QuotedAttributeValue::Text(_))
         } else {
             false
         }

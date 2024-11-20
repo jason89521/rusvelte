@@ -6,9 +6,9 @@ pub fn oxc_span_builder(ast: DeriveInput) -> TokenStream {
     match &ast.data {
         syn::Data::Struct(_) => build_struct(&ast),
         syn::Data::Enum(data_enum) => build_enum(&ast, data_enum),
-        syn::Data::Union(_) => TokenStream::from(
-            Error::new(ast.span(), "Only allow struct or enum").to_compile_error(),
-        ),
+        syn::Data::Union(_) => {
+            Error::new(ast.span(), "Only allow struct or enum").to_compile_error()
+        }
     }
 }
 
@@ -22,7 +22,7 @@ fn build_struct(ast: &syn::DeriveInput) -> TokenStream {
             }
         }
     };
-    gen.into()
+    gen
 }
 
 fn build_enum(ast: &DeriveInput, data_enum: &DataEnum) -> TokenStream {
@@ -44,5 +44,4 @@ fn build_enum(ast: &DeriveInput, data_enum: &DataEnum) -> TokenStream {
         }
       }
     }
-    .into()
 }

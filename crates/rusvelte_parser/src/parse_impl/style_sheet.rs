@@ -44,7 +44,7 @@ impl<'a> Parser<'a> {
         let content_end = self.offset;
         self.expect_regex(&REGEX_START_WITH_CLOSING_STYLE_TAG)?;
 
-        return Ok(StyleSheet {
+        Ok(StyleSheet {
             span: Span::new(start, self.offset),
             attributes,
             children,
@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
                 styles: &self.source[content_start as usize..content_end as usize],
                 comment: None,
             },
-        });
+        })
     }
 
     fn parser_style_sheet_body(&mut self) -> Result<Vec<StyleSheetChild<'a>>, ParserError> {
@@ -121,7 +121,7 @@ impl<'a> Parser<'a> {
         let start = self.offset;
         self.expect('{')?;
         let mut children = vec![];
-        while let Some(_) = self.peek() {
+        while self.peek().is_some() {
             self.skip_comment_or_whitespace();
             if self.match_ch('}') {
                 break;
@@ -191,7 +191,7 @@ impl<'a> Parser<'a> {
         let mut children = vec![];
         self.skip_comment_or_whitespace();
         let start = self.offset;
-        while let Some(_) = self.peek() {
+        while self.peek().is_some() {
             children.push(self.parse_selector(inside_pseudo_class)?);
             let end = self.offset;
             self.skip_comment_or_whitespace();
@@ -220,7 +220,7 @@ impl<'a> Parser<'a> {
         let list_start = self.offset;
         let mut children = vec![];
         let mut relative_selector = RelativeSelector::new(None, list_start);
-        while let Some(_) = self.peek() {
+        while self.peek().is_some() {
             let start = self.offset;
             if self.eat('&') {
                 relative_selector
@@ -358,7 +358,7 @@ impl<'a> Parser<'a> {
             self.offset = index;
             let combinator = self.parse_css_combinator()?;
             if let Some(combinator) = combinator {
-                if relative_selector.selectors.len() > 0 {
+                if !relative_selector.selectors.is_empty() {
                     relative_selector.span.end = index;
                     children.push(relative_selector)
                 }
@@ -431,7 +431,7 @@ impl<'a> Parser<'a> {
         }
 
         let result = &self.source[start as usize..self.offset_u()];
-        if result == "" {
+        if result.is_empty() {
             return Err(ParserError::new(
                 Span::empty(start),
                 ParserErrorKind::CssExpectedIdentifier,
@@ -464,17 +464,17 @@ impl<'a> Parser<'a> {
                     in_url = true;
                 }
                 ';' | '{' | '}' if !in_url && quote_mark.is_none() => {
-                    return Ok(&self.source[start..self.offset_u()].trim());
+                    return Ok(self.source[start..self.offset_u()].trim());
                 }
                 _ => (),
             }
             self.next();
         }
 
-        return Err(ParserError::new(
+        Err(ParserError::new(
             Span::empty(self.offset),
             ParserErrorKind::UnexpectedEOF,
-        ));
+        ))
     }
 
     fn parse_css_attribute_value(&mut self) -> Result<&'a str, ParserError> {
@@ -494,7 +494,7 @@ impl<'a> Parser<'a> {
                     self.expect(m)?;
                 }
 
-                return Ok(&self.source[start..self.offset_u()].trim());
+                return Ok(self.source[start..self.offset_u()].trim());
             }
             self.next();
         }
@@ -506,7 +506,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_nth_regex(&mut self) -> Option<&'a str> {
-        let value = REGEX_NTH.captures(&self.remain()).and_then(|caps| {
+        let value = REGEX_NTH.captures(self.remain()).and_then(|caps| {
             if caps.get(6).is_some() {
                 // found " of "
                 caps.get(0).map(|mat| mat.as_str())
