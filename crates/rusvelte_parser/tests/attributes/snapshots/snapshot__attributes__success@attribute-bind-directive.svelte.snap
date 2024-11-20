@@ -1,0 +1,122 @@
+---
+source: crates/rusvelte_parser/tests/attributes/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/attributes/inputs/attribute-bind-directive.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 46,
+  "end": 84,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Text",
+        "start": 44,
+        "end": 46,
+        "raw": "\n\n",
+        "data": "\n\n"
+      },
+      {
+        "type": "RegularElement",
+        "start": 46,
+        "end": 84,
+        "name": "input",
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 53,
+            "end": 68,
+            "name": "type",
+            "value": [
+              {
+                "type": "Text",
+                "start": 59,
+                "end": 67,
+                "raw": "checkbox",
+                "data": "checkbox"
+              }
+            ]
+          },
+          {
+            "type": "BindDirective",
+            "start": 69,
+            "end": 81,
+            "name": "checked",
+            "expression": {
+              "type": "Identifier",
+              "start": 74,
+              "end": 81,
+              "name": "checked"
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 44,
+    "context": "default",
+    "content": {
+      "type": "Program",
+      "start": 8,
+      "end": 35,
+      "sourceType": {
+        "language": "javascript",
+        "moduleKind": "module",
+        "variant": "standard"
+      },
+      "hashbang": null,
+      "directives": [],
+      "body": [
+        {
+          "type": "VariableDeclaration",
+          "start": 11,
+          "end": 34,
+          "kind": "let",
+          "declarations": [
+            {
+              "type": "VariableDeclarator",
+              "start": 15,
+              "end": 33,
+              "id": {
+                "type": "Identifier",
+                "start": 15,
+                "end": 22,
+                "name": "checked",
+                "typeAnnotation": null,
+                "optional": false
+              },
+              "init": {
+                "type": "CallExpression",
+                "start": 25,
+                "end": 33,
+                "callee": {
+                  "type": "Identifier",
+                  "start": 25,
+                  "end": 31,
+                  "name": "$state"
+                },
+                "typeParameters": null,
+                "arguments": [],
+                "optional": false
+              },
+              "definite": false
+            }
+          ],
+          "declare": false
+        }
+      ]
+    },
+    "attributes": []
+  }
+}
