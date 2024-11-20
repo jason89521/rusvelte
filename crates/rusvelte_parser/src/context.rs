@@ -1,51 +1,54 @@
 use crate::Parser;
 
-#[derive(Debug, Clone, Default)]
-pub struct Context<'a> {
-    kind: ParentKind,
-    name: &'a str,
-    closed_at: Option<u32>,
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
-pub enum ParentKind {
-    RegularElement,
+#[derive(Debug, Clone, Default, PartialEq)]
+pub enum Context<'a> {
+    RegularElement {
+        name: &'a str,
+        auto_closed: bool,
+    },
     #[default]
     Root,
 }
 
 impl<'a> Context<'a> {
     pub fn root_context() -> Self {
-        Self {
-            kind: ParentKind::Root,
-            ..Default::default()
-        }
+        Context::default()
     }
 
     pub fn regular_element_context(name: &'a str) -> Self {
-        Self {
-            kind: ParentKind::RegularElement,
+        Context::RegularElement {
             name,
-            ..Default::default()
+            auto_closed: false,
         }
     }
 
-    pub fn closed_at(&self) -> Option<u32> {
-        self.closed_at
+    pub fn auto_closed(&self) -> bool {
+        if let Context::RegularElement { auto_closed, .. } = self {
+            *auto_closed
+        } else {
+            false
+        }
+    }
+
+    pub fn name(&self) -> &'a str {
+        match self {
+            Context::RegularElement { name, .. } => name,
+            Context::Root => "Root",
+        }
     }
 }
 
 impl<'a> Parser<'a> {
     pub fn is_parent_root(&self) -> bool {
-        self.expect_context().kind == ParentKind::Root
+        self.expect_context() == &Context::Root
     }
 
-    pub fn parent_kind(&self) -> ParentKind {
-        self.expect_context().kind
+    pub fn is_parent_regular_element(&self) -> bool {
+        matches!(self.expect_context(), Context::RegularElement { .. })
     }
 
     pub fn parent_name(&self) -> &'a str {
-        self.expect_context().name
+        self.expect_context().name()
     }
 
     pub fn push_context(&mut self, context: Context<'a>) {
@@ -56,8 +59,10 @@ impl<'a> Parser<'a> {
         self.context_stack.pop()
     }
 
-    pub fn set_parent_closed_at(&mut self, index: u32) {
-        self.expect_context_mut().closed_at = Some(index)
+    pub fn close_parent(&mut self) {
+        if let Context::RegularElement { auto_closed, .. } = self.expect_context_mut() {
+            *auto_closed = true
+        }
     }
 
     fn expect_context(&self) -> &Context<'a> {

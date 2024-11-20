@@ -1,19 +1,17 @@
 use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
-use oxc_span::{GetSpan, Span};
+use oxc_span::Span;
 use regex::Regex;
 use rusvelte_utils::closing_tag_omitted;
 
 use crate::{
-    context::ParentKind,
     error::{ParserError, ParserErrorKind},
     regex_pattern::{REGEX_CLOSING_COMMENT, REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG},
     Context, LastAutoClosedTag, Parser,
 };
 
 use rusvelte_ast::ast::{
-    Comment, Element, ExpressionTag, Fragment, FragmentNode, RegularElement, Script, StyleSheet,
-    Text,
+    Attribute, Comment, Element, ExpressionTag, Fragment, RegularElement, Script, StyleSheet, Text,
 };
 
 const SVELTE_HEAD_TAG: &str = "svelte:head";
@@ -66,7 +64,24 @@ pub enum ParseElementReturn<'a> {
     Comment(Comment<'a>),
     Script(Script<'a>),
     StyleSheet(StyleSheet<'a>),
-    Nodes(Vec<FragmentNode<'a>>),
+    /// Encounter auto closed element
+    ClosePrev,
+}
+
+impl<'a> ParseElementReturn<'a> {
+    fn regular_element(
+        span: Span,
+        name: &'a str,
+        attributes: Vec<Attribute<'a>>,
+        fragment: Fragment<'a>,
+    ) -> ParseElementReturn<'a> {
+        ParseElementReturn::Element(Element::RegularElement(RegularElement {
+            span,
+            name,
+            attributes,
+            fragment,
+        }))
+    }
 }
 
 #[derive(Debug)]
@@ -94,15 +109,17 @@ impl<'a> Parser<'a> {
 
         let name = self.eat_until(&REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG);
 
-        if self.parent_kind() == ParentKind::RegularElement
-            && closing_tag_omitted(self.parent_name(), name)
-        {
-            self.set_parent_closed_at(start);
+        if self.is_parent_regular_element() && closing_tag_omitted(self.parent_name(), name) {
+            self.close_parent();
             self.last_auto_closed_tag = Some(LastAutoClosedTag {
                 tag: self.parent_name(),
                 reason: name,
                 depth: self.context_stack.len() as u8,
-            })
+            });
+            // rewind
+            self.offset = start;
+
+            return Ok(ParseElementReturn::ClosePrev);
         }
 
         if name.starts_with("svelte:") && !META_TAGS.contains(name) {
@@ -185,45 +202,23 @@ impl<'a> Parser<'a> {
             self.expect('>')?;
             let span = Span::new(start, self.offset);
             let fragment = Fragment { nodes: vec![] };
-            return Ok(ParseElementReturn::Element(Element::RegularElement(
-                RegularElement {
-                    span,
-                    name,
-                    fragment,
-                    attributes,
-                },
-            )));
+            return Ok(ParseElementReturn::regular_element(
+                span, name, attributes, fragment,
+            ));
         }
 
         self.expect('>')?;
         self.push_context(Context::regular_element_context(name));
         let fragment = self.parse_fragment()?;
 
-        let ctx = self.pop_context().expect("Expected self context.");
-        if let Some(closed_at) = ctx.closed_at() {
-            let mut nodes = vec![];
-            let mut fragment_nodes = std::collections::VecDeque::from(fragment.nodes);
-            while fragment_nodes
-                .front()
-                .map_or(false, |node| node.span().start < closed_at)
-            {
-                let node = fragment_nodes.pop_front().expect("Expected fragment node");
-                nodes.push(node);
-            }
-
-            let element =
-                FragmentNode::Element(Box::new(Element::RegularElement(RegularElement {
-                    span: Span::new(start, closed_at),
-                    name,
-                    attributes,
-                    fragment: Fragment { nodes },
-                })));
-            let mut nodes = vec![element];
-            for node in fragment_nodes.into_iter() {
-                nodes.push(node);
-            }
-
-            return Ok(ParseElementReturn::Nodes(nodes));
+        let ctx = self.pop_context().expect("Expected self context");
+        if ctx.auto_closed() {
+            return Ok(ParseElementReturn::regular_element(
+                Span::new(start, self.offset),
+                name,
+                attributes,
+                fragment,
+            ));
         }
 
         let closing_tag_name = self
@@ -231,7 +226,7 @@ impl<'a> Parser<'a> {
             .ok_or(self.error(ParserErrorKind::ExpectedClosingTag))?;
         if closing_tag_name != name {
             // close any elements that don't have their own closing tags, e.g. <div><p></div>
-            if self.parent_kind() != ParentKind::RegularElement {
+            if !self.is_parent_regular_element() {
                 match self.last_auto_closed_tag.as_ref() {
                     Some(last_auto_closed_tag) if last_auto_closed_tag.tag == name => {
                         return Err(self.error_at(
@@ -257,27 +252,22 @@ impl<'a> Parser<'a> {
                 }
             }
 
-            return Ok(ParseElementReturn::Element(Element::RegularElement(
-                RegularElement {
-                    fragment,
-                    name,
-                    span: Span::new(start, self.offset),
-                    attributes,
-                },
-            )));
+            return Ok(ParseElementReturn::regular_element(
+                Span::new(start, self.offset),
+                name,
+                attributes,
+                fragment,
+            ));
         }
 
         self.expect_regex(&REGEX_CLOSING_TAG)?;
-        let element = RegularElement {
-            fragment,
-            name,
-            span: Span::new(start, self.offset),
-            attributes,
-        };
 
-        Ok(ParseElementReturn::Element(Element::RegularElement(
-            element,
-        )))
+        Ok(ParseElementReturn::regular_element(
+            Span::new(start, self.offset),
+            name,
+            attributes,
+            fragment,
+        ))
     }
 
     /// Used for parse attribute value and textarea's nodes
