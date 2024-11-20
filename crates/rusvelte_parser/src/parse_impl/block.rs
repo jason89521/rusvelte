@@ -79,6 +79,7 @@ impl<'a> Parser<'a> {
             self.expect_str("if")?;
             self.skip_whitespace();
             self.expect('}')?;
+            is_closed = true;
         }
         let _ctx = self.pop_context().expect("Expected a if context");
         result.span.end = self.offset;

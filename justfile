@@ -9,3 +9,4 @@ test-parser TEST_NAME:
 
 lint:
   cargo clippy -- -D warnings
+  
