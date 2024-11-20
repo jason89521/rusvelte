@@ -29,7 +29,7 @@ pub struct AtRule<'a> {
     pub span: Span,
     pub name: &'a str,
     pub prelude: &'a str,
-    pub block: Option<Block<'a>>,
+    pub block: Option<CSSBlock<'a>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -130,7 +130,7 @@ pub struct ComplexSelector<'a> {
 pub struct Rule<'a> {
     pub span: Span,
     pub prelude: SelectorList<'a>,
-    pub block: Block<'a>,
+    pub block: CSSBlock<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -148,7 +148,8 @@ pub enum BlockChild<'a> {
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct Block<'a> {
+#[ast_tree(type = "Block")]
+pub struct CSSBlock<'a> {
     pub span: Span,
     pub children: Vec<BlockChild<'a>>,
 }
