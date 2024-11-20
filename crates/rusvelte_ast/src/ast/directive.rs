@@ -17,13 +17,16 @@ pub enum Directive<'a> {
 }
 
 impl<'a> Directive<'a> {
-    pub fn create(
+    /// # Panics
+    ///
+    /// Panics if `expression` is none when trying to construct a ClassDirective or UseDirective.
+    pub fn new(
         span: Span,
         kind: DirectiveKind<'a>,
         name: &'a str,
         expression: Option<Expression<'a>>,
         modifiers: Vec<&'a str>,
-    ) -> Option<Self> {
+    ) -> Self {
         let directive = match kind {
             DirectiveKind::AnimateDirective => Directive::AnimateDirective(AnimateDirective {
                 span,
@@ -43,7 +46,7 @@ impl<'a> Directive<'a> {
                         expression,
                     })
                 } else {
-                    return None;
+                    panic!("Trying to construct a ClassDirective without expression")
                 }
             }
             DirectiveKind::LetDirective => Directive::LetDirective(LetDirective {
@@ -83,12 +86,12 @@ impl<'a> Directive<'a> {
                         expression,
                     })
                 } else {
-                    return None;
+                    panic!("Trying to construct a UseDirective without expression")
                 }
             }
         };
 
-        Some(directive)
+        directive
     }
 
     /// Only useful when Directive is [TransitionDirective]
