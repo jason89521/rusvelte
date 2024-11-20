@@ -1,4 +1,5 @@
 mod attribute;
+mod block;
 mod element;
 mod fragment;
 mod script;

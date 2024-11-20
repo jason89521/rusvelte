@@ -24,6 +24,7 @@ static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<script\s+.*?lang="ts".*?\s*>"#).unwrap());
 static REGEX_START_WHOLE_COMMENT: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"(^<!--.*?-->)|(^\/\*.*?\*\/)"#).unwrap());
+static REGEX_START_WHITESPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s").unwrap());
 
 struct LastAutoClosedTag<'a> {
     tag: &'a str,
@@ -306,6 +307,15 @@ impl<'a> Parser<'a> {
     fn skip_whitespace(&mut self) {
         if let Some(mat) = REGEX_NON_WHITESPACE.find(self.remain()) {
             self.offset += mat.start() as u32;
+        }
+    }
+
+    fn expect_whitespace(&mut self) -> Result<(), ParserError> {
+        if REGEX_START_WHITESPACE.is_match(self.remain()) {
+            self.skip_whitespace();
+            Ok(())
+        } else {
+            Err(self.error(ParserErrorKind::ExpectedWhitespace))
         }
     }
 

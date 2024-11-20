@@ -4,12 +4,10 @@ use rusvelte_ast::ast::{ExpressionTag, Tag};
 use crate::{error::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-    pub fn parse_tag(&mut self) -> Result<Tag<'a>, ParserError> {
-        let start = self.offset;
-        self.next();
-
+    pub fn parse_tag(&mut self, start: u32) -> Result<Tag<'a>, ParserError> {
         let expr = self.parse_expression()?;
 
+        self.skip_whitespace();
         self.expect('}')?;
 
         Ok(Tag::ExpressionTag(ExpressionTag {

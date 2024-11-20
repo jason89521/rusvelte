@@ -2,6 +2,9 @@ use crate::Parser;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum Context<'a> {
+    Block {
+        name: &'a str,
+    },
     RegularElement {
         name: &'a str,
         auto_closed: bool,
@@ -22,6 +25,10 @@ impl<'a> Context<'a> {
         }
     }
 
+    pub fn block_context(name: &'a str) -> Self {
+        Context::Block { name }
+    }
+
     pub fn auto_closed(&self) -> bool {
         if let Context::RegularElement { auto_closed, .. } = self {
             *auto_closed
@@ -32,6 +39,7 @@ impl<'a> Context<'a> {
 
     pub fn name(&self) -> &'a str {
         match self {
+            Context::Block { name, .. } => name,
             Context::RegularElement { name, .. } => name,
             Context::Root => "Root",
         }
