@@ -4,26 +4,24 @@ use rusvelte_ast::ast::{Fragment, FragmentNode, ScriptContext};
 use super::element::ParseElementReturn;
 
 enum ParseFragmentNodeReturn<'a> {
-    Nodes(Vec<FragmentNode<'a>>),
     Node(FragmentNode<'a>),
+    ClosePrev,
     None,
 }
 
 impl<'a> Parser<'a> {
     pub fn parse_fragment(&mut self) -> Result<Fragment<'a>, ParserError> {
-        let mut result = vec![];
+        let mut nodes = vec![];
         while self.offset_u() < self.source.len() && !self.match_str("</") {
             match self.parse_fragment_node()? {
-                ParseFragmentNodeReturn::Nodes(mut nodes) => {
-                    result.append(&mut nodes);
-                }
                 ParseFragmentNodeReturn::Node(node) => {
-                    result.push(node);
+                    nodes.push(node);
                 }
+                ParseFragmentNodeReturn::ClosePrev => return Ok(Fragment { nodes }),
                 ParseFragmentNodeReturn::None => (),
             }
         }
-        Ok(Fragment { nodes: result })
+        Ok(Fragment { nodes })
     }
 
     fn parse_fragment_node(&mut self) -> Result<ParseFragmentNodeReturn<'a>, ParserError> {
@@ -65,9 +63,7 @@ impl<'a> Parser<'a> {
                     self.css = Some(style_sheet);
                     return Ok(ParseFragmentNodeReturn::None);
                 }
-                ParseElementReturn::Nodes(nodes) => {
-                    return Ok(ParseFragmentNodeReturn::Nodes(nodes))
-                }
+                ParseElementReturn::ClosePrev => return Ok(ParseFragmentNodeReturn::ClosePrev),
             }
         } else if self.match_str("{") {
             FragmentNode::Tag(self.parse_tag()?)
