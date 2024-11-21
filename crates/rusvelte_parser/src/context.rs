@@ -15,22 +15,22 @@ pub enum Context<'a> {
 
 impl<'a> Context<'a> {
     pub fn root_context() -> Self {
-        Context::default()
+        Self::default()
     }
 
     pub fn regular_element_context(name: &'a str) -> Self {
-        Context::RegularElement {
+        Self::RegularElement {
             name,
             auto_closed: false,
         }
     }
 
     pub fn block_context(name: &'a str) -> Self {
-        Context::Block { name }
+        Self::Block { name }
     }
 
     pub fn auto_closed(&self) -> bool {
-        if let Context::RegularElement { auto_closed, .. } = self {
+        if let Self::RegularElement { auto_closed, .. } = self {
             *auto_closed
         } else {
             false
@@ -39,9 +39,9 @@ impl<'a> Context<'a> {
 
     pub fn name(&self) -> &'a str {
         match self {
-            Context::Block { name, .. } => name,
-            Context::RegularElement { name, .. } => name,
-            Context::Root => "Root",
+            Self::Block { name, .. } => name,
+            Self::RegularElement { name, .. } => name,
+            Self::Root => "Root",
         }
     }
 }
