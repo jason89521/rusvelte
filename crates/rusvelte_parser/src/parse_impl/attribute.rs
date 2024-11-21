@@ -130,7 +130,7 @@ impl<'a> Parser<'a> {
             .match_regex(&REGEX_STARTS_WITH_QUOTE_CHARACTERS)
             .is_some()
         {
-            return Err(self.error(ParserErrorKind::ExpectedToken('=')));
+            return Err(self.error(ParserErrorKind::ExpectedToken('='.to_string())));
         }
 
         let directive_meta = name.find(':').and_then(|idx| {
@@ -258,7 +258,7 @@ impl<'a> Parser<'a> {
         {
             return Err(ParserError::new(
                 Span::empty(self.offset),
-                ParserErrorKind::ExpectedToken('='),
+                ParserErrorKind::ExpectedToken('='.to_string()),
             ));
         }
 

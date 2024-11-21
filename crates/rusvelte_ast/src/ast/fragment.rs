@@ -1,6 +1,6 @@
 use rusvelte_derive::{AstTree, OxcSpan};
 
-use super::{Comment, Element, Tag, Text};
+use super::{Block, Comment, Element, Tag, Text};
 
 #[derive(Debug, AstTree, Default)]
 pub struct Fragment<'a> {
@@ -13,4 +13,5 @@ pub enum FragmentNode<'a> {
     Element(Box<Element<'a>>),
     Tag(Tag<'a>),
     Comment(Comment<'a>),
+    Block(Block<'a>),
 }

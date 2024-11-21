@@ -45,10 +45,6 @@ pub enum ParserErrorKind {
     UnexpectedEOFWithChar(char),
     #[error(r#"Expected closing tag."#)]
     ExpectedClosingTag,
-    #[error(r#"ClassDirective should have expression"#)]
-    ClassDirectiveShouldHaveExpression,
-    #[error(r#"UseDirective should have expression"#)]
-    UseDirectiveShouldHaveExpression,
 
     // From svelte
     #[error("Unexpected EOF.")]
@@ -66,7 +62,7 @@ pub enum ParserErrorKind {
     #[error("Expected attribute value")]
     ExpectedAttributeValue,
     #[error("Expected token {0}")]
-    ExpectedToken(char),
+    ExpectedToken(String),
     #[error("A component can have a single top-level `<script>` element and/or a single top-level `<script module>` element")]
     ScriptDuplicate,
     #[error("Expected a valid CSS identifier")]
@@ -99,6 +95,12 @@ pub enum ParserErrorKind {
     DirectiveInvalidValue,
     #[error("Attributes need to be unique")]
     AttributeDuplicate,
+    #[error("Expected whitespace")]
+    ExpectedWhitespace,
+    #[error("Block was left open")]
+    BlockUnclosed,
+    #[error("'elseif' should be 'else if'")]
+    BlockInvalidElseif,
 }
 
 impl Parser<'_> {

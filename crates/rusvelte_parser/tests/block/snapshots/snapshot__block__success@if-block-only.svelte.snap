@@ -1,0 +1,100 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/if-block-only.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 71,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 71,
+        "elseif": false,
+        "test": {
+          "type": "StaticMemberExpression",
+          "start": 5,
+          "end": 18,
+          "object": {
+            "type": "Identifier",
+            "start": 5,
+            "end": 9,
+            "name": "user"
+          },
+          "property": {
+            "type": "Identifier",
+            "start": 10,
+            "end": 18,
+            "name": "loggedIn"
+          },
+          "optional": false
+        },
+        "consequent": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 19,
+              "end": 22,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 22,
+              "end": 65,
+              "name": "button",
+              "attributes": [
+                {
+                  "type": "Attribute",
+                  "start": 30,
+                  "end": 46,
+                  "name": "onclick",
+                  "value": {
+                    "type": "ExpressionTag",
+                    "start": 38,
+                    "end": 46,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 39,
+                      "end": 45,
+                      "name": "toggle"
+                    }
+                  }
+                }
+              ],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 47,
+                    "end": 56,
+                    "raw": " Log out ",
+                    "data": " Log out "
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 65,
+              "end": 66,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "alternate": null
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

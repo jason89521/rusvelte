@@ -1,4 +1,5 @@
 mod attribute;
+mod block;
 mod directive;
 mod element;
 mod fragment;
@@ -9,6 +10,7 @@ mod tag;
 mod text;
 
 pub use attribute::*;
+pub use block::*;
 pub use directive::*;
 pub use element::*;
 pub use fragment::*;

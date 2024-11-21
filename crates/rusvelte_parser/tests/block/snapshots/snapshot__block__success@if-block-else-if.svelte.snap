@@ -1,0 +1,221 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/if-block-else-if.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 136,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 136,
+        "elseif": false,
+        "test": {
+          "type": "BinaryExpression",
+          "start": 5,
+          "end": 11,
+          "left": {
+            "type": "Identifier",
+            "start": 5,
+            "end": 6,
+            "name": "x"
+          },
+          "operator": ">",
+          "right": {
+            "type": "Literal",
+            "start": 9,
+            "end": 11,
+            "value": 10.0,
+            "raw": "10"
+          }
+        },
+        "consequent": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 12,
+              "end": 15,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 15,
+              "end": 44,
+              "name": "p",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 18,
+                    "end": 21,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 19,
+                      "end": 20,
+                      "name": "x"
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 21,
+                    "end": 40,
+                    "raw": " is greater than 10",
+                    "data": " is greater than 10"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 44,
+              "end": 45,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "alternate": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "IfBlock",
+              "start": 45,
+              "end": 136,
+              "elseif": true,
+              "test": {
+                "type": "BinaryExpression",
+                "start": 55,
+                "end": 60,
+                "left": {
+                  "type": "Literal",
+                  "start": 55,
+                  "end": 56,
+                  "value": 5.0,
+                  "raw": "5"
+                },
+                "operator": ">",
+                "right": {
+                  "type": "Identifier",
+                  "start": 59,
+                  "end": 60,
+                  "name": "x"
+                }
+              },
+              "consequent": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 61,
+                    "end": 64,
+                    "raw": "\n  ",
+                    "data": "\n  "
+                  },
+                  {
+                    "type": "RegularElement",
+                    "start": 64,
+                    "end": 89,
+                    "name": "p",
+                    "attributes": [],
+                    "fragment": {
+                      "type": "Fragment",
+                      "nodes": [
+                        {
+                          "type": "ExpressionTag",
+                          "start": 67,
+                          "end": 70,
+                          "expression": {
+                            "type": "Identifier",
+                            "start": 68,
+                            "end": 69,
+                            "name": "x"
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 70,
+                          "end": 85,
+                          "raw": " is less than 5",
+                          "data": " is less than 5"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 89,
+                    "end": 90,
+                    "raw": "\n",
+                    "data": "\n"
+                  }
+                ]
+              },
+              "alternate": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 97,
+                    "end": 100,
+                    "raw": "\n  ",
+                    "data": "\n  "
+                  },
+                  {
+                    "type": "RegularElement",
+                    "start": 100,
+                    "end": 130,
+                    "name": "p",
+                    "attributes": [],
+                    "fragment": {
+                      "type": "Fragment",
+                      "nodes": [
+                        {
+                          "type": "ExpressionTag",
+                          "start": 103,
+                          "end": 106,
+                          "expression": {
+                            "type": "Identifier",
+                            "start": 104,
+                            "end": 105,
+                            "name": "x"
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 106,
+                          "end": 126,
+                          "raw": " is between 5 and 10",
+                          "data": " is between 5 and 10"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 130,
+                    "end": 131,
+                    "raw": "\n",
+                    "data": "\n"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

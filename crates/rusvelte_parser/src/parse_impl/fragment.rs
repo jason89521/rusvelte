@@ -6,6 +6,8 @@ use super::element::ParseElementReturn;
 enum ParseFragmentNodeReturn<'a> {
     Node(FragmentNode<'a>),
     ClosePrev,
+    /// Encounter a next/close block notation like `{:else }` or `{/if}`
+    NextOrCloseBlock,
     None,
 }
 
@@ -17,7 +19,9 @@ impl<'a> Parser<'a> {
                 ParseFragmentNodeReturn::Node(node) => {
                     nodes.push(node);
                 }
-                ParseFragmentNodeReturn::ClosePrev => return Ok(Fragment { nodes }),
+                ParseFragmentNodeReturn::ClosePrev | ParseFragmentNodeReturn::NextOrCloseBlock => {
+                    return Ok(Fragment { nodes })
+                }
                 ParseFragmentNodeReturn::None => (),
             }
         }
@@ -65,8 +69,23 @@ impl<'a> Parser<'a> {
                 }
                 ParseElementReturn::ClosePrev => return Ok(ParseFragmentNodeReturn::ClosePrev),
             }
-        } else if self.match_str("{") {
-            FragmentNode::Tag(self.parse_tag()?)
+        } else if self.match_ch('{') {
+            let start = self.offset;
+            self.expect('{')?;
+            self.skip_whitespace();
+
+            match self
+                .peek()
+                .ok_or(self.error(ParserErrorKind::UnexpectedEOF))?
+            {
+                '#' => FragmentNode::Block(self.parse_block(start)?),
+                ':' | '/' => {
+                    // rewind
+                    self.offset = start;
+                    return Ok(ParseFragmentNodeReturn::NextOrCloseBlock);
+                }
+                _ => FragmentNode::Tag(self.parse_tag(start)?),
+            }
         } else {
             FragmentNode::Text(self.parse_text())
         };

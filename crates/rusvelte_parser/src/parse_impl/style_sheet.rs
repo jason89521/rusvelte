@@ -9,7 +9,7 @@ use crate::{
 };
 
 use rusvelte_ast::ast::{
-    AtRule, Attribute, AttributeSelector, Block, BlockChild, ClassSelector, Combinator,
+    AtRule, Attribute, AttributeSelector, BlockChild, CSSBlock, ClassSelector, Combinator,
     ComplexSelector, Declaration, IdSelector, NestingSelector, Nth, Percentage,
     PseudoClassSelector, PseudoElementSelector, RelativeSelector, Rule, SelectorList,
     SimpleSelector, StyleSheet, StyleSheetChild, StyleSheetContent, TypeSelector,
@@ -91,7 +91,7 @@ impl<'a> Parser<'a> {
 
         if self.match_ch('{') {
             // e.g. `@media (...) {...}`
-            block = Some(self.parse_block()?);
+            block = Some(self.parse_css_block()?);
         } else {
             // e.g. `@import '...'`
             self.expect(';')?;
@@ -108,7 +108,7 @@ impl<'a> Parser<'a> {
     fn parse_css_rule(&mut self) -> Result<Rule<'a>, ParserError> {
         let start = self.offset;
         let prelude = self.parse_selector_list(false)?;
-        let block = self.parse_block()?;
+        let block = self.parse_css_block()?;
 
         Ok(Rule {
             span: Span::new(start, self.offset),
@@ -117,7 +117,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn parse_block(&mut self) -> Result<Block<'a>, ParserError> {
+    fn parse_css_block(&mut self) -> Result<CSSBlock<'a>, ParserError> {
         let start = self.offset;
         self.expect('{')?;
         let mut children = vec![];
@@ -131,7 +131,7 @@ impl<'a> Parser<'a> {
         }
         self.expect('}')?;
 
-        Ok(Block {
+        Ok(CSSBlock {
             span: Span::new(start, self.offset),
             children,
         })
