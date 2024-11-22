@@ -94,17 +94,25 @@ impl<'a> Parser<'a> {
         self.expect_whitespace()?;
         let expression_start = self.offset;
         let mut text = self.remain();
-        let mut expression = self.parse_expression_in(text, expression_start);
-        while let Err(e) = expression {
-            if let Some(as_idx) = text.rfind("as") {
-                text = &text[..as_idx];
-                expression = self.parse_expression_in(text, expression_start);
-            } else {
-                return Err(e);
+        // we have to do this loop because `{#each x as { y = z }}` fails to parse —
+        // the `as { y = z }` is treated as an Expression but it's actually a Pattern.
+        // the 'fix' is to backtrack and hide everything from the `as` onwards, until
+        // we get a valid expression
+        let mut expression = loop {
+            match self.parse_expression_in(text, expression_start) {
+                Ok(expr) => {
+                    break expr;
+                }
+                Err(e) => {
+                    if let Some(as_idx) = text.rfind("as") {
+                        text = &text[..as_idx];
+                    } else {
+                        return Err(e);
+                    }
+                }
             }
-        }
+        };
 
-        let mut expression = expression?;
         self.offset += expression.span().size();
         self.skip_whitespace();
         // this could be a TypeScript assertion that was erroneously eaten.
