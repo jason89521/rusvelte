@@ -158,6 +158,16 @@ impl<'a> Parser<'a> {
         Ok(program)
     }
 
+    fn parse_binding_pattern(&mut self) -> Result<BindingPattern<'a>, ParserError> {
+        let mut pattern = OxcParser::new(self.allocator, self.remain(), self.source_type)
+            .parse_binding_pattern()
+            .map_err(|d| self.error(ParserErrorKind::ParseBindingPattern(d)))?;
+        let mut span_offset = SpanOffset(self.offset);
+        span_offset.visit_binding_pattern(&mut pattern);
+        self.offset += pattern.span().size();
+        Ok(pattern)
+    }
+
     fn meta_tag_exist(&self, meta_tag: &'a str) -> bool {
         self.meta_tags.contains(meta_tag)
     }

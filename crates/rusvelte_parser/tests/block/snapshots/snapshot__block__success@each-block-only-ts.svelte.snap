@@ -1,0 +1,198 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/each-block-only-ts.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 29,
+  "end": 112,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Text",
+        "start": 27,
+        "end": 29,
+        "raw": "\n\n",
+        "data": "\n\n"
+      },
+      {
+        "type": "EachBlock",
+        "start": 29,
+        "end": 112,
+        "expression": {
+          "type": "Identifier",
+          "start": 36,
+          "end": 41,
+          "name": "items"
+        },
+        "context": {
+          "type": "Identifier",
+          "start": 45,
+          "end": 56,
+          "name": "a",
+          "typeAnnotation": {
+            "type": "TSTypeAnnotation",
+            "start": 46,
+            "end": 56,
+            "typeAnnotation": {
+              "type": "TSArrayType",
+              "start": 48,
+              "end": 56,
+              "elementType": {
+                "type": "TSNumberKeyword",
+                "start": 48,
+                "end": 54
+              }
+            }
+          },
+          "optional": false
+        },
+        "body": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 69,
+              "end": 71,
+              "raw": "\n\t",
+              "data": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 71,
+              "end": 104,
+              "name": "li",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 75,
+                    "end": 86,
+                    "expression": {
+                      "type": "StaticMemberExpression",
+                      "start": 76,
+                      "end": 85,
+                      "object": {
+                        "type": "Identifier",
+                        "start": 76,
+                        "end": 80,
+                        "name": "item"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "start": 81,
+                        "end": 85,
+                        "name": "name"
+                      },
+                      "optional": false
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 86,
+                    "end": 89,
+                    "raw": " x ",
+                    "data": " x "
+                  },
+                  {
+                    "type": "ExpressionTag",
+                    "start": 89,
+                    "end": 99,
+                    "expression": {
+                      "type": "StaticMemberExpression",
+                      "start": 90,
+                      "end": 98,
+                      "object": {
+                        "type": "Identifier",
+                        "start": 90,
+                        "end": 94,
+                        "name": "item"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "start": 95,
+                        "end": 98,
+                        "name": "qty"
+                      },
+                      "optional": false
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 104,
+              "end": 105,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "fallback": null,
+        "index": "i",
+        "key": {
+          "type": "StaticMemberExpression",
+          "start": 60,
+          "end": 67,
+          "object": {
+            "type": "Identifier",
+            "start": 60,
+            "end": 64,
+            "name": "item"
+          },
+          "property": {
+            "type": "Identifier",
+            "start": 65,
+            "end": 67,
+            "name": "id"
+          },
+          "optional": false
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 27,
+    "context": "default",
+    "content": {
+      "type": "Program",
+      "start": 18,
+      "end": 18,
+      "sourceType": {
+        "language": "typescript",
+        "moduleKind": "module",
+        "variant": "standard"
+      },
+      "hashbang": null,
+      "directives": [],
+      "body": []
+    },
+    "attributes": [
+      {
+        "type": "Attribute",
+        "start": 8,
+        "end": 17,
+        "name": "lang",
+        "value": [
+          {
+            "type": "Text",
+            "start": 14,
+            "end": 16,
+            "raw": "ts",
+            "data": "ts"
+          }
+        ]
+      }
+    ]
+  }
+}

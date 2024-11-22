@@ -1,0 +1,130 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/each-block-only.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 72,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "EachBlock",
+        "start": 0,
+        "end": 72,
+        "expression": {
+          "type": "Identifier",
+          "start": 7,
+          "end": 12,
+          "name": "items"
+        },
+        "context": {
+          "type": "Identifier",
+          "start": 16,
+          "end": 20,
+          "name": "item",
+          "typeAnnotation": null,
+          "optional": false
+        },
+        "body": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 34,
+              "end": 37,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 37,
+              "end": 64,
+              "name": "li",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 41,
+                    "end": 44,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 42,
+                      "end": 43,
+                      "name": "i"
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 44,
+                    "end": 45,
+                    "raw": " ",
+                    "data": " "
+                  },
+                  {
+                    "type": "ExpressionTag",
+                    "start": 45,
+                    "end": 59,
+                    "expression": {
+                      "type": "StaticMemberExpression",
+                      "start": 46,
+                      "end": 58,
+                      "object": {
+                        "type": "Identifier",
+                        "start": 46,
+                        "end": 50,
+                        "name": "item"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "start": 51,
+                        "end": 58,
+                        "name": "content"
+                      },
+                      "optional": false
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 64,
+              "end": 65,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "fallback": null,
+        "index": "i",
+        "key": {
+          "type": "StaticMemberExpression",
+          "start": 25,
+          "end": 32,
+          "object": {
+            "type": "Identifier",
+            "start": 25,
+            "end": 29,
+            "name": "item"
+          },
+          "property": {
+            "type": "Identifier",
+            "start": 30,
+            "end": 32,
+            "name": "id"
+          },
+          "optional": false
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

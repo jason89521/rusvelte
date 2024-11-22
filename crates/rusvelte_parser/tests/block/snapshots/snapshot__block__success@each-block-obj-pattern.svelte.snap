@@ -1,0 +1,170 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/each-block-obj-pattern.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 73,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "EachBlock",
+        "start": 0,
+        "end": 73,
+        "expression": {
+          "type": "Identifier",
+          "start": 7,
+          "end": 12,
+          "name": "items"
+        },
+        "context": {
+          "type": "ObjectPattern",
+          "start": 16,
+          "end": 33,
+          "properties": [
+            {
+              "type": "BindingProperty",
+              "start": 18,
+              "end": 20,
+              "key": {
+                "type": "Identifier",
+                "start": 18,
+                "end": 20,
+                "name": "id"
+              },
+              "value": {
+                "type": "Identifier",
+                "start": 18,
+                "end": 20,
+                "name": "id",
+                "typeAnnotation": null,
+                "optional": false
+              },
+              "shorthand": true,
+              "computed": false
+            },
+            {
+              "type": "BindingProperty",
+              "start": 22,
+              "end": 26,
+              "key": {
+                "type": "Identifier",
+                "start": 22,
+                "end": 26,
+                "name": "name"
+              },
+              "value": {
+                "type": "Identifier",
+                "start": 22,
+                "end": 26,
+                "name": "name",
+                "typeAnnotation": null,
+                "optional": false
+              },
+              "shorthand": true,
+              "computed": false
+            },
+            {
+              "type": "BindingProperty",
+              "start": 28,
+              "end": 31,
+              "key": {
+                "type": "Identifier",
+                "start": 28,
+                "end": 31,
+                "name": "qty"
+              },
+              "value": {
+                "type": "Identifier",
+                "start": 28,
+                "end": 31,
+                "name": "qty",
+                "typeAnnotation": null,
+                "optional": false
+              },
+              "shorthand": true,
+              "computed": false
+            }
+          ],
+          "typeAnnotation": null,
+          "optional": false
+        },
+        "body": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 39,
+              "end": 42,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 42,
+              "end": 65,
+              "name": "li",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 46,
+                    "end": 52,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 47,
+                      "end": 51,
+                      "name": "name"
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 52,
+                    "end": 55,
+                    "raw": " x ",
+                    "data": " x "
+                  },
+                  {
+                    "type": "ExpressionTag",
+                    "start": 55,
+                    "end": 60,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 56,
+                      "end": 59,
+                      "name": "qty"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 65,
+              "end": 66,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "fallback": null,
+        "index": null,
+        "key": {
+          "type": "Identifier",
+          "start": 35,
+          "end": 37,
+          "name": "id"
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}
