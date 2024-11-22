@@ -1,17 +1,34 @@
-
 [workspace]
 members = ["crates/*"]
 resolver = "2"
 
+[patch.crates-io]
+oxc_allocator = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_allocator" }
+oxc_ast = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_ast", features = [
+  "serialize",
+] }
+oxc_parser = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_parser" }
+oxc_span = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_span" }
+oxc_syntax = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_syntax" }
+oxc_diagnostics = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_diagnostics" }
+
+# for development
+# oxc_allocator = { path = "../oxc/crates/oxc_allocator", package = "oxc_allocator" }
+# oxc_ast = { path = "../oxc/crates/oxc_ast" }
+# oxc_parser = { path = "../oxc/crates/oxc_parser" }
+# oxc_span = { path = "../oxc/crates/oxc_span", package = "oxc_span" }
+# oxc_syntax = { path = "../oxc/crates/oxc_syntax", package = "oxc_syntax" }
+# oxc_diagnostics = { path = "../oxc/crates/oxc_diagnostics", package = "oxc_diagnostics" }
+
 [workspace.dependencies]
 serde = { version = "1.0.214" }
 serde_json = { version = "1.0.132" }
-oxc_allocator = { version = "0.36.0" }
-oxc_ast = { version = "0.36.0", features = ["serialize"] }
-oxc_parser = { version = "0.36.0" }
-oxc_span = { version = "0.36.0" }
-oxc_syntax = { version = "0.36.0" }
-oxc_diagnostics = { version = "0.36.0" }
+oxc_allocator = { version = "0.37.0" }
+oxc_ast = { version = "0.37.0", features = ["serialize"] }
+oxc_parser = { version = "0.37.0" }
+oxc_span = { version = "0.37.0" }
+oxc_syntax = { version = "0.37.0" }
+oxc_diagnostics = { version = "0.37.0" }
 thiserror = { version = "2.0.1" }
 htmlize = { version = "1.0.5" }
 regex = { version = "1.11.1" }

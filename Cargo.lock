@@ -297,9 +297,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_allocator"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "931f734a61f63a0571163b160b764d90d83077c4d2631d15b26fe1b66763dad8"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "allocator-api2",
  "bumpalo",
@@ -308,9 +307,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_ast"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9a771175e84c2324c841fe7ca3ddacb5df8102f043e2fc3e96d0bfee039c13d"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "bitflags",
  "cow-utils",
@@ -328,9 +326,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_ast_macros"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed71131e79889e226fb6510b90fa1a4a7495c8fdac43a4f505334fb0f1324e3e"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -339,9 +336,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_diagnostics"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e37049d46eb02a97e4cc0900672a921666393c642c1ad419a20d483285f5b590"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "oxc-miette",
  "rustc-hash",
@@ -349,27 +345,24 @@ dependencies = [
 
 [[package]]
 name = "oxc_estree"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fa45c638ccfd88b5c26147b0a98e1e8dd49542327dda94445b940ef91920d6a"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "oxc_index"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae76739229d0cc5e834e0e3b9e8c4078a86828ff47f5bc71138e4571ce528f83"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "oxc_parser"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0106e10cd67a59d91a75232d4c40f188b8532efea9b9bbed110bce157e7d3b9a"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "assert-unchecked",
  "bitflags",
@@ -389,9 +382,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_regular_expression"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1bd0d5b1b943173378a5f61d6a4c49edc7e8c9157241e9bbba54594d7449b4c"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "oxc_allocator",
  "oxc_ast_macros",
@@ -406,9 +398,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_span"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7b5d7caf8a20611f34c5c9ebdf232b6b42498e5424d02ef1e2dffe31553b49f"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "compact_str",
  "oxc-miette",
@@ -420,9 +411,8 @@ dependencies = [
 
 [[package]]
 name = "oxc_syntax"
-version = "0.36.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3135d5ddd0dc8ca535c0ac517a526ace8cac2699bb1345064c9fe046ca761dfa"
+version = "0.37.0"
+source = "git+https://github.com/jason89521/oxc.git?branch=rusvelte#af6fa2cd17b3b40d71184da8580801ebae254b50"
 dependencies = [
  "assert-unchecked",
  "bitflags",
