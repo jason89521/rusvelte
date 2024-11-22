@@ -37,6 +37,8 @@ pub enum ParserErrorKind {
     ParseProgram(Vec<OxcDiagnostic>),
     #[error("Parse expression error: {0:#?}.")]
     ParseExpression(Vec<OxcDiagnostic>),
+    #[error("Parse binding pattern error: {0:#?}.")]
+    ParseBindingPattern(OxcDiagnostic),
     #[error(r#"Expected a "{expected}", but found a "{found}"."#)]
     ExpectedChar { expected: char, found: char },
     #[error(r#"Expected a "{0}" str."#)]
@@ -45,6 +47,10 @@ pub enum ParserErrorKind {
     UnexpectedEOFWithChar(char),
     #[error(r#"Expected closing tag."#)]
     ExpectedClosingTag,
+    #[error(r#"Expected 'as' for each block"#)]
+    ExpectedEachBlockAs,
+    #[error(r#"Expected at {expected}, but found at {found}"#)]
+    UnexpectedOffset { expected: u32, found: u32 },
 
     // From svelte
     #[error("Unexpected EOF.")]
@@ -101,6 +107,8 @@ pub enum ParserErrorKind {
     BlockUnclosed,
     #[error("'elseif' should be 'else if'")]
     BlockInvalidElseif,
+    #[error("Expected an identifier")]
+    ExpectedIdentifier,
 }
 
 impl Parser<'_> {

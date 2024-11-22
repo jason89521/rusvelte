@@ -1,0 +1,132 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/each-block-else.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 83,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "EachBlock",
+        "start": 0,
+        "end": 83,
+        "expression": {
+          "type": "Identifier",
+          "start": 7,
+          "end": 12,
+          "name": "todos"
+        },
+        "context": {
+          "type": "Identifier",
+          "start": 16,
+          "end": 20,
+          "name": "todo",
+          "typeAnnotation": null,
+          "optional": false
+        },
+        "body": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 21,
+              "end": 24,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 24,
+              "end": 42,
+              "name": "p",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 27,
+                    "end": 38,
+                    "expression": {
+                      "type": "StaticMemberExpression",
+                      "start": 28,
+                      "end": 37,
+                      "object": {
+                        "type": "Identifier",
+                        "start": 28,
+                        "end": 32,
+                        "name": "todo"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "start": 33,
+                        "end": 37,
+                        "name": "text"
+                      },
+                      "optional": false
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 42,
+              "end": 43,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "fallback": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 50,
+              "end": 53,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 53,
+              "end": 75,
+              "name": "p",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 56,
+                    "end": 71,
+                    "raw": "No tasks today!",
+                    "data": "No tasks today!"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 75,
+              "end": 76,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "index": null,
+        "key": null
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

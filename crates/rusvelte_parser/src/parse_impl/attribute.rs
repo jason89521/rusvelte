@@ -1,5 +1,7 @@
 use std::{collections::HashSet, sync::LazyLock};
 
+use oxc_allocator::Box;
+use oxc_ast::ast::Expression;
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
 
@@ -96,7 +98,7 @@ impl<'a> Parser<'a> {
             }
 
             // handle shorthand attr
-            let (name, expression) = if let Some(v) = self.eat_identifier()? {
+            let (name, identifier) = if let Some(v) = self.eat_identifier()? {
                 v
             } else {
                 return Err(self.error(ParserErrorKind::AttributeEmptyShorthand));
@@ -107,8 +109,8 @@ impl<'a> Parser<'a> {
                 span: Span::new(start, self.offset),
                 name,
                 value: AttributeValue::ExpressionTag(ExpressionTag {
-                    span: expression.span(),
-                    expression,
+                    span: identifier.span,
+                    expression: Expression::Identifier(Box::new_in(identifier, self.allocator)),
                 }),
             })));
         }

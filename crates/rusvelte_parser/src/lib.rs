@@ -1,15 +1,15 @@
-use std::{collections::HashSet, sync::LazyLock};
+use std::{cell::Cell, collections::HashSet, sync::LazyLock};
 
 use context::Context;
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
 use oxc_ast::{
-    ast::{Expression, Program},
+    ast::{BindingPattern, Expression, IdentifierReference, Program},
     VisitMut,
 };
 use oxc_parser::Parser as OxcParser;
 use oxc_span::{GetSpan, SourceType, Span};
-use oxc_syntax::identifier::is_identifier_name;
+use oxc_syntax::identifier::{is_identifier_part, is_identifier_start};
 use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
 use rusvelte_ast::ast::{Fragment, Root, Script, StyleSheet};
@@ -158,6 +158,16 @@ impl<'a> Parser<'a> {
         Ok(program)
     }
 
+    fn parse_binding_pattern(&mut self) -> Result<BindingPattern<'a>, ParserError> {
+        let mut pattern = OxcParser::new(self.allocator, self.remain(), self.source_type)
+            .parse_binding_pattern()
+            .map_err(|d| self.error(ParserErrorKind::ParseBindingPattern(d)))?;
+        let mut span_offset = SpanOffset(self.offset);
+        span_offset.visit_binding_pattern(&mut pattern);
+        self.offset += pattern.span().size();
+        Ok(pattern)
+    }
+
     fn meta_tag_exist(&self, meta_tag: &'a str) -> bool {
         self.meta_tags.contains(meta_tag)
     }
@@ -262,21 +272,39 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn eat_identifier(&mut self) -> Result<Option<(&'a str, Expression<'a>)>, ParserError> {
-        let mut i = 1;
+    fn eat_identifier(
+        &mut self,
+    ) -> Result<Option<(&'a str, IdentifierReference<'a>)>, ParserError> {
+        let start = self.offset;
         let remain = self.remain();
-        while i < remain.len() && is_identifier_name(&remain[..i]) {
-            i += 1;
+        match self.peek() {
+            Some(ch) if is_identifier_start(ch) => {
+                self.next();
+            }
+            _ => return Ok(None),
         }
 
-        let name = &remain[..i - 1];
-        if name.is_empty() {
-            return Ok(None);
+        while let Some(ch) = self.peek() {
+            if !is_identifier_part(ch) {
+                break;
+            }
+            self.next();
         }
-        // TODO: handle unexpected_reserved_word
-        let expr = self.parse_expression_in(name, self.offset)?;
-        self.offset += expr.span().size();
-        Ok(Some((name, expr)))
+
+        let identifier = &remain[..(self.offset - start) as usize];
+        if identifier.is_empty() {
+            Ok(None)
+        } else {
+            // TODO: handle unexpected_reserved_word
+            Ok(Some((
+                identifier,
+                IdentifierReference {
+                    span: Span::new(start, self.offset),
+                    name: identifier.into(),
+                    reference_id: Cell::default(),
+                },
+            )))
+        }
     }
 
     fn eat_regex(&mut self, re: &regex::Regex) -> Option<&'a str> {
