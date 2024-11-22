@@ -151,14 +151,16 @@ impl<'a> Parser<'a> {
             self.skip_whitespace();
         }
 
-        let mut key = None;
-        if self.eat('(') {
+        let key = if self.eat('(') {
             self.skip_whitespace();
-            key = Some(self.parse_expression()?);
+            let key = Some(self.parse_expression()?);
             self.skip_whitespace();
             self.expect(')')?;
             self.skip_whitespace();
-        }
+            key
+        } else {
+            None
+        };
 
         self.expect('}')?;
         self.push_context(Context::Block { name: "each" });
