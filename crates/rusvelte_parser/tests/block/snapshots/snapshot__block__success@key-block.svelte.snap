@@ -1,0 +1,72 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/key-block.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 40,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "KeyBlock",
+        "start": 0,
+        "end": 40,
+        "expression": {
+          "type": "Identifier",
+          "start": 6,
+          "end": 11,
+          "name": "value"
+        },
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 12,
+              "end": 15,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "RegularElement",
+              "start": 15,
+              "end": 33,
+              "name": "div",
+              "attributes": [],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "ExpressionTag",
+                    "start": 20,
+                    "end": 27,
+                    "expression": {
+                      "type": "Identifier",
+                      "start": 21,
+                      "end": 26,
+                      "name": "value"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 33,
+              "end": 34,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}
