@@ -8,6 +8,7 @@ use super::Fragment;
 pub enum Block<'a> {
     IfBlock(IfBlock<'a>),
     EachBlock(EachBlock<'a>),
+    AwaitBlock(AwaitBlock<'a>),
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -28,4 +29,17 @@ pub struct EachBlock<'a> {
     pub fallback: Option<Fragment<'a>>,
     pub index: Option<&'a str>,
     pub key: Option<Expression<'a>>,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct AwaitBlock<'a> {
+    pub span: Span,
+    pub expression: Expression<'a>,
+    /// The resolved value inside the `then` block
+    pub value: Option<BindingPattern<'a>>,
+    /// The rejection reason inside the `catch` block
+    pub error: Option<BindingPattern<'a>>,
+    pub pending: Option<Fragment<'a>>,
+    pub then: Option<Fragment<'a>>,
+    pub catch: Option<Fragment<'a>>,
 }

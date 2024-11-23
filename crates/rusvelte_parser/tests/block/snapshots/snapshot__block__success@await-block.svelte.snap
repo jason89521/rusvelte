@@ -1,0 +1,82 @@
+---
+source: crates/rusvelte_parser/tests/block/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/block/inputs/await-block.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 68,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "AwaitBlock",
+        "start": 0,
+        "end": 68,
+        "expression": {
+          "type": "Identifier",
+          "start": 8,
+          "end": 18,
+          "name": "expression"
+        },
+        "value": {
+          "type": "Identifier",
+          "start": 33,
+          "end": 37,
+          "name": "name",
+          "typeAnnotation": null,
+          "optional": false
+        },
+        "error": {
+          "type": "Identifier",
+          "start": 50,
+          "end": 54,
+          "name": "name",
+          "typeAnnotation": null,
+          "optional": false
+        },
+        "pending": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 19,
+              "end": 26,
+              "raw": "pending",
+              "data": "pending"
+            }
+          ]
+        },
+        "then": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 38,
+              "end": 42,
+              "raw": "then",
+              "data": "then"
+            }
+          ]
+        },
+        "catch": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 55,
+              "end": 60,
+              "raw": "catch",
+              "data": "catch"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

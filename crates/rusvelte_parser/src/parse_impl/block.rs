@@ -1,7 +1,7 @@
 use oxc_ast::ast::Expression;
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
-use rusvelte_ast::ast::{Block, EachBlock, Fragment, FragmentNode, IfBlock};
+use rusvelte_ast::ast::{AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock};
 use std::sync::LazyLock;
 
 use crate::{
@@ -14,6 +14,8 @@ static REGEX_START_NEXT_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\{\s*:"#).unwrap());
 static REGEX_START_CLOSE_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\{\s*\/"#).unwrap());
+static REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*}"#).unwrap());
 
 impl<'a> Parser<'a> {
     pub fn parse_block(&mut self, start: u32) -> Result<Block<'a>, ParserError> {
@@ -27,6 +29,8 @@ impl<'a> Parser<'a> {
             }
         } else if self.eat_str("each") {
             Ok(Block::EachBlock(self.parse_each_block(start)?))
+        } else if self.eat_str("await") {
+            Ok(Block::AwaitBlock(self.parse_await_block(start)?))
         } else {
             unimplemented!()
         }
@@ -196,6 +200,116 @@ impl<'a> Parser<'a> {
             fallback,
             index,
             key,
+        })
+    }
+
+    fn parse_await_block(&mut self, start: u32) -> Result<AwaitBlock<'a>, ParserError> {
+        self.expect_whitespace()?;
+        let expression = self.parse_expression()?;
+        self.skip_whitespace();
+
+        let mut value = None;
+        let mut error = None;
+        let mut pending = None;
+        let mut then = None;
+        let mut catch = None;
+        if self.eat_str("then") {
+            // {#await expr then}
+            if self
+                .match_regex(&REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
+                .is_some()
+            {
+                self.skip_whitespace();
+            } else {
+                // {#await expr then pattern}
+                self.expect_whitespace()?;
+                value = Some(self.parse_binding_pattern()?);
+                self.skip_whitespace();
+            }
+        } else if self.eat_str("catch") {
+            // {#await expr catch}
+            if self
+                .match_regex(&REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
+                .is_some()
+            {
+                self.skip_whitespace();
+            } else {
+                // {#await expr catch err}
+                self.expect_whitespace()?;
+                error = Some(self.parse_binding_pattern()?);
+                self.skip_whitespace();
+            }
+        }
+
+        self.expect('}')?;
+        self.push_context(Context::Block { name: "await" });
+        if value.is_some() {
+            then = Some(self.parse_fragment()?);
+        } else if error.is_some() {
+            catch = Some(self.parse_fragment()?)
+        } else {
+            pending = Some(self.parse_fragment()?)
+        }
+
+        let mut parse_next = |parser: &mut Self| {
+            if parser.eat_str("then") {
+                if then.is_some() {
+                    return Err(
+                        parser.error(ParserErrorKind::BlockDuplicateClause("{:then}".to_string()))
+                    );
+                }
+
+                if !parser.eat('}') {
+                    parser.expect_whitespace()?;
+                    value = Some(parser.parse_binding_pattern()?);
+                    parser.skip_whitespace();
+                    parser.expect('}')?;
+                }
+
+                then = Some(parser.parse_fragment()?)
+            } else if parser.eat_str("catch") {
+                if catch.is_some() {
+                    return Err(parser.error(ParserErrorKind::BlockDuplicateClause(
+                        "{:catch}".to_string(),
+                    )));
+                }
+
+                if !parser.eat('}') {
+                    parser.expect_whitespace()?;
+                    error = Some(parser.parse_binding_pattern()?);
+                    parser.skip_whitespace();
+                    parser.expect('}')?;
+                }
+
+                catch = Some(parser.parse_fragment()?)
+            } else {
+                return Err(parser.error(ParserErrorKind::ExpectedToken(
+                    "{:then ...} or {:catch ...}".to_string(),
+                )));
+            }
+
+            Ok(())
+        };
+
+        while self.eat_regex(&REGEX_START_NEXT_BLOCK).is_some() {
+            parse_next(self)?
+        }
+
+        self.expect_regex(&REGEX_START_CLOSE_BLOCK)?;
+        self.expect_str("await")?;
+        self.skip_whitespace();
+        self.expect('}')?;
+
+        self.pop_context();
+
+        Ok(AwaitBlock {
+            span: Span::new(start, self.offset),
+            expression,
+            value,
+            error,
+            pending,
+            then,
+            catch,
         })
     }
 }
