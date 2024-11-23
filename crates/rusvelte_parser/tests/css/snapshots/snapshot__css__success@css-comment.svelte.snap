@@ -1,0 +1,50 @@
+---
+source: crates/rusvelte_parser/tests/css/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/css/inputs/css-comment.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": {
+    "type": "StyleSheet",
+    "start": 10,
+    "end": 25,
+    "attributes": [],
+    "children": [],
+    "content": {
+      "type": "StyleSheetContent",
+      "start": 17,
+      "end": 17,
+      "styles": "",
+      "comment": {
+        "type": "Comment",
+        "start": 0,
+        "end": 9,
+        "data": "  "
+      }
+    }
+  },
+  "start": 0,
+  "end": 9,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Comment",
+        "start": 0,
+        "end": 9,
+        "data": "  "
+      },
+      {
+        "type": "Text",
+        "start": 9,
+        "end": 10,
+        "raw": "\n",
+        "data": "\n"
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

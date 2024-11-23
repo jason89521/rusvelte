@@ -117,6 +117,7 @@ snapshot_kind: text
         }
       ]
     },
-    "attributes": []
+    "attributes": [],
+    "leading_comment": null
   }
 }

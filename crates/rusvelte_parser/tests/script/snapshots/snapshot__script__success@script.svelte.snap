@@ -1,7 +1,8 @@
 ---
-source: crates/svelte-parser/tests/simple/mod.rs
+source: crates/rusvelte_parser/tests/script/mod.rs
 expression: root
-input_file: crates/svelte-parser/tests/simple/inputs/script.svelte
+input_file: crates/rusvelte_parser/tests/script/inputs/script.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
@@ -54,7 +55,8 @@ input_file: crates/svelte-parser/tests/simple/inputs/script.svelte
           }
         ]
       }
-    ]
+    ],
+    "leading_comment": null
   },
   "instance": {
     "type": "Script",
@@ -74,6 +76,7 @@ input_file: crates/svelte-parser/tests/simple/inputs/script.svelte
       "directives": [],
       "body": []
     },
-    "attributes": []
+    "attributes": [],
+    "leading_comment": null
   }
 }

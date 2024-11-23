@@ -193,6 +193,7 @@ snapshot_kind: text
           }
         ]
       }
-    ]
+    ],
+    "leading_comment": null
   }
 }
