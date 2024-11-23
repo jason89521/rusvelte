@@ -16,7 +16,7 @@ pub struct RegularElement<'a> {
     pub fragment: Fragment<'a>,
 }
 
-#[derive(Debug, AstTree, OxcSpan)]
+#[derive(Debug, AstTree, OxcSpan, Clone, Copy)]
 pub struct Comment<'a> {
     pub span: Span,
     pub data: &'a str,

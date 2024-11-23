@@ -1,5 +1,5 @@
 use crate::{Parser, ParserError, ParserErrorKind};
-use rusvelte_ast::ast::{Fragment, FragmentNode, ScriptContext};
+use rusvelte_ast::ast::{Comment, Fragment, FragmentNode, Script, ScriptContext, StyleSheet};
 
 use super::element::ParseElementReturn;
 
@@ -8,7 +8,8 @@ enum ParseFragmentNodeReturn<'a> {
     ClosePrev,
     /// Encounter a next/close block notation like `{:else }` or `{/if}`
     NextOrCloseBlock,
-    None,
+    Script(Script<'a>),
+    StyleSheet(StyleSheet<'a>),
 }
 
 impl<'a> Parser<'a> {
@@ -22,19 +23,8 @@ impl<'a> Parser<'a> {
                 ParseFragmentNodeReturn::ClosePrev | ParseFragmentNodeReturn::NextOrCloseBlock => {
                     return Ok(Fragment { nodes })
                 }
-                ParseFragmentNodeReturn::None => (),
-            }
-        }
-        Ok(Fragment { nodes })
-    }
-
-    fn parse_fragment_node(&mut self) -> Result<ParseFragmentNodeReturn<'a>, ParserError> {
-        let node = if self.match_str("<") {
-            let parse_element_return = self.parse_element()?;
-            match parse_element_return {
-                ParseElementReturn::Element(element) => FragmentNode::Element(Box::new(element)),
-                ParseElementReturn::Comment(comment) => FragmentNode::Comment(comment),
-                ParseElementReturn::Script(script) => {
+                ParseFragmentNodeReturn::Script(mut script) => {
+                    script.leading_comment = self.find_leading_comment(&nodes);
                     match script.context {
                         ScriptContext::Default => {
                             if self.instance.is_some() {
@@ -55,17 +45,33 @@ impl<'a> Parser<'a> {
                             self.module = Some(script)
                         }
                     }
-                    return Ok(ParseFragmentNodeReturn::None);
                 }
-                ParseElementReturn::StyleSheet(style_sheet) => {
+                ParseFragmentNodeReturn::StyleSheet(mut style_sheet) => {
                     if self.css.is_some() {
                         return Err(ParserError::new(
                             style_sheet.span,
                             ParserErrorKind::StyleDuplicate,
                         ));
                     }
+                    style_sheet.content.comment = self.find_leading_comment(&nodes);
                     self.css = Some(style_sheet);
-                    return Ok(ParseFragmentNodeReturn::None);
+                }
+            }
+        }
+        Ok(Fragment { nodes })
+    }
+
+    fn parse_fragment_node(&mut self) -> Result<ParseFragmentNodeReturn<'a>, ParserError> {
+        let node = if self.match_str("<") {
+            let parse_element_return = self.parse_element()?;
+            match parse_element_return {
+                ParseElementReturn::Element(element) => FragmentNode::Element(Box::new(element)),
+                ParseElementReturn::Comment(comment) => FragmentNode::Comment(comment),
+                ParseElementReturn::Script(script) => {
+                    return Ok(ParseFragmentNodeReturn::Script(script))
+                }
+                ParseElementReturn::StyleSheet(style_sheet) => {
+                    return Ok(ParseFragmentNodeReturn::StyleSheet(style_sheet))
                 }
                 ParseElementReturn::ClosePrev => return Ok(ParseFragmentNodeReturn::ClosePrev),
             }
@@ -91,5 +97,16 @@ impl<'a> Parser<'a> {
         };
 
         Ok(ParseFragmentNodeReturn::Node(node))
+    }
+
+    fn find_leading_comment(&mut self, nodes: &[FragmentNode<'a>]) -> Option<Comment<'a>> {
+        for node in nodes.iter().rev() {
+            match node {
+                FragmentNode::Comment(comment) => return Some(*comment),
+                FragmentNode::Text(text) if !text.raw.is_empty() => (),
+                _ => break,
+            }
+        }
+        None
     }
 }

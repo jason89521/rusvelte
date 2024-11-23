@@ -3,7 +3,7 @@ use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 use serde::Serialize;
 
-use super::attribute::Attribute;
+use super::{attribute::Attribute, Comment};
 
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct Script<'a> {
@@ -11,6 +11,8 @@ pub struct Script<'a> {
     pub context: ScriptContext,
     pub content: Program<'a>,
     pub attributes: Vec<Attribute<'a>>,
+    /// svelte store the comment into the Program, but I think it is not necessary to store there.
+    pub leading_comment: Option<Comment<'a>>,
 }
 
 #[derive(Debug)]

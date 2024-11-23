@@ -84,6 +84,7 @@ impl<'a> Parser<'a> {
             context,
             content: program,
             attributes,
+            leading_comment: None,
         })
     }
 }
