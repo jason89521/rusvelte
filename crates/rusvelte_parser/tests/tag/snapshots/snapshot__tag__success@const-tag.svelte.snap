@@ -1,0 +1,99 @@
+---
+source: crates/rusvelte_parser/tests/tag/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/tag/inputs/const-tag.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 34,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 34,
+        "elseif": false,
+        "test": {
+          "type": "Identifier",
+          "start": 5,
+          "end": 6,
+          "name": "a"
+        },
+        "consequent": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 7,
+              "end": 10,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "ConstTag",
+              "start": 10,
+              "end": 28,
+              "declaration": {
+                "type": "VariableDeclaration",
+                "start": 12,
+                "end": 27,
+                "kind": "const",
+                "declarations": [
+                  {
+                    "type": "VariableDeclarator",
+                    "start": 18,
+                    "end": 27,
+                    "id": {
+                      "type": "Identifier",
+                      "start": 18,
+                      "end": 19,
+                      "name": "a",
+                      "typeAnnotation": null,
+                      "optional": false
+                    },
+                    "init": {
+                      "type": "BinaryExpression",
+                      "start": 22,
+                      "end": 27,
+                      "left": {
+                        "type": "Literal",
+                        "start": 22,
+                        "end": 23,
+                        "value": 1.0,
+                        "raw": "1"
+                      },
+                      "operator": "+",
+                      "right": {
+                        "type": "Literal",
+                        "start": 26,
+                        "end": 27,
+                        "value": 1.0,
+                        "raw": "1"
+                      }
+                    },
+                    "definite": false
+                  }
+                ],
+                "declare": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 28,
+              "end": 29,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "alternate": null
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

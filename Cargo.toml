@@ -12,8 +12,8 @@ oxc_diagnostics = { git = "https://github.com/jason89521/oxc.git", branch = "rus
 
 # for development
 # oxc_allocator = { path = "../oxc/crates/oxc_allocator", package = "oxc_allocator" }
-# oxc_ast = { path = "../oxc/crates/oxc_ast" }
-# oxc_parser = { path = "../oxc/crates/oxc_parser" }
+# oxc_ast = { path = "../oxc/crates/oxc_ast", package = "oxc_ast" }
+# oxc_parser = { path = "../oxc/crates/oxc_parser", package = "oxc_parser" }
 # oxc_span = { path = "../oxc/crates/oxc_span", package = "oxc_span" }
 # oxc_syntax = { path = "../oxc/crates/oxc_syntax", package = "oxc_syntax" }
 # oxc_diagnostics = { path = "../oxc/crates/oxc_diagnostics", package = "oxc_diagnostics" }

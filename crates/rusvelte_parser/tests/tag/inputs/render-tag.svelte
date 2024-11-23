@@ -1,0 +1,1 @@
+{@render sum(1, 2)}{@render a?.sum(1, 2)}

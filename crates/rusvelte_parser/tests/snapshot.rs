@@ -2,6 +2,7 @@ mod attributes;
 mod block;
 mod css;
 mod simple;
+mod tag;
 
 #[macro_export]
 macro_rules! test_success {

@@ -4,7 +4,7 @@ use context::Context;
 use error::{ParserError, ParserErrorKind};
 use oxc_allocator::Allocator;
 use oxc_ast::{
-    ast::{BindingPattern, Expression, IdentifierReference, Program},
+    ast::{BindingPattern, Expression, IdentifierReference, Program, VariableDeclaration},
     VisitMut,
 };
 use oxc_parser::Parser as OxcParser;
@@ -166,6 +166,16 @@ impl<'a> Parser<'a> {
         span_offset.visit_binding_pattern(&mut pattern);
         self.offset += pattern.span().size();
         Ok(pattern)
+    }
+
+    fn parse_variable_declaration(&mut self) -> Result<VariableDeclaration<'a>, ParserError> {
+        let mut declaration = OxcParser::new(self.allocator, self.remain(), self.source_type)
+            .parse_variable_declaration()
+            .map_err(|d| self.error(ParserErrorKind::ParseVariableDeclaration(d)))?;
+        let mut span_offset = SpanOffset(self.offset);
+        span_offset.visit_variable_declaration(&mut declaration);
+        self.offset += declaration.span.size();
+        Ok(declaration)
     }
 
     fn meta_tag_exist(&self, meta_tag: &'a str) -> bool {
