@@ -1,7 +1,7 @@
 use oxc_ast::ast::Expression;
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
-use rusvelte_ast::ast::{AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock};
+use rusvelte_ast::ast::{AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock, KeyBlock};
 use std::sync::LazyLock;
 
 use crate::{
@@ -31,6 +31,8 @@ impl<'a> Parser<'a> {
             Ok(Block::EachBlock(self.parse_each_block(start)?))
         } else if self.eat_str("await") {
             Ok(Block::AwaitBlock(self.parse_await_block(start)?))
+        } else if self.eat_str("key") {
+            Ok(Block::KeyBlock(self.parse_key_block(start)?))
         } else {
             unimplemented!()
         }
@@ -311,5 +313,31 @@ impl<'a> Parser<'a> {
             then,
             catch,
         })
+    }
+
+    fn parse_key_block(&mut self, start: u32) -> Result<KeyBlock<'a>, ParserError> {
+        self.expect_whitespace()?;
+        let expression = self.parse_expression()?;
+        self.skip_whitespace();
+        self.expect('}')?;
+        self.push_context(Context::block_context("key"));
+        let fragment = self.parse_fragment()?;
+        self.pop_context();
+
+        self.expect_close_block("key")?;
+
+        Ok(KeyBlock {
+            span: Span::new(start, self.offset),
+            expression,
+            fragment,
+        })
+    }
+
+    fn expect_close_block(&mut self, name: &'a str) -> Result<(), ParserError> {
+        self.expect_regex(&REGEX_START_CLOSE_BLOCK)?;
+        self.expect_str(name)?;
+        self.skip_whitespace();
+        self.expect('}')?;
+        Ok(())
     }
 }

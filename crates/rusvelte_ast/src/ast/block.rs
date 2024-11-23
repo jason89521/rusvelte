@@ -9,6 +9,7 @@ pub enum Block<'a> {
     IfBlock(IfBlock<'a>),
     EachBlock(EachBlock<'a>),
     AwaitBlock(AwaitBlock<'a>),
+    KeyBlock(KeyBlock<'a>),
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -42,4 +43,11 @@ pub struct AwaitBlock<'a> {
     pub pending: Option<Fragment<'a>>,
     pub then: Option<Fragment<'a>>,
     pub catch: Option<Fragment<'a>>,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct KeyBlock<'a> {
+    pub span: Span,
+    pub expression: Expression<'a>,
+    pub fragment: Fragment<'a>,
 }
