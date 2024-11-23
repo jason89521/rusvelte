@@ -1,4 +1,4 @@
-use oxc_ast::ast::{BindingPattern, Expression};
+use oxc_ast::ast::{BindingIdentifier, BindingPattern, Expression};
 use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 
@@ -10,6 +10,7 @@ pub enum Block<'a> {
     EachBlock(EachBlock<'a>),
     AwaitBlock(AwaitBlock<'a>),
     KeyBlock(KeyBlock<'a>),
+    SnippetBlock(SnippetBlock<'a>),
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -50,4 +51,12 @@ pub struct KeyBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
     pub fragment: Fragment<'a>,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SnippetBlock<'a> {
+    pub span: Span,
+    pub expression: BindingIdentifier<'a>,
+    pub parameters: Vec<BindingPattern<'a>>,
+    pub body: Fragment<'a>,
 }

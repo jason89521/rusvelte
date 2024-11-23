@@ -111,6 +111,8 @@ pub enum ParserErrorKind {
     ExpectedIdentifier,
     #[error("{0} cannot appear more than once within a block")]
     BlockDuplicateClause(String),
+    #[error("Expected 'if', 'each', 'await', 'key' or 'snippet'")]
+    ExpectedBlockType,
 }
 
 impl Parser<'_> {

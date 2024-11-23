@@ -1,8 +1,10 @@
-use oxc_ast::ast::Expression;
+use oxc_ast::ast::{BindingIdentifier, Expression};
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
-use rusvelte_ast::ast::{AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock, KeyBlock};
-use std::sync::LazyLock;
+use rusvelte_ast::ast::{
+    AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock, KeyBlock, SnippetBlock,
+};
+use std::{cell::Cell, sync::LazyLock};
 
 use crate::{
     context::Context,
@@ -33,8 +35,10 @@ impl<'a> Parser<'a> {
             Ok(Block::AwaitBlock(self.parse_await_block(start)?))
         } else if self.eat_str("key") {
             Ok(Block::KeyBlock(self.parse_key_block(start)?))
+        } else if self.eat_str("snippet") {
+            Ok(Block::SnippetBlock(self.parse_snippet_block(start)?))
         } else {
-            unimplemented!()
+            Err(self.error(ParserErrorKind::ExpectedBlockType))
         }
     }
 
@@ -330,6 +334,43 @@ impl<'a> Parser<'a> {
             span: Span::new(start, self.offset),
             expression,
             fragment,
+        })
+    }
+
+    fn parse_snippet_block(&mut self, start: u32) -> Result<SnippetBlock<'a>, ParserError> {
+        self.expect_whitespace()?;
+        let expression = if let Some((.., ident)) = self.eat_identifier()? {
+            BindingIdentifier {
+                span: ident.span,
+                name: ident.name,
+                symbol_id: Cell::default(),
+            }
+        } else {
+            return Err(self.error(ParserErrorKind::ExpectedIdentifier));
+        };
+        self.skip_whitespace();
+        self.expect('(')?;
+        self.skip_whitespace();
+        let mut parameters = vec![];
+        while !self.eat(')') {
+            parameters.push(self.parse_binding_pattern()?);
+            self.skip_whitespace();
+            self.eat(',');
+            self.skip_whitespace();
+        }
+        self.skip_whitespace();
+        self.expect('}')?;
+
+        self.push_context(Context::block_context("snippet"));
+        let body = self.parse_fragment()?;
+        self.pop_context();
+        self.expect_close_block("snippet")?;
+
+        Ok(SnippetBlock {
+            span: Span::new(start, self.offset),
+            expression,
+            parameters,
+            body,
         })
     }
 
