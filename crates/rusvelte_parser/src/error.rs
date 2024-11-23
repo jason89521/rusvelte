@@ -109,6 +109,8 @@ pub enum ParserErrorKind {
     BlockInvalidElseif,
     #[error("Expected an identifier")]
     ExpectedIdentifier,
+    #[error("{0} cannot appear more than once within a block")]
+    BlockDuplicateClause(String),
 }
 
 impl Parser<'_> {
