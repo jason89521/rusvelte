@@ -18,24 +18,29 @@ static REGEX_START_CLOSE_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\{\s*\/"#).unwrap());
 static REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s*}"#).unwrap());
+const IF_STR: &str = "if";
+const EACH_STR: &str = "each";
+const AWAIT_STR: &str = "await";
+const KEY_STR: &str = "key";
+const SNIPPET_STR: &str = "snippet";
 
 impl<'a> Parser<'a> {
     pub fn parse_block(&mut self, start: u32) -> Result<Block<'a>, ParserError> {
         self.expect('#')?;
-        if self.eat_str("if") {
+        if self.eat_str(IF_STR) {
             let (is_closed, if_block) = self.parse_if_block(start)?;
             if is_closed {
                 Ok(Block::IfBlock(if_block))
             } else {
                 Err(self.error_at(start, ParserErrorKind::BlockUnclosed))
             }
-        } else if self.eat_str("each") {
+        } else if self.eat_str(EACH_STR) {
             Ok(Block::EachBlock(self.parse_each_block(start)?))
-        } else if self.eat_str("await") {
+        } else if self.eat_str(AWAIT_STR) {
             Ok(Block::AwaitBlock(self.parse_await_block(start)?))
-        } else if self.eat_str("key") {
+        } else if self.eat_str(KEY_STR) {
             Ok(Block::KeyBlock(self.parse_key_block(start)?))
-        } else if self.eat_str("snippet") {
+        } else if self.eat_str(SNIPPET_STR) {
             Ok(Block::SnippetBlock(self.parse_snippet_block(start)?))
         } else {
             Err(self.error(ParserErrorKind::ExpectedBlockType))
@@ -49,7 +54,7 @@ impl<'a> Parser<'a> {
         self.skip_whitespace();
         self.expect('}')?;
 
-        self.push_context(Context::block_context("if"));
+        self.push_context(Context::block_context(IF_STR));
         let consequent = self.parse_fragment()?;
         let mut result = IfBlock {
             span: Span::empty(start),
@@ -66,12 +71,12 @@ impl<'a> Parser<'a> {
                     "{:else} or {:else if}".to_string(),
                 )));
             }
-            if self.eat_str("if") {
+            if self.eat_str(IF_STR) {
                 return Err(self.error(ParserErrorKind::BlockInvalidElseif));
             }
 
             self.skip_whitespace();
-            if self.eat_str("if") {
+            if self.eat_str(IF_STR) {
                 // :else if
                 let (is_closed_by_else, mut alternate) = self.parse_if_block(alternate_start)?;
                 is_closed = is_closed_by_else;
@@ -89,7 +94,7 @@ impl<'a> Parser<'a> {
             }
         }
         if self.eat_regex(&REGEX_START_CLOSE_BLOCK).is_some() {
-            self.expect_str("if")?;
+            self.expect_str(IF_STR)?;
             self.skip_whitespace();
             self.expect('}')?;
             is_closed = true;
@@ -181,7 +186,7 @@ impl<'a> Parser<'a> {
         };
 
         self.expect('}')?;
-        self.push_context(Context::Block { name: "each" });
+        self.push_context(Context::Block { name: EACH_STR });
         let body = self.parse_fragment()?;
         let mut fallback = None;
         if self.eat_regex(&REGEX_START_NEXT_BLOCK).is_some() {
@@ -193,10 +198,8 @@ impl<'a> Parser<'a> {
             fallback = Some(self.parse_fragment()?);
         }
 
-        self.expect_regex(&REGEX_START_CLOSE_BLOCK)?;
-        self.expect_str("each")?;
-        self.skip_whitespace();
-        self.expect('}')?;
+        self.pop_context();
+        self.expect_close_block(EACH_STR)?;
 
         Ok(EachBlock {
             span: Span::new(start, self.offset),
@@ -248,7 +251,7 @@ impl<'a> Parser<'a> {
         }
 
         self.expect('}')?;
-        self.push_context(Context::Block { name: "await" });
+        self.push_context(Context::Block { name: AWAIT_STR });
         if value.is_some() {
             then = Some(self.parse_fragment()?);
         } else if error.is_some() {
@@ -301,12 +304,8 @@ impl<'a> Parser<'a> {
             parse_next(self)?
         }
 
-        self.expect_regex(&REGEX_START_CLOSE_BLOCK)?;
-        self.expect_str("await")?;
-        self.skip_whitespace();
-        self.expect('}')?;
-
         self.pop_context();
+        self.expect_close_block(AWAIT_STR)?;
 
         Ok(AwaitBlock {
             span: Span::new(start, self.offset),
@@ -324,11 +323,11 @@ impl<'a> Parser<'a> {
         let expression = self.parse_expression()?;
         self.skip_whitespace();
         self.expect('}')?;
-        self.push_context(Context::block_context("key"));
+        self.push_context(Context::block_context(KEY_STR));
         let fragment = self.parse_fragment()?;
         self.pop_context();
 
-        self.expect_close_block("key")?;
+        self.expect_close_block(KEY_STR)?;
 
         Ok(KeyBlock {
             span: Span::new(start, self.offset),
@@ -361,10 +360,10 @@ impl<'a> Parser<'a> {
         self.skip_whitespace();
         self.expect('}')?;
 
-        self.push_context(Context::block_context("snippet"));
+        self.push_context(Context::block_context(SNIPPET_STR));
         let body = self.parse_fragment()?;
         self.pop_context();
-        self.expect_close_block("snippet")?;
+        self.expect_close_block(SNIPPET_STR)?;
 
         Ok(SnippetBlock {
             span: Span::new(start, self.offset),
