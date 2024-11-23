@@ -1,0 +1,104 @@
+---
+source: crates/rusvelte_parser/tests/tag/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/tag/inputs/render-tag.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 41,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "RenderTag",
+        "start": 0,
+        "end": 19,
+        "expression": {
+          "type": "CallExpression",
+          "start": 9,
+          "end": 18,
+          "callee": {
+            "type": "Identifier",
+            "start": 9,
+            "end": 12,
+            "name": "sum"
+          },
+          "typeParameters": null,
+          "arguments": [
+            {
+              "type": "Literal",
+              "start": 13,
+              "end": 14,
+              "value": 1.0,
+              "raw": "1"
+            },
+            {
+              "type": "Literal",
+              "start": 16,
+              "end": 17,
+              "value": 2.0,
+              "raw": "2"
+            }
+          ],
+          "optional": false
+        }
+      },
+      {
+        "type": "RenderTag",
+        "start": 19,
+        "end": 41,
+        "expression": {
+          "type": "ChainExpression",
+          "start": 28,
+          "end": 40,
+          "expression": {
+            "type": "CallExpression",
+            "start": 28,
+            "end": 40,
+            "callee": {
+              "type": "StaticMemberExpression",
+              "start": 28,
+              "end": 34,
+              "object": {
+                "type": "Identifier",
+                "start": 28,
+                "end": 29,
+                "name": "a"
+              },
+              "property": {
+                "type": "Identifier",
+                "start": 31,
+                "end": 34,
+                "name": "sum"
+              },
+              "optional": true
+            },
+            "typeParameters": null,
+            "arguments": [
+              {
+                "type": "Literal",
+                "start": 35,
+                "end": 36,
+                "value": 1.0,
+                "raw": "1"
+              },
+              {
+                "type": "Literal",
+                "start": 38,
+                "end": 39,
+                "value": 2.0,
+                "raw": "2"
+              }
+            ],
+            "optional": false
+          }
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

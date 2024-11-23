@@ -1,0 +1,30 @@
+---
+source: crates/rusvelte_parser/tests/tag/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/tag/inputs/html-tag.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 15,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "HtmlTag",
+        "start": 0,
+        "end": 15,
+        "expression": {
+          "type": "Identifier",
+          "start": 7,
+          "end": 14,
+          "name": "content"
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

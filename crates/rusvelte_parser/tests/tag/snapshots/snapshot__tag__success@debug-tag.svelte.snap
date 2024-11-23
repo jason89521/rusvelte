@@ -1,0 +1,45 @@
+---
+source: crates/rusvelte_parser/tests/tag/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/tag/inputs/debug-tag.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 22,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "DebugTag",
+        "start": 0,
+        "end": 13,
+        "identifiers": [
+          {
+            "type": "Identifier",
+            "start": 8,
+            "end": 12,
+            "name": "user"
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "start": 13,
+        "end": 14,
+        "raw": "\n",
+        "data": "\n"
+      },
+      {
+        "type": "DebugTag",
+        "start": 14,
+        "end": 22,
+        "identifiers": []
+      }
+    ]
+  },
+  "module": null,
+  "instance": null
+}

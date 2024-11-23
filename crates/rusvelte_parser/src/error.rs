@@ -39,6 +39,8 @@ pub enum ParserErrorKind {
     ParseExpression(Vec<OxcDiagnostic>),
     #[error("Parse binding pattern error: {0:#?}.")]
     ParseBindingPattern(OxcDiagnostic),
+    #[error("Parse variable declaration error: {0:#?}.")]
+    ParseVariableDeclaration(OxcDiagnostic),
     #[error(r#"Expected a "{expected}", but found a "{found}"."#)]
     ExpectedChar { expected: char, found: char },
     #[error(r#"Expected a "{0}" str."#)]
@@ -51,6 +53,8 @@ pub enum ParserErrorKind {
     ExpectedEachBlockAs,
     #[error(r#"Expected at {expected}, but found at {found}"#)]
     UnexpectedOffset { expected: u32, found: u32 },
+    #[error(r#"Expected 'html', 'const', 'debug' or 'render'"#)]
+    ExpectedTagType,
 
     // From svelte
     #[error("Unexpected EOF.")]
@@ -113,6 +117,12 @@ pub enum ParserErrorKind {
     BlockDuplicateClause(String),
     #[error("Expected 'if', 'each', 'await', 'key' or 'snippet'")]
     ExpectedBlockType,
+    #[error("`{{@debug ...}}` arguments must be identifiers, not arbitrary expressions")]
+    DebugTagInvalidArguments,
+    #[error("`{{@const ...}}` must consist of a single variable declaration")]
+    ConstTagInvalidExpression,
+    #[error("`{{@render ...}}` tags can only contain call expressions")]
+    RenderTagInvalidExpression,
 }
 
 impl Parser<'_> {

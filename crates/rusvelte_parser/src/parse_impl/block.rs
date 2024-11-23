@@ -9,6 +9,7 @@ use std::{cell::Cell, sync::LazyLock};
 use crate::{
     context::Context,
     error::{ParserError, ParserErrorKind},
+    regex_pattern::REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE,
     Parser,
 };
 
@@ -16,8 +17,7 @@ static REGEX_START_NEXT_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\{\s*:"#).unwrap());
 static REGEX_START_CLOSE_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\{\s*\/"#).unwrap());
-static REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"^\s*}"#).unwrap());
+
 const IF_STR: &str = "if";
 const EACH_STR: &str = "each";
 const AWAIT_STR: &str = "await";
