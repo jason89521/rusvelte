@@ -217,48 +217,64 @@ impl<'a> Parser<'a> {
         let expression = self.parse_expression()?;
         self.skip_whitespace();
 
-        let mut value = None;
-        let mut error = None;
-        let mut pending = None;
-        let mut then = None;
-        let mut catch = None;
-        if self.eat_str("then") {
+        let mut value = if self.eat_str("then") {
             // {#await expr then}
             if self
                 .match_regex(&REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
                 .is_some()
             {
                 self.skip_whitespace();
+                None
             } else {
                 // {#await expr then pattern}
                 self.expect_whitespace()?;
-                value = Some(self.parse_binding_pattern()?);
+                let value = self.parse_binding_pattern()?;
                 self.skip_whitespace();
+                Some(value)
             }
-        } else if self.eat_str("catch") {
+        } else {
+            None
+        };
+
+        let mut error = if self.eat_str("catch") {
             // {#await expr catch}
             if self
                 .match_regex(&REGEX_START_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
                 .is_some()
             {
                 self.skip_whitespace();
+                None
             } else {
                 // {#await expr catch err}
                 self.expect_whitespace()?;
-                error = Some(self.parse_binding_pattern()?);
+                let error = self.parse_binding_pattern()?;
                 self.skip_whitespace();
+                Some(error)
             }
-        }
+        } else {
+            None
+        };
 
         self.expect('}')?;
-        self.push_context(Context::Block { name: AWAIT_STR });
-        if value.is_some() {
-            then = Some(self.parse_fragment()?);
-        } else if error.is_some() {
-            catch = Some(self.parse_fragment()?)
+        self.push_context(Context::Block { name: "await" });
+
+        let mut then = if value.is_some() {
+            Some(self.parse_fragment()?)
         } else {
-            pending = Some(self.parse_fragment()?)
-        }
+            None
+        };
+
+        let mut catch = if error.is_some() {
+            Some(self.parse_fragment()?)
+        } else {
+            None
+        };
+
+        let pending = if then.is_none() && catch.is_none() {
+            Some(self.parse_fragment()?)
+        } else {
+            None
+        };
 
         let mut parse_next = |parser: &mut Self| {
             if parser.eat_str("then") {
@@ -275,8 +291,12 @@ impl<'a> Parser<'a> {
                     parser.expect('}')?;
                 }
 
-                then = Some(parser.parse_fragment()?)
-            } else if parser.eat_str("catch") {
+                then = Some(parser.parse_fragment()?);
+
+                return Ok(());
+            };
+
+            if parser.eat_str("catch") {
                 if catch.is_some() {
                     return Err(parser.error(ParserErrorKind::BlockDuplicateClause(
                         "{:catch}".to_string(),
@@ -290,14 +310,14 @@ impl<'a> Parser<'a> {
                     parser.expect('}')?;
                 }
 
-                catch = Some(parser.parse_fragment()?)
-            } else {
-                return Err(parser.error(ParserErrorKind::ExpectedToken(
-                    "{:then ...} or {:catch ...}".to_string(),
-                )));
-            }
+                catch = Some(parser.parse_fragment()?);
 
-            Ok(())
+                return Ok(());
+            };
+
+            return Err(parser.error(ParserErrorKind::ExpectedToken(
+                "{:then ...} or {:catch ...}".to_string(),
+            )));
         };
 
         while self.eat_regex(&REGEX_START_NEXT_BLOCK).is_some() {
