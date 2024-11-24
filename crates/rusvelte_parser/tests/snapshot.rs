@@ -1,6 +1,7 @@
 mod attributes;
 mod block;
 mod css;
+mod element;
 mod script;
 mod simple;
 mod tag;

@@ -1,0 +1,31 @@
+---
+source: crates/rusvelte_parser/tests/element/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/element/inputs/component.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 11,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Component",
+        "start": 0,
+        "end": 11,
+        "name": "Foo",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null,
+  "options": null
+}

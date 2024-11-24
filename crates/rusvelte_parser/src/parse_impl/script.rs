@@ -67,7 +67,7 @@ impl<'a> Parser<'a> {
                                     ParserErrorKind::ScriptInvalidContext,
                                 ));
                             }
-                            if attribute.value.as_text().unwrap() != "module" {
+                            if attribute.value.as_raw_text().unwrap() != "module" {
                                 return Err(ParserError::new(
                                     attribute.value.span(),
                                     ParserErrorKind::ScriptInvalidContext,

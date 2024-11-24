@@ -3,7 +3,7 @@ use oxc_span::Span;
 
 use crate::Parser;
 
-#[derive(thiserror::Error)]
+#[derive(thiserror::Error, Clone)]
 pub struct ParserError {
     pub kind: ParserErrorKind,
     pub span: Span,
@@ -31,7 +31,7 @@ impl std::fmt::Display for ParserError {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, Clone)]
 pub enum ParserErrorKind {
     #[error("Parse program error: {0:#?}.")]
     ParseProgram(Vec<OxcDiagnostic>),
@@ -123,6 +123,34 @@ pub enum ParserErrorKind {
     ConstTagInvalidExpression,
     #[error("`{{@render ...}}` tags can only contain call expressions")]
     RenderTagInvalidExpression,
+    #[error("`<svelte:component>` must have a 'this' attribute")]
+    SvelteComponentMissingThis,
+    #[error("Invalid component definition — must be an `{{expression}}`")]
+    SvelteComponentInvalidThis,
+    #[error("`<svelte:element>` must have a 'this' attribute")]
+    SvelteElementMissingThis,
+    #[error("Invalid element definition — must be an `{{expression}}`")]
+    SvelteElementInvalidThis,
+    #[error("`<svelte:options>` can only receive static attributes")]
+    SvelteOptionsInvalidAttribute,
+    #[error("\"tag\" option is deprecated — use \"customElement\" instead")]
+    SvelteOptionsDeprecatedTag,
+    #[error("\"customElement\" must be a string literal defining a valid custom element name or an object of the form {{ tag?: string; shadow?: \"open\" | \"none\"; props?: {{ [key: string]: {{ attribute?: string; reflect?: boolean; type: .. }} }} }}")]
+    SvelteOptionsInvalidCustomElement,
+    #[error("Tag name must be lowercase and hyphenated")]
+    SvelteOptionsInvalidTagName,
+    #[error("Tag name is reserved")]
+    SvelteOptionsReservedTagName,
+    #[error("\"props\" must be a statically analyzable object literal of the form \"{{ [key: string]: {{ attribute?: string; reflect?: boolean; type?: \"String\" | \"Boolean\" | \"Number\" | \"Array\" | \"Object\" }}\"")]
+    SvelteOptionsInvalidCustomElementProps,
+    #[error("\"shadow\" must be either \"open\" or \"none\"")]
+    SvelteOptionsInvalidCustomElementShadow,
+    #[error("Value must be {0}, if specified")]
+    SvelteOptionsInvalidAttributeValue(String),
+    #[error("`<svelte:options>` unknown attribute '{0}'")]
+    SvelteOptionsUnknownAttribute(String),
+    #[error("<{0}> cannot have children")]
+    SvelteMetaInvalidContent(String),
 }
 
 impl Parser<'_> {

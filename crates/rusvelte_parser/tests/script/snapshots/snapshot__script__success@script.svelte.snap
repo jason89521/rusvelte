@@ -78,5 +78,6 @@ snapshot_kind: text
     },
     "attributes": [],
     "leading_comment": null
-  }
+  },
+  "options": null
 }
