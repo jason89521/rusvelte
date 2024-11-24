@@ -1,7 +1,8 @@
 ---
-source: crates/rusvelte-parser/tests/attributes/mod.rs
+source: crates/rusvelte_parser/tests/attributes/mod.rs
 expression: root
-input_file: crates/rusvelte-parser/tests/attributes/inputs/attribute-shorthand.svelte
+input_file: crates/rusvelte_parser/tests/attributes/inputs/attribute-shorthand.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
@@ -43,5 +44,6 @@ input_file: crates/rusvelte-parser/tests/attributes/inputs/attribute-shorthand.s
     ]
   },
   "module": null,
-  "instance": null
+  "instance": null,
+  "options": null
 }

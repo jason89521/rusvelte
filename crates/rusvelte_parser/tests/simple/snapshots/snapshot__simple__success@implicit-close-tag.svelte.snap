@@ -1,7 +1,8 @@
 ---
-source: crates/svelte-parser/tests/simple/mod.rs
+source: crates/rusvelte_parser/tests/simple/mod.rs
 expression: root
-input_file: crates/svelte-parser/tests/simple/inputs/implicit-close-tag.svelte
+input_file: crates/rusvelte_parser/tests/simple/inputs/implicit-close-tag.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
@@ -52,5 +53,6 @@ input_file: crates/svelte-parser/tests/simple/inputs/implicit-close-tag.svelte
     ]
   },
   "module": null,
-  "instance": null
+  "instance": null,
+  "options": null
 }

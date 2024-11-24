@@ -114,5 +114,6 @@ snapshot_kind: text
     ]
   },
   "module": null,
-  "instance": null
+  "instance": null,
+  "options": null
 }

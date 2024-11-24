@@ -1,7 +1,8 @@
 ---
-source: crates/svelte-parser/tests/css/mod.rs
+source: crates/rusvelte_parser/tests/css/mod.rs
 expression: root
-input_file: crates/svelte-parser/tests/css/inputs/css-pseudo-classes.svelte
+input_file: crates/rusvelte_parser/tests/css/inputs/css-pseudo-classes.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
@@ -411,5 +412,6 @@ input_file: crates/svelte-parser/tests/css/inputs/css-pseudo-classes.svelte
     "nodes": []
   },
   "module": null,
-  "instance": null
+  "instance": null,
+  "options": null
 }

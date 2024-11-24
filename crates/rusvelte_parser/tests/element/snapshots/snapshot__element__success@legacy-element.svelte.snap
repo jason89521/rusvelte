@@ -1,0 +1,195 @@
+---
+source: crates/rusvelte_parser/tests/element/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/element/inputs/legacy-element.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 0,
+  "end": 165,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "SvelteComponent",
+        "start": 0,
+        "end": 94,
+        "name": "svelte:component",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 27,
+              "end": 30,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "SvelteFragment",
+              "start": 30,
+              "end": 74,
+              "name": "svelte:fragment",
+              "attributes": [
+                {
+                  "type": "Attribute",
+                  "start": 47,
+                  "end": 55,
+                  "name": "slot",
+                  "value": [
+                    {
+                      "type": "Text",
+                      "start": 53,
+                      "end": 54,
+                      "raw": "a",
+                      "data": "a"
+                    }
+                  ]
+                }
+              ],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": []
+              }
+            },
+            {
+              "type": "Text",
+              "start": 74,
+              "end": 75,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "expression": {
+          "type": "Identifier",
+          "start": 24,
+          "end": 25,
+          "name": "A"
+        }
+      },
+      {
+        "type": "Text",
+        "start": 94,
+        "end": 95,
+        "raw": "\n",
+        "data": "\n"
+      },
+      {
+        "type": "IfBlock",
+        "start": 95,
+        "end": 152,
+        "elseif": false,
+        "test": {
+          "type": "BinaryExpression",
+          "start": 100,
+          "end": 105,
+          "left": {
+            "type": "Identifier",
+            "start": 100,
+            "end": 101,
+            "name": "a"
+          },
+          "operator": ">",
+          "right": {
+            "type": "Literal",
+            "start": 104,
+            "end": 105,
+            "value": 0.0,
+            "raw": "0"
+          }
+        },
+        "consequent": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 106,
+              "end": 109,
+              "raw": "\n  ",
+              "data": "\n  "
+            },
+            {
+              "type": "SvelteSelf",
+              "start": 109,
+              "end": 134,
+              "name": "svelte:self",
+              "attributes": [
+                {
+                  "type": "Attribute",
+                  "start": 122,
+                  "end": 131,
+                  "name": "a",
+                  "value": {
+                    "type": "ExpressionTag",
+                    "start": 124,
+                    "end": 131,
+                    "expression": {
+                      "type": "BinaryExpression",
+                      "start": 125,
+                      "end": 130,
+                      "left": {
+                        "type": "Identifier",
+                        "start": 125,
+                        "end": 126,
+                        "name": "a"
+                      },
+                      "operator": "-",
+                      "right": {
+                        "type": "Literal",
+                        "start": 129,
+                        "end": 130,
+                        "value": 1.0,
+                        "raw": "1"
+                      }
+                    }
+                  }
+                }
+              ],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": []
+              }
+            },
+            {
+              "type": "Text",
+              "start": 134,
+              "end": 135,
+              "raw": "\n",
+              "data": "\n"
+            }
+          ]
+        },
+        "alternate": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 142,
+              "end": 147,
+              "raw": "\n  a\n",
+              "data": "\n  a\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "SlotElement",
+        "start": 152,
+        "end": 165,
+        "name": "slot",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null,
+  "options": null
+}

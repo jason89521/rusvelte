@@ -53,5 +53,6 @@ snapshot_kind: text
       "end": 9,
       "data": "  "
     }
-  }
+  },
+  "options": null
 }

@@ -12,9 +12,10 @@ use oxc_span::{GetSpan, SourceType, Span};
 use oxc_syntax::identifier::{is_identifier_part, is_identifier_start};
 use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
-use rusvelte_ast::ast::{Fragment, Root, Script, StyleSheet};
+use rusvelte_ast::ast::{Fragment, Root, Script, StyleSheet, SvelteOptions};
 use rusvelte_ast::span_offset::SpanOffset;
 
+mod constants;
 mod context;
 mod error;
 mod parse_impl;
@@ -43,6 +44,7 @@ pub struct Parser<'a> {
     context_stack: Vec<Context<'a>>,
     meta_tags: HashSet<&'a str>,
     last_auto_closed_tag: Option<LastAutoClosedTag<'a>>,
+    options: Option<SvelteOptions<'a>>,
     pub fragments: Vec<Fragment<'a>>,
 }
 
@@ -69,6 +71,7 @@ impl<'a> Parser<'a> {
             meta_tags: HashSet::new(),
             last_auto_closed_tag: None,
             context_stack: vec![],
+            options: None,
         }
     }
 
@@ -99,12 +102,14 @@ impl<'a> Parser<'a> {
             end
         });
         self.context_stack.pop();
+
         Ok(Root {
             span: Span::new(start, end),
             fragment,
             instance: self.instance.take(),
             module: self.module.take(),
             css: self.css.take(),
+            options: self.options.take(),
         })
     }
 

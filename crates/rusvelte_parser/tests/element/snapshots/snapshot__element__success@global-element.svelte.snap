@@ -1,0 +1,173 @@
+---
+source: crates/rusvelte_parser/tests/element/mod.rs
+expression: root
+input_file: crates/rusvelte_parser/tests/element/inputs/global-element.svelte
+snapshot_kind: text
+---
+{
+  "type": "Root",
+  "css": null,
+  "start": 33,
+  "end": 191,
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Text",
+        "start": 31,
+        "end": 33,
+        "raw": "\n\n",
+        "data": "\n\n"
+      },
+      {
+        "type": "SvelteWindow",
+        "start": 33,
+        "end": 68,
+        "name": "svelte:window",
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 48,
+            "end": 65,
+            "name": "onevent",
+            "value": {
+              "type": "ExpressionTag",
+              "start": 56,
+              "end": 65,
+              "expression": {
+                "type": "Identifier",
+                "start": 57,
+                "end": 64,
+                "name": "handler"
+              }
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      },
+      {
+        "type": "SvelteDocument",
+        "start": 68,
+        "end": 105,
+        "name": "svelte:document",
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 85,
+            "end": 102,
+            "name": "onevent",
+            "value": {
+              "type": "ExpressionTag",
+              "start": 93,
+              "end": 102,
+              "expression": {
+                "type": "Identifier",
+                "start": 94,
+                "end": 101,
+                "name": "handler"
+              }
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      },
+      {
+        "type": "SvelteBody",
+        "start": 105,
+        "end": 140,
+        "name": "svelte:body",
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 120,
+            "end": 137,
+            "name": "onevent",
+            "value": {
+              "type": "ExpressionTag",
+              "start": 128,
+              "end": 137,
+              "expression": {
+                "type": "Identifier",
+                "start": 129,
+                "end": 136,
+                "name": "handler"
+              }
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      },
+      {
+        "type": "SvelteHead",
+        "start": 140,
+        "end": 155,
+        "name": "svelte:head",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        }
+      },
+      {
+        "type": "SvelteElement",
+        "start": 155,
+        "end": 191,
+        "name": "svelte:element",
+        "attributes": [],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": []
+        },
+        "tag": {
+          "type": "Identifier",
+          "start": 177,
+          "end": 187,
+          "name": "expression"
+        }
+      }
+    ]
+  },
+  "module": null,
+  "instance": null,
+  "options": {
+    "type": "SvelteOptions",
+    "start": 0,
+    "end": 31,
+    "runes": true,
+    "immutable": null,
+    "accessors": null,
+    "attributes": [
+      {
+        "type": "Attribute",
+        "start": 16,
+        "end": 28,
+        "name": "runes",
+        "value": {
+          "type": "ExpressionTag",
+          "start": 22,
+          "end": 28,
+          "expression": {
+            "type": "Literal",
+            "start": 23,
+            "end": 27,
+            "value": true,
+            "raw": "true"
+          }
+        }
+      }
+    ],
+    "custom_element": null,
+    "namespace": null,
+    "css": null,
+    "preserve_whitespace": null
+  }
+}

@@ -1,0 +1,9 @@
+pub const SVELTE_HEAD_TAG: &str = "svelte:head";
+pub const SVELTE_OPTIONS_TAG: &str = "svelte:options";
+pub const SVELTE_WINDOW_TAG: &str = "svelte:window";
+pub const SVELTE_DOCUMENT_TAG: &str = "svelte:document";
+pub const SVELTE_BODY_TAG: &str = "svelte:body";
+pub const SVELTE_ELEMENT_TAG: &str = "svelte:element";
+pub const SVELTE_COMPONENT_TAG: &str = "svelte:component";
+pub const SVELTE_SELF_TAG: &str = "svelte:self";
+pub const SVELTE_FRAGMENT_TAG: &str = "svelte:fragment";

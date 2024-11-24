@@ -1,7 +1,8 @@
 ---
-source: crates/rusvelte-parser/tests/simple/mod.rs
+source: crates/rusvelte_parser/tests/simple/mod.rs
 expression: root
-input_file: crates/rusvelte-parser/tests/simple/inputs/closing-tag-omitted.svelte
+input_file: crates/rusvelte_parser/tests/simple/inputs/closing-tag-omitted.svelte
+snapshot_kind: text
 ---
 {
   "type": "Root",
@@ -44,5 +45,6 @@ input_file: crates/rusvelte-parser/tests/simple/inputs/closing-tag-omitted.svelt
     ]
   },
   "module": null,
-  "instance": null
+  "instance": null,
+  "options": null
 }

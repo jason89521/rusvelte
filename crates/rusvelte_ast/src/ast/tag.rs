@@ -19,6 +19,17 @@ pub struct ExpressionTag<'a> {
     pub expression: Expression<'a>,
 }
 
+impl<'a> ExpressionTag<'a> {
+    pub fn get_static_value(&self) -> Option<&'a str> {
+        match &self.expression {
+            Expression::BooleanLiteral(lit) => Some(lit.as_str()),
+            Expression::StringLiteral(lit) => Some(lit.value.as_str()),
+            Expression::NumericLiteral(lit) => Some(lit.raw),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct HtmlTag<'a> {
     pub span: Span,

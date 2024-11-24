@@ -1,28 +1,28 @@
 use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
+use oxc_allocator::{Allocator, CloneIn};
 use oxc_span::Span;
 use regex::Regex;
-use rusvelte_utils::closing_tag_omitted;
+use rusvelte_utils::{html_tree_validation::closing_tag_omitted, void_element::is_void};
 
 use crate::{
+    constants::{
+        SVELTE_BODY_TAG, SVELTE_COMPONENT_TAG, SVELTE_DOCUMENT_TAG, SVELTE_ELEMENT_TAG,
+        SVELTE_FRAGMENT_TAG, SVELTE_HEAD_TAG, SVELTE_OPTIONS_TAG, SVELTE_SELF_TAG,
+        SVELTE_WINDOW_TAG,
+    },
     error::{ParserError, ParserErrorKind},
-    regex_pattern::{REGEX_CLOSING_COMMENT, REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG},
+    regex_pattern::{
+        REGEX_CLOSING_COMMENT, REGEX_VALID_COMPONENT_NAME, REGEX_WHITESPACE_OR_SLASH_OR_CLOSING_TAG,
+    },
     Context, LastAutoClosedTag, Parser,
 };
 
 use rusvelte_ast::ast::{
-    Attribute, Comment, Element, ExpressionTag, Fragment, RegularElement, Script, StyleSheet, Text,
+    Attribute, Comment, Component, Element, ExpressionTag, Fragment, RegularElement, Script,
+    SlotElement, StyleSheet, SvelteBody, SvelteComponent, SvelteDocument, SvelteElement,
+    SvelteFragment, SvelteHead, SvelteSelf, SvelteWindow, Text, TitleElement,
 };
-
-const SVELTE_HEAD_TAG: &str = "svelte:head";
-const SVELTE_OPTIONS_TAG: &str = "svelte:options";
-const SVELTE_WINDOW_TAG: &str = "svelte:window";
-const SVELTE_DOCUMENT_TAG: &str = "svelte:document";
-const SVELTE_BODY_TAG: &str = "svelte:body";
-const SVELTE_ELEMENT_TAG: &str = "svelte:element";
-const SVELTE_COMPONENT_TAG: &str = "svelte:component";
-const SVELTE_SELF_TAG: &str = "svelte:self";
-const SVELTE_FRAGMENT_TAG: &str = "svelte:fragment";
 
 static ROOT_ONLY_META_TAGS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
     HashSet::from([
@@ -50,9 +50,6 @@ static META_TAGS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
 static REGEX_VALID_ELEMENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^(?:![a-zA-Z]+|[a-zA-Z](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9])$").unwrap()
 });
-static REGEX_VALID_COMPONENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(?:\p{Lu}[$\u200c\u200d\p{ID_Continue}.]*|\p{ID_Start}[$\u200c\u200d\p{ID_Continue}]*(?:\.[$\u200c\u200d\p{ID_Continue}]+)+)$").unwrap()
-});
 static REGEX_CLOSING_TAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^<\/\s*(\S*)\s*>").unwrap());
 static REGEX_NOT_LOWERCASE_A_TO_Z: LazyLock<Regex> =
@@ -66,6 +63,11 @@ pub enum ParseElementReturn<'a> {
     StyleSheet(StyleSheet<'a>),
     /// Encounter auto closed element
     ClosePrev,
+    SvelteOptions {
+        span: Span,
+        fragment: Fragment<'a>,
+        attributes: Vec<Attribute<'a>>,
+    },
 }
 
 impl<'a> ParseElementReturn<'a> {
@@ -81,6 +83,135 @@ impl<'a> ParseElementReturn<'a> {
             attributes,
             fragment,
         }))
+    }
+
+    fn element(
+        allocator: &'a Allocator,
+        span: Span,
+        name: &'a str,
+        mut attributes: Vec<Attribute<'a>>,
+        fragment: Fragment<'a>,
+    ) -> Result<ParseElementReturn<'a>, ParserError> {
+        let clone_this_expression = |attributes: &mut Vec<Attribute<'a>>| {
+            let (missing_this, invalid_this) = if name == SVELTE_COMPONENT_TAG {
+                (
+                    ParserErrorKind::SvelteComponentMissingThis,
+                    ParserErrorKind::SvelteComponentInvalidThis,
+                )
+            } else {
+                (
+                    ParserErrorKind::SvelteElementMissingThis,
+                    ParserErrorKind::SvelteElementInvalidThis,
+                )
+            };
+
+            let index = attributes
+                .iter()
+                .position(|attr| {
+                    matches!(attr, Attribute::NormalAttribute(_)) && attr.name() == "this"
+                })
+                .ok_or(ParserError {
+                    kind: missing_this,
+                    span,
+                })?;
+            let attr = attributes.remove(index);
+            let expression = attr
+                .get_expression_tag()
+                .ok_or(ParserError {
+                    kind: invalid_this,
+                    span,
+                })?
+                .expression
+                .clone_in(allocator);
+
+            Ok(expression)
+        };
+        let element = match name {
+            SVELTE_COMPONENT_TAG => Element::SvelteComponent(SvelteComponent {
+                span,
+                name,
+                expression: clone_this_expression(&mut attributes)?,
+                attributes,
+                fragment,
+            }),
+            SVELTE_ELEMENT_TAG => Element::SvelteElement(SvelteElement {
+                span,
+                name,
+                tag: clone_this_expression(&mut attributes)?,
+                attributes,
+                fragment,
+            }),
+            SVELTE_HEAD_TAG => Element::SvelteHead(SvelteHead {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            // special case, the options element should be remove
+            SVELTE_OPTIONS_TAG => {
+                return Ok(ParseElementReturn::SvelteOptions {
+                    span,
+                    attributes,
+                    fragment,
+                })
+            }
+            SVELTE_WINDOW_TAG => Element::SvelteWindow(SvelteWindow {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            SVELTE_DOCUMENT_TAG => Element::SvelteDocument(SvelteDocument {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            SVELTE_BODY_TAG => Element::SvelteBody(SvelteBody {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            SVELTE_SELF_TAG => Element::SvelteSelf(SvelteSelf {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            SVELTE_FRAGMENT_TAG => Element::SvelteFragment(SvelteFragment {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            _ if REGEX_VALID_COMPONENT_NAME.is_match(name) => Element::Component(Component {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            "title" => Element::TitleElement(TitleElement {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            "slot" => Element::SlotElement(SlotElement {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+            _ => Element::RegularElement(RegularElement {
+                span,
+                name,
+                attributes,
+                fragment,
+            }),
+        };
+
+        Ok(ParseElementReturn::Element(element))
     }
 }
 
@@ -152,32 +283,6 @@ impl<'a> Parser<'a> {
             self.meta_tags.insert(name);
         }
 
-        // TODO: implement element
-        {
-            match name {
-                SVELTE_HEAD_TAG => unimplemented!(),
-                SVELTE_OPTIONS_TAG => unimplemented!(),
-                SVELTE_WINDOW_TAG => unimplemented!(),
-                SVELTE_DOCUMENT_TAG => unimplemented!(),
-                SVELTE_BODY_TAG => unimplemented!(),
-                SVELTE_ELEMENT_TAG => unimplemented!(),
-                SVELTE_COMPONENT_TAG => unimplemented!(),
-                SVELTE_SELF_TAG => unimplemented!(),
-                SVELTE_FRAGMENT_TAG => unimplemented!(),
-                _ => (),
-            };
-
-            if REGEX_VALID_COMPONENT_NAME.is_match(name) {
-                // Component
-            }
-
-            if name == "title" {
-                // TitleElement
-            }
-
-            // RegularElement
-        }
-
         self.skip_whitespace();
         let is_root_script = self.is_parent_root() && name == "script";
         let is_root_style = self.is_parent_root() && name == "style";
@@ -197,18 +302,16 @@ impl<'a> Parser<'a> {
             return Ok(ParseElementReturn::StyleSheet(style_sheet));
         }
 
-        // self closed element
-        if self.eat('/') {
+        // self closed element or void element
+        if self.eat('/') || is_void(name) {
             self.expect('>')?;
             let span = Span::new(start, self.offset);
             let fragment = Fragment { nodes: vec![] };
-            return Ok(ParseElementReturn::regular_element(
-                span, name, attributes, fragment,
-            ));
+            return ParseElementReturn::element(self.allocator, span, name, attributes, fragment);
         }
 
         self.expect('>')?;
-        self.push_context(Context::regular_element_context(name));
+        self.push_context(Context::element_context(name));
         let fragment = self.parse_fragment()?;
 
         let ctx = self.pop_context().expect("Expected self context");
@@ -262,12 +365,13 @@ impl<'a> Parser<'a> {
 
         self.expect_regex(&REGEX_CLOSING_TAG)?;
 
-        Ok(ParseElementReturn::regular_element(
+        ParseElementReturn::element(
+            self.allocator,
             Span::new(start, self.offset),
             name,
             attributes,
             fragment,
-        ))
+        )
     }
 
     /// Used for parse attribute value and textarea's nodes

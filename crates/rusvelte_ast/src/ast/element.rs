@@ -1,3 +1,4 @@
+use oxc_ast::ast::Expression;
 use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 
@@ -6,6 +7,17 @@ use super::{attribute::Attribute, Fragment};
 #[derive(Debug, AstTree, OxcSpan)]
 pub enum Element<'a> {
     RegularElement(RegularElement<'a>),
+    SvelteComponent(SvelteComponent<'a>),
+    SvelteElement(SvelteElement<'a>),
+    SvelteBody(SvelteBody<'a>),
+    SvelteWindow(SvelteWindow<'a>),
+    SvelteDocument(SvelteDocument<'a>),
+    SvelteHead(SvelteHead<'a>),
+    SvelteFragment(SvelteFragment<'a>),
+    SvelteSelf(SvelteSelf<'a>),
+    TitleElement(TitleElement<'a>),
+    SlotElement(SlotElement<'a>),
+    Component(Component<'a>),
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -23,46 +35,91 @@ pub struct Comment<'a> {
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteHead {
+pub struct SvelteHead<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteOptions {
+pub struct SvelteWindow<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteWindow {
+pub struct SvelteDocument<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteDocument {
+pub struct SvelteBody<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteBody {
+pub struct SvelteElement<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
+    pub tag: Expression<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteElement {
+pub struct SvelteComponent<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
+    pub expression: Expression<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteComponent {
+pub struct SvelteSelf<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteSelf {
+pub struct SvelteFragment<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
-pub struct SvelteFragment {
+pub struct TitleElement<'a> {
     pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct SlotElement<'a> {
+    pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
+}
+
+#[derive(Debug, AstTree, OxcSpan)]
+pub struct Component<'a> {
+    pub span: Span,
+    pub name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
+    pub fragment: Fragment<'a>,
 }
