@@ -1,3 +1,4 @@
 /target
 input.svelte
 output.json
+node_modules

@@ -9,4 +9,6 @@ test-parser TEST_NAME:
 
 lint:
   cargo clippy -- -D warnings
-  
+
+build-wasm mode="release":
+  wasm-pack build --out-dir ../../npm/wasm --target web --{{mode}} --scope rusvelte crates/rusvelte_wasm

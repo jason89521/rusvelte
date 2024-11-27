@@ -17,7 +17,7 @@ use rusvelte_ast::span_offset::SpanOffset;
 
 mod constants;
 mod context;
-mod error;
+pub mod error;
 mod parse_impl;
 mod regex_pattern;
 

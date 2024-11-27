@@ -34,6 +34,8 @@ quote = { version = "1.0.37" }
 syn = { version = "2.0.87" }
 proc-macro2 = { version = "1.0.89" }
 insta = { version = "1.41.1" }
+wasm-bindgen = "0.2.95"
+serde-wasm-bindgen = "0.6.5"
 
 rusvelte_derive = { path = "crates/rusvelte_derive" }
 rusvelte_utils = { path = "crates/rusvelte_utils" }
