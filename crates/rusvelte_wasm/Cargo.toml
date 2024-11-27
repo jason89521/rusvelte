@@ -1,0 +1,16 @@
+[package]
+name = "rusvelte_wasm"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+test = false
+doctest = false
+
+[dependencies]
+rusvelte_parser = { workspace = true }
+wasm-bindgen = { workspace = true }
+oxc_allocator = { workspace = true }
+serde = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
