@@ -25,7 +25,7 @@ pub struct Analyzer<'a> {
     current_scope_id: ScopeId,
 }
 
-impl<'a> Default for Analyzer<'a> {
+impl Default for Analyzer<'_> {
     fn default() -> Self {
         let scopes = Scopes::default();
         let current_scope_id = scopes.root_scope_id();

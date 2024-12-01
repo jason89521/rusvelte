@@ -13,7 +13,7 @@ pub enum Tag<'a> {
     RenderTag(RenderTag<'a>),
 }
 
-impl<'a> Tag<'a> {
+impl Tag<'_> {
     pub fn is_expression_tag(&self) -> bool {
         matches!(self, Self::ExpressionTag(_))
     }
