@@ -13,6 +13,12 @@ pub enum Tag<'a> {
     RenderTag(RenderTag<'a>),
 }
 
+impl<'a> Tag<'a> {
+    pub fn is_expression_tag(&self) -> bool {
+        matches!(self, Self::ExpressionTag(_))
+    }
+}
+
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct ExpressionTag<'a> {
     pub span: Span,
