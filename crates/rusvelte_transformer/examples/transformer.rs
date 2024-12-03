@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (scopes, nodes, symbols) = analyzer.analyze(&root);
 
     let transformer = Transformer::new(&allocator, scopes, symbols);
-    let program = transformer.transform(&mut root);
+    let program = transformer.client_transform(&mut root);
 
     let instance = Codegen::new().build(&program);
     println!("{}", instance.code);

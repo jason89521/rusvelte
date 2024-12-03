@@ -63,7 +63,7 @@ impl<'a> Transformer<'a> {
         }
     }
 
-    pub fn transform(mut self, root: &mut Root<'a>) -> Program<'a> {
+    pub fn client_transform(mut self, root: &mut Root<'a>) -> Program<'a> {
         let mut instance_body = self.ast.vec([]);
         if let Some(script) = root.instance.as_mut() {
             self.visit_program(&mut script.content);
