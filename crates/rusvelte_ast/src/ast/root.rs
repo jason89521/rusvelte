@@ -27,7 +27,7 @@ pub struct SvelteOptions<'a> {
     pub preserve_whitespace: Option<bool>,
 }
 
-impl<'a> SvelteOptions<'a> {
+impl SvelteOptions<'_> {
     pub fn new(span: Span) -> Self {
         Self {
             span,

@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 oxc_span = { workspace = true }
 rusvelte_ast = { workspace = true }
+regex = { workspace = true }

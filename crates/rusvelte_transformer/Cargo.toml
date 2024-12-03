@@ -1,0 +1,18 @@
+[package]
+name = "rusvelte_transformer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rusvelte_ast = { workspace = true }
+rusvelte_analyzer = { workspace = true }
+rusvelte_utils = { workspace = true }
+oxc_allocator = { workspace = true }
+oxc_span = { workspace = true }
+oxc_syntax = { workspace = true }
+
+
+[dev-dependencies]
+rusvelte_parser = { workspace = true }
+oxc_codegen = { workspace = true }
+insta = { workspace = true, features = ["glob"] }

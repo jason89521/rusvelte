@@ -9,6 +9,8 @@ oxc_parser = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte
 oxc_span = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_span" }
 oxc_syntax = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_syntax" }
 oxc_diagnostics = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_diagnostics" }
+oxc_ecmascript = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_ecmascript" }
+oxc_codegen = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelte", package = "oxc_codegen" }
 
 # for development
 # oxc_allocator = { path = "../oxc/crates/oxc_allocator", package = "oxc_allocator" }
@@ -21,12 +23,15 @@ oxc_diagnostics = { git = "https://github.com/jason89521/oxc.git", branch = "rus
 [workspace.dependencies]
 serde = { version = "1.0.214" }
 serde_json = { version = "1.0.132" }
-oxc_allocator = { version = "0.37.0" }
-oxc_ast = { version = "0.37.0", features = ["serialize"] }
-oxc_parser = { version = "0.37.0" }
-oxc_span = { version = "0.37.0" }
-oxc_syntax = { version = "0.37.0" }
-oxc_diagnostics = { version = "0.37.0" }
+oxc_allocator = { version = "0.38.0" }
+oxc_ast = { version = "0.38.0", features = ["serialize"] }
+oxc_parser = { version = "0.38.0" }
+oxc_span = { version = "0.38.0" }
+oxc_syntax = { version = "0.38.0" }
+oxc_diagnostics = { version = "0.38.0" }
+oxc_ecmascript = { version = "0.38.0" }
+oxc_codegen = { version = "0.38.0" }
+oxc_index = { version = "1.0.0" }
 thiserror = { version = "2.0.1" }
 htmlize = { version = "1.0.5" }
 regex = { version = "1.11.1" }
@@ -36,8 +41,11 @@ proc-macro2 = { version = "1.0.89" }
 insta = { version = "1.41.1" }
 wasm-bindgen = "0.2.95"
 serde-wasm-bindgen = "0.6.5"
+bitflags = { version = "2.6.0" }
 
 rusvelte_derive = { path = "crates/rusvelte_derive" }
 rusvelte_utils = { path = "crates/rusvelte_utils" }
 rusvelte_parser = { path = "crates/rusvelte_parser" }
 rusvelte_ast = { path = "crates/rusvelte_ast" }
+rusvelte_analyzer = { path = "crates/rusvelte_analyzer" }
+rusvelte_transformer = { path = "crates/rusvelte_transformer" }

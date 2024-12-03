@@ -1,0 +1,16 @@
+[package]
+name = "rusvelte_analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rusvelte_ast = { workspace = true }
+oxc_index = { workspace = true }
+oxc_syntax = { workspace = true }
+oxc_span = { workspace = true }
+oxc_allocator = { workspace = true }
+oxc_ecmascript = { workspace = true }
+bitflags = { workspace = true }
+
+[dev-dependencies]
+rusvelte_parser = { workspace = true }

@@ -1,0 +1,15 @@
+---
+source: crates/rusvelte_transformer/tests/snapshot.rs
+expression: code
+input_file: crates/rusvelte_transformer/tests/samples/simple.svelte
+snapshot_kind: text
+---
+import "svelte/internal/disclose-version";
+import * as $ from "svelte/internal/client";
+export default function App($$anchor) {
+	let count = $.state(0);
+	$.next();
+	var text = $.text();
+	$.template_effect(() => $.set_text(text, count));
+	$.append($$anchor, text);
+}

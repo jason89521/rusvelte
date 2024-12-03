@@ -9,4 +9,5 @@ rusvelte_derive = { workspace = true }
 oxc_ast = { workspace = true }
 serde = { workspace = true }
 oxc_syntax = { workspace = true }
+oxc_allocator = { workspace = true }
 htmlize = { workspace = true, features = ["unescape"] }

@@ -210,11 +210,11 @@ impl<'a> Parser<'a> {
             return Ok(Some(Attribute::Directive(directive)));
         }
 
-        return Ok(Some(Attribute::NormalAttribute(NormalAttribute {
+        Ok(Some(Attribute::NormalAttribute(NormalAttribute {
             span: Span::new(start, end),
             value,
             name,
-        })));
+        })))
     }
 
     fn parse_static_attribute(&mut self) -> Result<Option<Attribute<'a>>, ParserError> {
