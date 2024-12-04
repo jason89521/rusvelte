@@ -1,3 +1,4 @@
+use oxc_allocator::Vec;
 use oxc_ast::ast::Program;
 use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
@@ -10,7 +11,7 @@ pub struct Script<'a> {
     pub span: Span,
     pub context: ScriptContext,
     pub content: Program<'a>,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     /// svelte store the comment into the Program, but I think it is not necessary to store there.
     pub leading_comment: Option<Comment<'a>>,
 }

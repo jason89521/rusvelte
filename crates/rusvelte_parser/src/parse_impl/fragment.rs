@@ -7,7 +7,6 @@ use oxc_span::{GetSpan, Span};
 use regex::Regex;
 use rusvelte_ast::ast::{
     Attribute, Comment, CustomElement, Fragment, FragmentNode, Script, ScriptContext, StyleSheet,
-    SvelteOptions,
 };
 use rusvelte_utils::{
     constants::{NAMESPACE_MATHML, NAMESPACE_SVG},
@@ -44,14 +43,14 @@ enum ParseFragmentNodeReturn<'a> {
 
 impl<'a> Parser<'a> {
     pub fn parse_fragment(&mut self) -> Result<Fragment<'a>, ParserError> {
-        let mut nodes = vec![];
+        let mut nodes = self.ast.vec([]);
         while self.offset_u() < self.source.len() && !self.match_str("</") {
             match self.parse_fragment_node()? {
                 ParseFragmentNodeReturn::Node(node) => {
                     nodes.push(node);
                 }
                 ParseFragmentNodeReturn::ClosePrev | ParseFragmentNodeReturn::NextOrCloseBlock => {
-                    return Ok(Fragment { nodes })
+                    return Ok(self.ast.fragment(nodes))
                 }
                 ParseFragmentNodeReturn::Script(mut script) => {
                     script.leading_comment = self.find_leading_comment(&nodes);
@@ -89,7 +88,7 @@ impl<'a> Parser<'a> {
                 ParseFragmentNodeReturn::SvelteOptions => (),
             }
         }
-        Ok(Fragment { nodes })
+        Ok(self.ast.fragment(nodes))
     }
 
     fn parse_fragment_node(&mut self) -> Result<ParseFragmentNodeReturn<'a>, ParserError> {
@@ -110,7 +109,7 @@ impl<'a> Parser<'a> {
                     attributes,
                     fragment,
                 } => {
-                    let mut options = SvelteOptions::new(span);
+                    let mut options = self.ast.svelte_options(span);
                     for attr in attributes.iter() {
                         let span = attr.span();
                         let attr = if let Attribute::NormalAttribute(attr) = attr {

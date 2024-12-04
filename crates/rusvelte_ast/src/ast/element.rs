@@ -3,6 +3,7 @@ use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{attribute::Attribute, Fragment};
+use oxc_allocator::Vec;
 
 #[derive(Debug, AstTree, OxcSpan)]
 pub enum Element<'a> {
@@ -24,7 +25,7 @@ pub enum Element<'a> {
 pub struct RegularElement<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -38,7 +39,7 @@ pub struct Comment<'a> {
 pub struct SvelteHead<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -46,7 +47,7 @@ pub struct SvelteHead<'a> {
 pub struct SvelteWindow<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -54,7 +55,7 @@ pub struct SvelteWindow<'a> {
 pub struct SvelteDocument<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -62,7 +63,7 @@ pub struct SvelteDocument<'a> {
 pub struct SvelteBody<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -70,7 +71,7 @@ pub struct SvelteBody<'a> {
 pub struct SvelteElement<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
     pub tag: Expression<'a>,
 }
@@ -79,7 +80,7 @@ pub struct SvelteElement<'a> {
 pub struct SvelteComponent<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
     pub expression: Expression<'a>,
 }
@@ -88,7 +89,7 @@ pub struct SvelteComponent<'a> {
 pub struct SvelteSelf<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -96,7 +97,7 @@ pub struct SvelteSelf<'a> {
 pub struct SvelteFragment<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -104,7 +105,7 @@ pub struct SvelteFragment<'a> {
 pub struct TitleElement<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -112,7 +113,7 @@ pub struct TitleElement<'a> {
 pub struct SlotElement<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
 }
 
@@ -120,6 +121,8 @@ pub struct SlotElement<'a> {
 pub struct Component<'a> {
     pub span: Span,
     pub name: &'a str,
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
+    #[ast_ignore]
+    pub dynamic: bool,
 }

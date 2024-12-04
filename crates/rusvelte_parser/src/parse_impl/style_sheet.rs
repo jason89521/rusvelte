@@ -1,5 +1,6 @@
 use std::sync::LazyLock;
 
+use oxc_allocator::Vec;
 use oxc_span::Span;
 use regex::Regex;
 
@@ -11,8 +12,8 @@ use crate::{
 use rusvelte_ast::ast::{
     AtRule, Attribute, AttributeSelector, BlockChild, CSSBlock, ClassSelector, Combinator,
     ComplexSelector, Declaration, IdSelector, NestingSelector, Nth, Percentage,
-    PseudoClassSelector, PseudoElementSelector, RelativeSelector, Rule, SelectorList,
-    SimpleSelector, StyleSheet, StyleSheetChild, StyleSheetContent, TypeSelector,
+    PseudoClassSelector, PseudoElementSelector, Rule, SelectorList, SimpleSelector, StyleSheet,
+    StyleSheetChild, StyleSheetContent, TypeSelector,
 };
 
 static REGEX_START_WITH_CLOSING_STYLE_TAG: LazyLock<Regex> =
@@ -37,7 +38,7 @@ impl<'a> Parser<'a> {
     pub fn parse_style_sheet(
         &mut self,
         start: u32,
-        attributes: Vec<Attribute<'a>>,
+        attributes: Vec<'a, Attribute<'a>>,
     ) -> Result<StyleSheet<'a>, ParserError> {
         let content_start = self.offset;
         let children = self.parser_style_sheet_body()?;
@@ -56,8 +57,8 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn parser_style_sheet_body(&mut self) -> Result<Vec<StyleSheetChild<'a>>, ParserError> {
-        let mut children = vec![];
+    fn parser_style_sheet_body(&mut self) -> Result<Vec<'a, StyleSheetChild<'a>>, ParserError> {
+        let mut children = self.ast.vec([]);
         self.skip_comment_or_whitespace();
         while self.offset_u() < self.source.len() {
             self.skip_comment_or_whitespace();
@@ -120,7 +121,7 @@ impl<'a> Parser<'a> {
     fn parse_css_block(&mut self) -> Result<CSSBlock<'a>, ParserError> {
         let start = self.offset;
         self.expect('{')?;
-        let mut children = vec![];
+        let mut children = self.ast.vec([]);
         while self.peek().is_some() {
             self.skip_comment_or_whitespace();
             if self.match_ch('}') {
@@ -188,7 +189,7 @@ impl<'a> Parser<'a> {
         &mut self,
         inside_pseudo_class: bool,
     ) -> Result<SelectorList<'a>, ParserError> {
-        let mut children = vec![];
+        let mut children = self.ast.vec([]);
         self.skip_comment_or_whitespace();
         let start = self.offset;
         while self.peek().is_some() {
@@ -218,8 +219,8 @@ impl<'a> Parser<'a> {
         inside_pseudo_class: bool,
     ) -> Result<ComplexSelector<'a>, ParserError> {
         let list_start = self.offset;
-        let mut children = vec![];
-        let mut relative_selector = RelativeSelector::new(None, list_start);
+        let mut children = self.ast.vec([]);
+        let mut relative_selector = self.ast.relative_selector(None, list_start);
         while self.peek().is_some() {
             let start = self.offset;
             if self.eat('&') {
@@ -364,7 +365,9 @@ impl<'a> Parser<'a> {
                 }
 
                 let combinator_start = combinator.span.start;
-                relative_selector = RelativeSelector::new(Some(combinator), combinator_start);
+                relative_selector = self
+                    .ast
+                    .relative_selector(Some(combinator), combinator_start);
                 self.skip_whitespace();
 
                 let css_selector_invalid = self.match_ch(',')

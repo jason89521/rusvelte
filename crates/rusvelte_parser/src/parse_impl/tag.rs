@@ -92,6 +92,7 @@ impl<'a> Parser<'a> {
                 Ok(Tag::RenderTag(RenderTag {
                     span: get_span(self),
                     expression,
+                    dynamic: false,
                 }))
             } else {
                 // Svelte parser doesn't return error here, weird

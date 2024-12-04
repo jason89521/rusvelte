@@ -2,7 +2,7 @@ use oxc_allocator::IntoIn;
 use rusvelte_ast::{
     ast::{Block, Element, FragmentNode, Tag},
     ast_kind::SvelteAstType,
-    traits::{get_ast_type::GetAstType, get_name::GetName, take_fragment_nodes::TakeFragmentNodes},
+    traits::{get_ast_type::GetAstType, get_fragment::GetFragmentMut, get_name::GetName},
 };
 use rusvelte_utils::regex_pattern::{REGEX_ENDS_WITH_WHITESPACES, REGEX_NOT_WHITESPACE};
 
@@ -18,11 +18,12 @@ pub struct CleanNodesReturn<'a> {
 impl<'a> Transformer<'a> {
     pub fn clean_nodes<T>(&self, parent: &mut T) -> CleanNodesReturn<'a>
     where
-        T: TakeFragmentNodes<'a> + GetAstType + GetName,
+        T: GetFragmentMut<'a> + GetAstType + GetName,
     {
         let mut hoisted = vec![];
         let mut regular = vec![];
-        for node in parent.take_fragment_nodes() {
+        let nodes = self.ast.move_fragment_nodes(parent.get_fragment_mut());
+        for node in nodes {
             match &node {
                 FragmentNode::Element(element)
                     if matches!(
@@ -162,10 +163,9 @@ impl<'a> Transformer<'a> {
         //       ))),
         let is_standalone = if let Some(first) = first {
             trimmed.len() == 1
-                && ((first.ast_type() == SvelteAstType::RenderTag/* && !first.metadata.dynamic */)
-                    || (first.ast_type() == SvelteAstType::Component/* &&
+                && ((first.ast_type() == SvelteAstType::RenderTag && !first.dynamic())
+                    || (first.ast_type() == SvelteAstType::Component && !first.dynamic()/* &&
                     !state.options.hmr &&
-                    !first.metadata.dynamic &&
                     !first.attributes.some(
                       (attribute) => attribute.type === 'Attribute' && attribute.name.startsWith('--')
                     ) */))

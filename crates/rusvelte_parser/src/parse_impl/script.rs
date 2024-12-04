@@ -1,3 +1,4 @@
+use oxc_allocator::Vec;
 use oxc_span::{GetSpan, Span};
 use std::sync::LazyLock;
 
@@ -22,7 +23,7 @@ impl<'a> Parser<'a> {
     pub fn parse_script(
         &mut self,
         start: u32,
-        attributes: Vec<Attribute<'a>>,
+        attributes: Vec<'a, Attribute<'a>>,
     ) -> Result<Script<'a>, ParserError> {
         let script_start = self.offset;
         let data = self.eat_until(&REGEX_CLOSING_SCRIPT_TAG);

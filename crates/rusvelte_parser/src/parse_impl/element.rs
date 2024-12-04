@@ -1,6 +1,6 @@
 use std::{collections::HashSet, ops::Deref, sync::LazyLock};
 
-use oxc_allocator::{Allocator, CloneIn};
+use oxc_allocator::{Allocator, CloneIn, Vec};
 use oxc_span::Span;
 use regex::Regex;
 use rusvelte_utils::{html_tree_validation::closing_tag_omitted, void_element::is_void};
@@ -66,7 +66,7 @@ pub enum ParseElementReturn<'a> {
     SvelteOptions {
         span: Span,
         fragment: Fragment<'a>,
-        attributes: Vec<Attribute<'a>>,
+        attributes: Vec<'a, Attribute<'a>>,
     },
 }
 
@@ -74,7 +74,7 @@ impl<'a> ParseElementReturn<'a> {
     fn regular_element(
         span: Span,
         name: &'a str,
-        attributes: Vec<Attribute<'a>>,
+        attributes: Vec<'a, Attribute<'a>>,
         fragment: Fragment<'a>,
     ) -> ParseElementReturn<'a> {
         ParseElementReturn::Element(Element::RegularElement(RegularElement {
@@ -89,10 +89,10 @@ impl<'a> ParseElementReturn<'a> {
         allocator: &'a Allocator,
         span: Span,
         name: &'a str,
-        mut attributes: Vec<Attribute<'a>>,
+        mut attributes: Vec<'a, Attribute<'a>>,
         fragment: Fragment<'a>,
     ) -> Result<ParseElementReturn<'a>, ParserError> {
-        let clone_this_expression = |attributes: &mut Vec<Attribute<'a>>| {
+        let clone_this_expression = |attributes: &mut Vec<'a, Attribute<'a>>| {
             let (missing_this, invalid_this) = if name == SVELTE_COMPONENT_TAG {
                 (
                     ParserErrorKind::SvelteComponentMissingThis,
@@ -190,6 +190,7 @@ impl<'a> ParseElementReturn<'a> {
                 name,
                 attributes,
                 fragment,
+                dynamic: false,
             }),
             "title" => Element::TitleElement(TitleElement {
                 span,
@@ -306,7 +307,7 @@ impl<'a> Parser<'a> {
         if self.eat('/') || is_void(name) {
             self.expect('>')?;
             let span = Span::new(start, self.offset);
-            let fragment = Fragment { nodes: vec![] };
+            let fragment = self.ast.fragment(self.ast.vec([]));
             return ParseElementReturn::element(self.allocator, span, name, attributes, fragment);
         }
 
@@ -379,13 +380,13 @@ impl<'a> Parser<'a> {
         &mut self,
         done: F,
         location: &'static str,
-    ) -> Result<Vec<SequenceValue<'a>>, ParserError>
+    ) -> Result<Vec<'a, SequenceValue<'a>>, ParserError>
     where
         F: Fn(&Self) -> bool,
     {
         let mut text_start = self.offset;
 
-        let mut values = vec![];
+        let mut values = self.ast.vec([]);
         let mut flush = |value: SequenceValue<'a>| {
             match &value {
                 SequenceValue::Text(text) if text.raw.is_empty() => (),
