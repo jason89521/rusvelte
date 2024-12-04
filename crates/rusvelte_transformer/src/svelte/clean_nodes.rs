@@ -36,11 +36,11 @@ impl<'a> Transformer<'a> {
                 {
                     hoisted.push(node);
                 }
-                FragmentNode::Tag(tag) if matches!(tag, Tag::ConstTag(_) | Tag::DebugTag(_)) => {
+                FragmentNode::Tag(Tag::ConstTag(_) | Tag::DebugTag(_)) => {
                     hoisted.push(node);
                 }
                 FragmentNode::Comment(_) => todo!("should check preserve_comment option"),
-                FragmentNode::Block(block) if matches!(block, Block::SnippetBlock(_)) => {
+                FragmentNode::Block(Block::SnippetBlock(_)) => {
                     hoisted.push(node);
                 }
                 _ => {

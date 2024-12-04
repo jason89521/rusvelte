@@ -4,13 +4,13 @@ pub trait GetName {
     fn name(&self) -> &str;
 }
 
-impl<'a> GetName for Fragment<'a> {
+impl GetName for Fragment<'_> {
     fn name(&self) -> &str {
         "Fragment"
     }
 }
 
-impl<'a> GetName for RegularElement<'a> {
+impl GetName for RegularElement<'_> {
     fn name(&self) -> &str {
         self.name
     }
