@@ -1,0 +1,11 @@
+---
+source: crates/rusvelte_transformer/tests/snapshot.rs
+expression: code
+input_file: crates/rusvelte_transformer/tests/samples/simple-handler/input.svelte
+snapshot_kind: text
+---
+import "svelte/internal/disclose-version";
+import * as $ from "svelte/internal/client";
+export default function App($$anchor) {
+	$.next();
+}
