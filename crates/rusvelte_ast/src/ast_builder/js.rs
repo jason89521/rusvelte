@@ -1,31 +1,10 @@
-use oxc_allocator::{Allocator, Box as OxcBox, IntoIn, Vec as OxcVec};
-use oxc_ast::{
-    ast::{
-        Argument, ArrowFunctionExpression, BindingPattern, CallExpression, Declaration,
-        ExportDefaultDeclarationKind, Expression, FormalParameter, FormalParameterKind, Function,
-        FunctionType, ImportDeclaration, ImportOrExportKind, Statement, StringLiteral,
-        VariableDeclaration, VariableDeclarationKind,
-    },
-    AstBuilder as OxcBuilder, NONE,
-};
+use super::AstBuilder;
+
+use oxc_allocator::{Box, IntoIn, Vec};
+use oxc_ast::{ast::*, NONE};
 use oxc_span::{Atom, SPAN};
 
-#[derive(Clone, Copy)]
-pub struct AstBuilder<'a> {
-    allocator: &'a Allocator,
-    builder: OxcBuilder<'a>,
-}
-
 impl<'a> AstBuilder<'a> {
-    pub fn new(allocator: &'a Allocator) -> Self {
-        let builder = OxcBuilder::new(allocator);
-        Self { allocator, builder }
-    }
-
-    pub fn vec<T, const N: usize>(self, array: [T; N]) -> OxcVec<'a, T> {
-        OxcVec::from_array_in(array, self.allocator)
-    }
-
     pub fn statement_import_declaration(self, decl: ImportDeclaration<'a>) -> Statement<'a> {
         Statement::ImportDeclaration(self.builder.alloc(decl))
     }
@@ -38,7 +17,7 @@ impl<'a> AstBuilder<'a> {
         let source = self.builder.string_literal(SPAN, source, None);
         self.builder.import_declaration(
             SPAN,
-            Some(OxcVec::from_array_in([specifier], self.allocator)),
+            Some(self.vec([specifier])),
             source,
             NONE,
             ImportOrExportKind::Value,
@@ -50,7 +29,7 @@ impl<'a> AstBuilder<'a> {
         A: IntoIn<'a, Atom<'a>>,
     {
         let callee = self.builder.expression_identifier_reference(SPAN, callee);
-        let args = OxcVec::from_iter_in(args, self.allocator);
+        let args = self.vec_from_iter(args);
         self.builder
             .call_expression(SPAN, callee, NONE, args, false)
     }
@@ -82,7 +61,7 @@ impl<'a> AstBuilder<'a> {
         self.builder.move_statement(stmt)
     }
 
-    pub fn alloc<T>(self, value: T) -> OxcBox<'a, T> {
+    pub fn alloc<T>(self, value: T) -> Box<'a, T> {
         self.builder.alloc(value)
     }
 
@@ -116,8 +95,8 @@ impl<'a> AstBuilder<'a> {
     pub fn function_declaration<A>(
         self,
         name: A,
-        params: OxcVec<'a, FormalParameter<'a>>,
-        statements: OxcVec<'a, Statement<'a>>,
+        params: Vec<'a, FormalParameter<'a>>,
+        statements: Vec<'a, Statement<'a>>,
     ) -> Function<'a>
     where
         A: IntoIn<'a, Atom<'a>>,
@@ -146,8 +125,8 @@ impl<'a> AstBuilder<'a> {
 
     pub fn arrow(
         self,
-        params: OxcVec<'a, FormalParameter<'a>>,
-        statements: OxcVec<'a, Statement<'a>>,
+        params: Vec<'a, FormalParameter<'a>>,
+        statements: Vec<'a, Statement<'a>>,
     ) -> ArrowFunctionExpression<'a> {
         let params = self.builder.formal_parameters(
             SPAN,
@@ -165,8 +144,8 @@ impl<'a> AstBuilder<'a> {
 
     pub fn expression_arrow(
         self,
-        params: OxcVec<'a, FormalParameter<'a>>,
-        statements: OxcVec<'a, Statement<'a>>,
+        params: Vec<'a, FormalParameter<'a>>,
+        statements: Vec<'a, Statement<'a>>,
     ) -> Expression<'a> {
         Expression::ArrowFunctionExpression(self.alloc(self.arrow(params, statements)))
     }

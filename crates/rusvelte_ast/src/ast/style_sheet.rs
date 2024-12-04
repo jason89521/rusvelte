@@ -1,3 +1,4 @@
+use oxc_allocator::Vec;
 use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 
@@ -6,8 +7,8 @@ use super::{attribute::Attribute, Comment};
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct StyleSheet<'a> {
     pub span: Span,
-    pub attributes: Vec<Attribute<'a>>,
-    pub children: Vec<StyleSheetChild<'a>>,
+    pub attributes: Vec<'a, Attribute<'a>>,
+    pub children: Vec<'a, StyleSheetChild<'a>>,
     pub content: StyleSheetContent<'a>,
 }
 
@@ -36,17 +37,7 @@ pub struct AtRule<'a> {
 pub struct RelativeSelector<'a> {
     pub span: Span,
     pub combinator: Option<Combinator<'a>>,
-    pub selectors: Vec<SimpleSelector<'a>>,
-}
-
-impl<'a> RelativeSelector<'a> {
-    pub fn new(combinator: Option<Combinator<'a>>, start: u32) -> Self {
-        Self {
-            span: Span::empty(start),
-            combinator,
-            selectors: vec![],
-        }
-    }
+    pub selectors: Vec<'a, SimpleSelector<'a>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -123,7 +114,7 @@ pub enum SimpleSelector<'a> {
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct ComplexSelector<'a> {
     pub span: Span,
-    pub children: Vec<RelativeSelector<'a>>,
+    pub children: Vec<'a, RelativeSelector<'a>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -151,13 +142,13 @@ pub enum BlockChild<'a> {
 #[ast_tree(type = "Block")]
 pub struct CSSBlock<'a> {
     pub span: Span,
-    pub children: Vec<BlockChild<'a>>,
+    pub children: Vec<'a, BlockChild<'a>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
 pub struct SelectorList<'a> {
     pub span: Span,
-    pub children: Vec<ComplexSelector<'a>>,
+    pub children: Vec<'a, ComplexSelector<'a>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]

@@ -66,6 +66,13 @@ fn build_struct(type_value: &str, data_struct: &DataStruct) -> syn::Result<Token
     });
     for field in fields {
         let field_name = field.ident.as_ref().unwrap();
+        let should_ignored = field
+            .attrs
+            .iter()
+            .any(|attr| attr.path().is_ident("ast_ignore"));
+        if should_ignored {
+            continue;
+        }
         if field_name == "span" {
             serialization_tokens.push(quote! {
                 let Span { start, end, .. } = self.span;

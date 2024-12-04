@@ -23,8 +23,10 @@ impl<'a> Transformer<'a> {
 
         if is_text_first {
             body.push(
-                self.ast
-                    .statement_expression(self.ast.expression_call_with_atom("$.next", vec![])),
+                self.ast.statement_expression(
+                    self.ast
+                        .expression_call_with_atom("$.next", self.ast.vec([])),
+                ),
             );
         }
 
@@ -57,28 +59,31 @@ impl<'a> Transformer<'a> {
                                 self.ast
                                     .statement_expression(self.ast.expression_call_with_atom(
                                         "$.set_text",
-                                        vec![
+                                        self.ast.vec([
                                             self.ast.expression_identifier_reference("text").into(),
                                             tag.expression.clone_in(self.allocator).into(),
-                                        ],
+                                        ]),
                                     ));
                             self.state.update.push(update);
                         }
                     }
                 }
 
-                body.push(self.ast.statement_var(
-                    id.clone_in(self.allocator),
-                    self.ast.expression_call_with_atom("$.text", vec![]),
-                ));
+                body.push(
+                    self.ast.statement_var(
+                        id.clone_in(self.allocator),
+                        self.ast
+                            .expression_call_with_atom("$.text", self.ast.vec([])),
+                    ),
+                );
                 close = Some(
                     self.ast
                         .statement_expression(self.ast.expression_call_with_atom(
                             "$.append",
-                            vec![
+                            self.ast.vec([
                                 self.ast.expression_identifier_reference("$$anchor").into(),
                                 self.ast.expression_identifier_reference("text").into(),
-                            ],
+                            ]),
                         )),
                 )
             }
@@ -86,12 +91,13 @@ impl<'a> Transformer<'a> {
 
         if !self.state.update.is_empty() {
             let update = self.state.take_update();
-            let stmt = self
-                .ast
-                .statement_expression(self.ast.expression_call_with_atom(
+            let stmt = self.ast.statement_expression(
+                self.ast.expression_call_with_atom(
                     "$.template_effect",
-                    vec![self.ast.expression_arrow(self.ast.vec([]), update).into()],
-                ));
+                    self.ast
+                        .vec([self.ast.expression_arrow(self.ast.vec([]), update).into()]),
+                ),
+            );
             body.push(stmt);
         }
 

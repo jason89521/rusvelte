@@ -1,10 +1,14 @@
 use rusvelte_derive::{AstTree, OxcSpan};
 
+use oxc_allocator::Vec;
+
 use super::{Block, Comment, Element, ExpressionTag, Tag, Text};
 
-#[derive(Debug, AstTree, Default)]
+#[derive(Debug, AstTree)]
 pub struct Fragment<'a> {
-    pub nodes: Vec<FragmentNode<'a>>,
+    pub nodes: Vec<'a, FragmentNode<'a>>,
+    #[ast_ignore]
+    pub dynamic: bool,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]
@@ -58,6 +62,20 @@ impl<'a> FragmentNode<'a> {
             Some(text)
         } else {
             None
+        }
+    }
+
+    pub fn dynamic(&self) -> bool {
+        match self {
+            Self::Tag(Tag::RenderTag(tag)) => tag.dynamic,
+            Self::Element(element) => {
+                if let Element::Component(component) = element.as_ref() {
+                    component.dynamic
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
     }
 }

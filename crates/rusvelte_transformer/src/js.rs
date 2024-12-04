@@ -49,7 +49,8 @@ impl<'a> JsVisitMut<'a> for Transformer<'a> {
                 if binding.is_init_by_state() {
                     let call_expr = self.ast.call_with_atom(
                         "$.get",
-                        vec![self.ast.expression_identifier_reference(&ident.name).into()],
+                        self.ast
+                            .vec([self.ast.expression_identifier_reference(&ident.name).into()]),
                     );
                     *expr = Expression::CallExpression(self.ast.alloc(call_expr))
                 }
@@ -70,10 +71,10 @@ impl<'a> JsVisitMut<'a> for Transformer<'a> {
                     let right = self.ast.move_expression(&mut assignment_expr.right);
                     let call_expr = self.ast.call_with_atom(
                         "$.set",
-                        vec![
+                        self.ast.vec([
                             self.ast.expression_identifier_reference(name).into(),
                             right.into(),
-                        ],
+                        ]),
                     );
                     *expr = Expression::CallExpression(self.ast.alloc(call_expr));
                 }

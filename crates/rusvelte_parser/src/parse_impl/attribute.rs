@@ -1,6 +1,6 @@
 use std::{collections::HashSet, sync::LazyLock};
 
-use oxc_allocator::Box;
+use oxc_allocator::{Box, Vec};
 use oxc_ast::ast::Expression;
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
@@ -30,8 +30,8 @@ impl<'a> Parser<'a> {
     pub fn parse_attributes(
         &mut self,
         parse_static: bool,
-    ) -> Result<Vec<Attribute<'a>>, ParserError> {
-        let mut attributes = vec![];
+    ) -> Result<Vec<'a, Attribute<'a>>, ParserError> {
+        let mut attributes = self.ast.vec([]);
         let mut unique_names: HashSet<(&str, &str)> = HashSet::new();
         while let Some(attr) = self.parse_attribute_impl(parse_static)? {
             let key = match &attr {

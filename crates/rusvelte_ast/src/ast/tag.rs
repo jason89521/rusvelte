@@ -58,6 +58,8 @@ pub struct ConstTag<'a> {
 pub struct RenderTag<'a> {
     pub span: Span,
     pub expression: RenderTagExpression<'a>,
+    #[ast_ignore]
+    pub dynamic: bool,
 }
 
 #[derive(Debug, AstTree, OxcSpan)]

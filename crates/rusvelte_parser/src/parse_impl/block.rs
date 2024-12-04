@@ -2,7 +2,7 @@ use oxc_ast::ast::{BindingIdentifier, Expression};
 use oxc_span::{GetSpan, Span};
 use regex::Regex;
 use rusvelte_ast::ast::{
-    AwaitBlock, Block, EachBlock, Fragment, FragmentNode, IfBlock, KeyBlock, SnippetBlock,
+    AwaitBlock, Block, EachBlock, FragmentNode, IfBlock, KeyBlock, SnippetBlock,
 };
 use std::{cell::Cell, sync::LazyLock};
 
@@ -81,9 +81,13 @@ impl<'a> Parser<'a> {
                 let (is_closed_by_else, mut alternate) = self.parse_if_block(alternate_start)?;
                 is_closed = is_closed_by_else;
                 alternate.elseif = true;
-                result.alternate = Some(Fragment {
-                    nodes: vec![FragmentNode::Block(Block::IfBlock(alternate))],
-                });
+
+                result.alternate = Some(
+                    self.ast.fragment(
+                        self.ast
+                            .vec([FragmentNode::Block(Block::IfBlock(alternate))]),
+                    ),
+                );
             } else {
                 // :else
                 self.skip_whitespace();

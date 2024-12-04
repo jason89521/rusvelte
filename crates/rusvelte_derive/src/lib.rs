@@ -4,7 +4,7 @@ use syn::{parse_macro_input, DeriveInput};
 mod ast_tree;
 mod oxc_span;
 
-#[proc_macro_derive(AstTree, attributes(ast_tree))]
+#[proc_macro_derive(AstTree, attributes(ast_tree, ast_ignore))]
 pub fn ast_tree_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
