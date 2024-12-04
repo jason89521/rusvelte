@@ -104,7 +104,7 @@ impl<'a> AttributeValue<'a> {
         }
         if let AttributeValue::Quoted(values) = self {
             if let QuotedAttributeValue::Text(text) = &values[0] {
-                return Some(text.raw);
+                return Some(text.raw.as_str());
             }
         }
         None
@@ -131,7 +131,7 @@ impl<'a> AttributeValue<'a> {
                         QuotedAttributeValue::ExpressionTag(expression_tag) => {
                             expression_tag.get_static_value()
                         }
-                        QuotedAttributeValue::Text(text) => Some(text.raw),
+                        QuotedAttributeValue::Text(text) => Some(text.raw.as_str()),
                     }
                 } else {
                     Some("true")

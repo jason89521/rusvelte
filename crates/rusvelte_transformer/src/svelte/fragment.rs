@@ -4,23 +4,29 @@ use rusvelte_ast::{
     ast::{Fragment, FragmentNode},
     js_ast::Statement,
 };
-use rusvelte_utils::regex_pattern::REGEX_NOT_WHITESPACE;
 
 use crate::Transformer;
+
+use super::clean_nodes::CleanNodesReturn;
 
 impl<'a> Transformer<'a> {
     pub fn visit_fragment(&mut self, fragment: &mut Fragment<'a>) -> OxcVec<'a, Statement<'a>> {
         let mut body = OxcVec::new_in(self.allocator);
         let mut close = None;
 
-        let trimmed = clean_nodes(&fragment.nodes);
+        let CleanNodesReturn {
+            hoisted: _,
+            trimmed,
+            is_standalone: _,
+            is_text_first,
+        } = self.clean_nodes(fragment);
 
-        // if is_text_first {
-        body.push(
-            self.ast
-                .statement_expression(self.ast.expression_call_with_atom("$.next", vec![])),
-        );
-        // }
+        if is_text_first {
+            body.push(
+                self.ast
+                    .statement_expression(self.ast.expression_call_with_atom("$.next", vec![])),
+            );
+        }
 
         let is_single_element = trimmed.len() == 1 && trimmed[0].is_regular_element();
         if is_single_element {
@@ -95,30 +101,4 @@ impl<'a> Transformer<'a> {
 
         body
     }
-}
-
-fn clean_nodes<'a>(nodes: &'a [FragmentNode<'a>]) -> &'a [FragmentNode<'a>] {
-    let (start, end) = nodes
-        .iter()
-        .position(|node| {
-            if let FragmentNode::Text(text) = node {
-                REGEX_NOT_WHITESPACE.is_match(&text.data)
-            } else {
-                true
-            }
-        })
-        .map_or((0, nodes.len()), |start| {
-            let end = nodes[start..]
-                .iter()
-                .position(|node| {
-                    if let FragmentNode::Text(text) = node {
-                        !REGEX_NOT_WHITESPACE.is_match(&text.data)
-                    } else {
-                        false
-                    }
-                })
-                .unwrap_or(nodes.len());
-            (start, end)
-        });
-    &nodes[start..end]
 }

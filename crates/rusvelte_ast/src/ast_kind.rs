@@ -1,7 +1,37 @@
 pub use oxc_ast::AstKind as JsAstKind;
-pub use oxc_ast::AstType;
+pub use oxc_ast::AstType as JsAstType;
 
 use crate::ast::*;
+
+// TODO: use codegen to generate this enum
+#[derive(Debug, PartialEq, Eq)]
+pub enum SvelteAstType {
+    Text,
+    Fragment,
+    RegularElement,
+    SvelteComponent,
+    SvelteElement,
+    SvelteBody,
+    SvelteWindow,
+    SvelteDocument,
+    SvelteHead,
+    SvelteFragment,
+    SvelteSelf,
+    TitleElement,
+    SlotElement,
+    Component,
+    ExpressionTag,
+    HtmlTag,
+    DebugTag,
+    ConstTag,
+    RenderTag,
+    Comment,
+    IfBlock,
+    EachBlock,
+    AwaitBlock,
+    KeyBlock,
+    SnippetBlock,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub enum SvelteAstKind<'a> {

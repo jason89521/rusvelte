@@ -44,4 +44,20 @@ impl<'a> FragmentNode<'a> {
             None
         }
     }
+
+    pub fn as_text(&self) -> Option<&Text<'a>> {
+        if let Self::Text(text) = self {
+            Some(text)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_text_mut(&mut self) -> Option<&mut Text<'a>> {
+        if let Self::Text(text) = self {
+            Some(text)
+        } else {
+            None
+        }
+    }
 }
