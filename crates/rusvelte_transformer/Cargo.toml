@@ -9,7 +9,6 @@ rusvelte_analyzer = { workspace = true }
 rusvelte_utils = { workspace = true }
 oxc_allocator = { workspace = true }
 oxc_span = { workspace = true }
-oxc_syntax = { workspace = true }
 
 
 [dev-dependencies]

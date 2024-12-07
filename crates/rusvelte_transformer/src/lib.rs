@@ -2,10 +2,10 @@ use std::cell::Cell;
 
 use oxc_allocator::{Allocator, Vec as OxcVec};
 use oxc_span::{SourceType, SPAN};
-use oxc_syntax::{scope::ScopeId, symbol::SymbolId};
 use rusvelte_analyzer::{
     scope::Scopes,
     symbol::{Binding, Symbols},
+    ScopeId, SymbolId,
 };
 use rusvelte_ast::{
     ast::Root,

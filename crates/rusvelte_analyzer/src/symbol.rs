@@ -1,8 +1,11 @@
+use super::reference::Reference;
 use bitflags::bitflags;
 use oxc_index::IndexVec;
 use oxc_span::{CompactStr, Span};
-use oxc_syntax::{node::NodeId, reference::ReferenceId, scope::ScopeId, symbol::SymbolId};
+use oxc_syntax::{node::NodeId, reference::ReferenceId, scope::ScopeId};
 use rusvelte_ast::js_ast::VariableDeclarationKind;
+
+pub use oxc_syntax::symbol::SymbolId;
 
 bitflags! {
     #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
@@ -118,19 +121,6 @@ impl Binding {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Reference {
-    #[allow(unused)]
-    node_id: NodeId,
-    symbol_id: Option<SymbolId>,
-}
-
-impl Reference {
-    pub fn symbol_id(&self) -> Option<SymbolId> {
-        self.symbol_id
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct Symbols {
     names: IndexVec<SymbolId, CompactStr>,
@@ -142,20 +132,24 @@ pub struct Symbols {
 }
 
 impl Symbols {
-    pub fn create_symbol(
+    pub fn create_symbol<T: Into<CompactStr>>(
         &mut self,
         span: Span,
-        name: CompactStr,
+        name: T,
         scope_id: ScopeId,
         node_id: NodeId,
         kind: BindingKind,
         declaration_kind: DeclarationKind,
     ) -> SymbolId {
         self.spans.push(span);
-        self.names.push(name);
+        self.names.push(name.into());
         self.scope_ids.push(scope_id);
         self.declarations
             .push(Binding::new(node_id, kind, declaration_kind))
+    }
+
+    pub fn names(&self) -> &IndexVec<SymbolId, CompactStr> {
+        &self.names
     }
 
     pub fn get_binding_mut(&mut self, symbol_id: SymbolId) -> &mut Binding {
@@ -171,7 +165,7 @@ impl Symbols {
         symbol_id: Option<SymbolId>,
         node_id: NodeId,
     ) -> ReferenceId {
-        self.references.push(Reference { node_id, symbol_id })
+        self.references.push(Reference::new(node_id, symbol_id))
     }
 
     pub fn get_reference(&self, reference_id: ReferenceId) -> Reference {

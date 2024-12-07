@@ -10,5 +10,6 @@ pub mod js_ast {
 }
 
 pub mod walk {
+    pub use oxc_ast::visit::walk;
     pub use oxc_ast::visit::walk_mut;
 }
