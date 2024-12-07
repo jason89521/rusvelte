@@ -41,6 +41,7 @@ pub enum SvelteAstKind<'a> {
     Text(&'a Text<'a>),
     RegularElement(&'a RegularElement<'a>),
     ExpressionTag(&'a ExpressionTag<'a>),
+    ConstTag(&'a ConstTag<'a>),
     NormalAttribute(&'a NormalAttribute<'a>),
 }
 

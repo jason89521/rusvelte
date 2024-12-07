@@ -1,7 +1,6 @@
 use std::cell::Cell;
 
-use oxc_syntax::scope::{ScopeFlags, ScopeId};
-use rusvelte_analyzer::symbol::BindingKind;
+use rusvelte_analyzer::{symbol::BindingKind, ScopeFlags, ScopeId};
 use rusvelte_ast::visit::JsVisitMut;
 
 use rusvelte_ast::js_ast::*;

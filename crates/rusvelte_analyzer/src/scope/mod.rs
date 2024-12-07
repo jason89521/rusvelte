@@ -1,10 +1,16 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use oxc_index::IndexVec;
 use oxc_span::CompactStr;
-use oxc_syntax::{node::NodeId, scope::ScopeId, symbol::SymbolId};
+use oxc_syntax::symbol::SymbolId;
+use oxc_syntax::{node::NodeId, scope::ScopeId};
 
 pub type Bindings = HashMap<CompactStr, SymbolId>;
+
+mod binder;
+pub mod scope_builder;
+mod visit_js;
+mod visit_svelte;
 
 #[derive(Debug, Default)]
 pub struct Scopes {
@@ -12,6 +18,7 @@ pub struct Scopes {
     child_ids: IndexVec<ScopeId, Vec<ScopeId>>,
     node_ids: IndexVec<ScopeId, NodeId>,
     bindings: IndexVec<ScopeId, Bindings>,
+    conflicts: HashSet<CompactStr>,
 }
 
 impl Scopes {
@@ -33,8 +40,13 @@ impl Scopes {
         self.parent_ids[scope_id]
     }
 
-    pub fn add_binding(&mut self, scope_id: ScopeId, name: CompactStr, symbol_id: SymbolId) {
-        self.bindings[scope_id].insert(name, symbol_id);
+    pub fn add_binding<T: Into<CompactStr>>(
+        &mut self,
+        scope_id: ScopeId,
+        name: T,
+        symbol_id: SymbolId,
+    ) {
+        self.bindings[scope_id].insert(name.into(), symbol_id);
     }
 
     pub fn ancestors(&self, scope_id: ScopeId) -> impl Iterator<Item = ScopeId> + '_ {
