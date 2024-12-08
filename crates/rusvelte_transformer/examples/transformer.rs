@@ -12,9 +12,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut parser = Parser::new(&source, &allocator);
     let mut root = parser.parse()?;
     let analyzer = Analyzer::default();
-    let (scopes, nodes, symbols) = analyzer.analyze(&root);
+    let (scopes, nodes, symbols, reference_table) = analyzer.analyze(&root);
 
-    let transformer = Transformer::new(&allocator, scopes, symbols);
+    let transformer = Transformer::new(&allocator, scopes, symbols, reference_table);
     let program = transformer.client_transform(&mut root);
 
     let instance = Codegen::new().build(&program);

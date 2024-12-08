@@ -3,8 +3,9 @@ use std::cell::Cell;
 use oxc_allocator::{Allocator, Vec as OxcVec};
 use oxc_span::{SourceType, SPAN};
 use rusvelte_analyzer::{
+    binding::{Binding, BindingTable},
+    reference::ReferenceTable,
     scope::Scopes,
-    symbol::{Binding, Symbols},
     ScopeId, SymbolId,
 };
 use rusvelte_ast::{
@@ -40,13 +41,19 @@ pub struct Transformer<'a> {
     allocator: &'a Allocator,
     hoisted: OxcVec<'a, Statement<'a>>,
     scopes: Scopes,
-    symbols: Symbols,
+    symbols: BindingTable,
+    reference_table: ReferenceTable,
     current_scope_id: ScopeId,
     state: TransformState<'a>,
 }
 
 impl<'a> Transformer<'a> {
-    pub fn new(allocator: &'a Allocator, scopes: Scopes, symbols: Symbols) -> Self {
+    pub fn new(
+        allocator: &'a Allocator,
+        scopes: Scopes,
+        symbols: BindingTable,
+        reference_table: ReferenceTable,
+    ) -> Self {
         let ast = AstBuilder::new(allocator);
         let hoisted = ast
             .vec([ast.statement_import_declaration(ast.import_all("$", "svelte/internal/client"))]);
@@ -58,6 +65,7 @@ impl<'a> Transformer<'a> {
             ast,
             scopes,
             symbols,
+            reference_table,
             current_scope_id,
             state: TransformState::new(allocator),
         }

@@ -2,10 +2,12 @@ use std::collections::{HashMap, HashSet};
 
 use oxc_index::IndexVec;
 use oxc_span::CompactStr;
+use oxc_syntax::reference::ReferenceId;
 use oxc_syntax::symbol::SymbolId;
 use oxc_syntax::{node::NodeId, scope::ScopeId};
 
 pub type Bindings = HashMap<CompactStr, SymbolId>;
+pub type References = HashMap<CompactStr, Vec<ReferenceId>>;
 
 mod binder;
 pub mod scope_builder;
@@ -18,6 +20,7 @@ pub struct Scopes {
     child_ids: IndexVec<ScopeId, Vec<ScopeId>>,
     node_ids: IndexVec<ScopeId, NodeId>,
     bindings: IndexVec<ScopeId, Bindings>,
+    references: IndexVec<ScopeId, References>,
     conflicts: HashSet<CompactStr>,
 }
 
@@ -33,6 +36,7 @@ impl Scopes {
         self.child_ids.push(vec![]);
         self.node_ids.push(node_id);
         self.bindings.push(HashMap::new());
+        self.references.push(HashMap::new());
         scope_id
     }
 
@@ -47,6 +51,18 @@ impl Scopes {
         symbol_id: SymbolId,
     ) {
         self.bindings[scope_id].insert(name.into(), symbol_id);
+    }
+
+    pub fn add_reference<T: Into<CompactStr>>(
+        &mut self,
+        scope_id: ScopeId,
+        name: T,
+        reference_id: ReferenceId,
+    ) {
+        self.references[scope_id]
+            .entry(name.into())
+            .and_modify(|v| v.push(reference_id))
+            .or_default();
     }
 
     pub fn ancestors(&self, scope_id: ScopeId) -> impl Iterator<Item = ScopeId> + '_ {

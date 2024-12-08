@@ -1,5 +1,5 @@
 use oxc_allocator::{CloneIn, Vec as OxcVec};
-use rusvelte_analyzer::symbol::BindingKind;
+use rusvelte_analyzer::binding::BindingKind;
 use rusvelte_ast::{
     ast::{Fragment, FragmentNode},
     js_ast::Statement,
@@ -49,7 +49,8 @@ impl<'a> Transformer<'a> {
                             .expression
                             .get_identifier_reference()
                             .and_then(|ident| {
-                                let reference = self.symbols.get_reference(ident.reference_id());
+                                let reference =
+                                    self.reference_table.get_reference(ident.reference_id());
                                 let binding = self.symbols.get_binding(reference.symbol_id()?);
                                 Some(binding.kind() == BindingKind::State)
                             })

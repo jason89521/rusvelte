@@ -1,7 +1,7 @@
 use oxc_ecmascript::BoundNames;
 use rusvelte_ast::js_ast::{Function, FunctionType, VariableDeclarator};
 
-use crate::symbol::{BindingKind, DeclarationKind};
+use crate::binding::{BindingKind, DeclarationKind};
 
 use super::scope_builder::ScopeBuilder;
 

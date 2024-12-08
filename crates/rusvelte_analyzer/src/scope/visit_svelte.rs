@@ -7,7 +7,7 @@ use rusvelte_ast::{
 use super::scope_builder::ScopeBuilder;
 
 impl<'a> Visit<'a> for ScopeBuilder<'a> {
-    fn enter_svelte_node(&mut self, kind: rusvelte_ast::ast_kind::SvelteAstKind<'a>) {
+    fn enter_svelte_node(&mut self, kind: SvelteAstKind<'a>) {
         self.create_ast_node(AstKind::Svelte(kind));
     }
 
