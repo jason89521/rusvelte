@@ -3,6 +3,7 @@ use rusvelte_ast::{
     ast_kind::{AstKind, JsAstKind, SvelteAstKind},
     js_ast::*,
     visit::JsVisit,
+    walk::walk::*,
 };
 
 use crate::binding::BindingKind;
@@ -12,6 +13,15 @@ use super::{binder::Binder, scope_builder::ScopeBuilder};
 impl<'a> JsVisit<'a> for ScopeBuilder<'a> {
     fn enter_node(&mut self, kind: JsAstKind<'a>) {
         self.create_ast_node(AstKind::Js(kind));
+
+        if let JsAstKind::IdentifierReference(ident) = kind {
+            let reference_id = self.reference(
+                ident.name.as_str(),
+                self.current_node_id,
+                self.current_scope_id,
+            );
+            ident.set_reference_id(reference_id);
+        }
     }
 
     fn enter_scope(
@@ -81,15 +91,13 @@ impl<'a> JsVisit<'a> for ScopeBuilder<'a> {
         self.leave_node(kind);
     }
 
-    fn visit_identifier_reference(&mut self, ident: &IdentifierReference<'a>) {
-        let kind = JsAstKind::IdentifierReference(self.alloc(ident));
-        self.enter_node(kind);
-        let reference_id = self.reference(
-            ident.name.as_str(),
-            self.current_node_id,
-            self.current_scope_id,
-        );
-        ident.set_reference_id(reference_id);
-        self.leave_node(kind);
+    fn visit_assignment_expression(&mut self, expr: &AssignmentExpression<'a>) {
+        walk_assignment_expression(self, expr);
+        self.extend_updates(&expr.left);
+    }
+
+    fn visit_update_expression(&mut self, expr: &UpdateExpression<'a>) {
+        walk_update_expression(self, expr);
+        self.extend_updates(&expr.argument);
     }
 }

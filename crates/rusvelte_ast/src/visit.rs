@@ -53,6 +53,34 @@ pub trait Visit<'a>: JsVisit<'a> {
     fn visit_attribute_value(&mut self, it: &AttributeValue<'a>) {
         walk_attribute_value(self, it)
     }
+    /// We cannot use `visit_directive` because it conflicts with the JS's directive
+    fn visit_svelte_directive(&mut self, it: &Directive<'a>) {
+        walk_directive(self, it);
+    }
+    fn visit_animate_directive(&mut self, it: &AnimateDirective<'a>) {
+        walk_animate_directive(self, it);
+    }
+    fn visit_bind_directive(&mut self, it: &BindDirective<'a>) {
+        walk_bind_directive(self, it);
+    }
+    fn visit_class_directive(&mut self, it: &ClassDirective<'a>) {
+        walk_class_directive(self, it);
+    }
+    fn visit_let_directive(&mut self, it: &LetDirective<'a>) {
+        walk_let_directive(self, it);
+    }
+    fn visit_on_directive(&mut self, it: &OnDirective<'a>) {
+        walk_on_directive(self, it);
+    }
+    fn visit_style_directive(&mut self, it: &StyleDirective<'a>) {
+        walk_style_directive(self, it);
+    }
+    fn visit_transition_directive(&mut self, it: &TransitionDirective<'a>) {
+        walk_transition_directive(self, it);
+    }
+    fn visit_use_directive(&mut self, it: &UseDirective<'a>) {
+        walk_use_directive(self, it);
+    }
 }
 
 pub mod walk {
@@ -151,7 +179,7 @@ pub mod walk {
         match it {
             Attribute::NormalAttribute(it) => visitor.visit_normal_attribute(it),
             Attribute::SpreadAttribute(it) => todo!(),
-            Attribute::Directive(it) => todo!(),
+            Attribute::Directive(it) => visitor.visit_svelte_directive(it),
         }
     }
 
@@ -168,5 +196,87 @@ pub mod walk {
             AttributeValue::Quoted(it) => todo!(),
             AttributeValue::True => todo!(),
         }
+    }
+
+    pub fn walk_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &Directive<'a>) {
+        match it {
+            Directive::AnimateDirective(it) => visitor.visit_animate_directive(it),
+            Directive::BindDirective(it) => visitor.visit_bind_directive(it),
+            Directive::ClassDirective(it) => visitor.visit_class_directive(it),
+            Directive::LetDirective(it) => visitor.visit_let_directive(it),
+            Directive::OnDirective(it) => visitor.visit_on_directive(it),
+            Directive::StyleDirective(it) => visitor.visit_style_directive(it),
+            Directive::TransitionDirective(it) => visitor.visit_transition_directive(it),
+            Directive::UseDirective(it) => visitor.visit_use_directive(it),
+        }
+    }
+
+    pub fn walk_animate_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &AnimateDirective<'a>) {
+        let kind = SvelteAstKind::AnimateDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        if let Some(expression) = &it.expression {
+            visitor.visit_expression(expression);
+        }
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_bind_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &BindDirective<'a>) {
+        let kind = SvelteAstKind::BindDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        visitor.visit_expression(&it.expression);
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_class_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &ClassDirective<'a>) {
+        let kind = SvelteAstKind::ClassDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        visitor.visit_expression(&it.expression);
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_let_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &LetDirective<'a>) {
+        let kind = SvelteAstKind::LetDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        if let Some(expression) = &it.expression {
+            visitor.visit_expression(expression);
+        }
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_on_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &OnDirective<'a>) {
+        let kind = SvelteAstKind::OnDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        if let Some(expression) = &it.expression {
+            visitor.visit_expression(expression);
+        }
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_style_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &StyleDirective<'a>) {
+        let kind = SvelteAstKind::StyleDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        visitor.visit_attribute_value(&it.value);
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_transition_directive<'a, V: Visit<'a>>(
+        visitor: &mut V,
+        it: &TransitionDirective<'a>,
+    ) {
+        let kind = SvelteAstKind::TransitionDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        if let Some(expression) = &it.expression {
+            visitor.visit_expression(expression);
+        }
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_use_directive<'a, V: Visit<'a>>(visitor: &mut V, it: &UseDirective<'a>) {
+        let kind = SvelteAstKind::UseDirective(visitor.alloc(it));
+        visitor.enter_svelte_node(kind);
+        if let Some(expression) = &it.expression {
+            visitor.visit_expression(expression);
+        }
+        visitor.leave_svelte_node(kind);
     }
 }

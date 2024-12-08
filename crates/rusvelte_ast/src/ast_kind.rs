@@ -43,6 +43,22 @@ pub enum SvelteAstKind<'a> {
     ExpressionTag(&'a ExpressionTag<'a>),
     ConstTag(&'a ConstTag<'a>),
     NormalAttribute(&'a NormalAttribute<'a>),
+    HtmlTag(&'a HtmlTag<'a>),
+    DebugTag(&'a DebugTag<'a>),
+    Comment(&'a Comment<'a>),
+    IfBlock(&'a IfBlock<'a>),
+    EachBlock(&'a EachBlock<'a>),
+    AwaitBlock(&'a AwaitBlock<'a>),
+    KeyBlock(&'a KeyBlock<'a>),
+    SnippetBlock(&'a SnippetBlock<'a>),
+    AnimateDirective(&'a AnimateDirective<'a>),
+    BindDirective(&'a BindDirective<'a>),
+    ClassDirective(&'a ClassDirective<'a>),
+    LetDirective(&'a LetDirective<'a>),
+    OnDirective(&'a OnDirective<'a>),
+    StyleDirective(&'a StyleDirective<'a>),
+    TransitionDirective(&'a TransitionDirective<'a>),
+    UseDirective(&'a UseDirective<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]

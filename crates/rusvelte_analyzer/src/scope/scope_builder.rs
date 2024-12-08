@@ -4,9 +4,11 @@ use oxc_syntax::symbol::SymbolId;
 use oxc_syntax::{node::NodeId, scope::ScopeId};
 use rusvelte_ast::ast::Root;
 use rusvelte_ast::ast_kind::AstKind;
+use rusvelte_ast::traits::extract_identifier::ExtractIdentifier;
+use rusvelte_ast::traits::unwrap_pattern::UnwrapPattern;
 use rusvelte_ast::visit::Visit;
 
-use crate::binding::{BindingKind, BindingTable, DeclarationKind};
+use crate::binding::{BindingFlags, BindingKind, BindingTable, DeclarationKind};
 use crate::node::AstNodes;
 use crate::reference::ReferenceTable;
 
@@ -19,6 +21,7 @@ pub struct ScopeBuilder<'a> {
     pub reference_table: ReferenceTable,
     pub current_node_id: NodeId,
     pub current_scope_id: ScopeId,
+    pub updates: Vec<(ScopeId, BindingFlags, ReferenceId)>,
 }
 
 impl Default for ScopeBuilder<'_> {
@@ -33,6 +36,7 @@ impl Default for ScopeBuilder<'_> {
             reference_table: ReferenceTable::default(),
             current_node_id: NodeId::new(0),
             current_scope_id,
+            updates: Vec::new(),
         }
     }
 }
@@ -53,6 +57,17 @@ impl<'a> ScopeBuilder<'a> {
                 .scopes
                 .find_symbol_id(reference.scope_id(), reference.name());
             reference.set_symbol_id(symbol_id);
+        }
+
+        for (scope_id, flags, reference_id) in self.updates.iter() {
+            let reference = self.reference_table.get_reference(*reference_id);
+            if let Some(binding) = self
+                .scopes
+                .find_symbol_id(*scope_id, reference.name())
+                .map(|symbol_id| self.binding_table.get_binding_mut(symbol_id))
+            {
+                binding.binding_flags |= *flags;
+            }
         }
 
         ScopeBuilderReturn {
@@ -153,5 +168,19 @@ impl<'a> ScopeBuilder<'a> {
             self.reference_table
                 .create_reference(self.current_node_id, None, scope_id, name);
         (reference_id, scope_id)
+    }
+
+    pub fn extend_updates<'b, T: UnwrapPattern<'b>>(&mut self, pattern: &'b T) {
+        let updates = pattern.unwrap_pattern().into_iter().map_while(|item| {
+            let ident = item.extract_identifier()?;
+            let reference_id = ident.reference_id();
+            let binding_flags = if item.is_identifier_reference() {
+                BindingFlags::reassigned()
+            } else {
+                BindingFlags::mutated()
+            };
+            Some((self.current_scope_id, binding_flags, reference_id))
+        });
+        self.updates.extend(updates);
     }
 }
