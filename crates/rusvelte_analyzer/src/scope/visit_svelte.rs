@@ -1,13 +1,13 @@
 use rusvelte_ast::{
     ast::*,
     ast_kind::{AstKind, SvelteAstKind},
-    visit::{JsVisit, Visit},
+    visit::{walk::*, JsVisit, Visit},
 };
 
 use super::scope_builder::ScopeBuilder;
 
 impl<'a> Visit<'a> for ScopeBuilder<'a> {
-    fn enter_svelte_node(&mut self, kind: rusvelte_ast::ast_kind::SvelteAstKind<'a>) {
+    fn enter_svelte_node(&mut self, kind: SvelteAstKind<'a>) {
         self.create_ast_node(AstKind::Svelte(kind));
     }
 
@@ -30,5 +30,10 @@ impl<'a> Visit<'a> for ScopeBuilder<'a> {
         self.visit_fragment(&root.fragment);
 
         self.leave_svelte_node(kind);
+    }
+
+    fn visit_bind_directive(&mut self, directive: &BindDirective<'a>) {
+        walk_bind_directive(self, directive);
+        self.extend_updates(&directive.expression);
     }
 }

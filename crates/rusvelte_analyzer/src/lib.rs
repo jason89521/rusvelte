@@ -1,7 +1,8 @@
+use binding::BindingTable;
 use node::AstNodes;
+use reference::ReferenceTable;
 use rusvelte_ast::ast::Root;
 use scope::{scope_builder::ScopeBuilderReturn, Scopes};
-use symbol::Symbols;
 
 pub use oxc_syntax::{
     node::NodeId,
@@ -9,21 +10,25 @@ pub use oxc_syntax::{
     symbol::{SymbolFlags, SymbolId},
 };
 
+pub mod binding;
 pub mod node;
-mod reference;
+pub mod reference;
 pub mod scope;
-pub mod symbol;
 
 #[derive(Debug, Default)]
 pub struct Analyzer {}
 
 impl Analyzer {
-    pub fn analyze<'a>(self, root: &Root<'a>) -> (Scopes, AstNodes<'a>, Symbols) {
+    pub fn analyze<'a>(
+        self,
+        root: &Root<'a>,
+    ) -> (Scopes, AstNodes<'a>, BindingTable, ReferenceTable) {
         let ScopeBuilderReturn {
             scopes,
             nodes,
-            symbols,
+            binding_table: symbols,
+            reference_table: references,
         } = scope::scope_builder::ScopeBuilder::default().build(root);
-        (scopes, nodes, symbols)
+        (scopes, nodes, symbols, references)
     }
 }

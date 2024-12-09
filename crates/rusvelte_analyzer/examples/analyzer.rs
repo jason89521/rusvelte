@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = parser.parse()?;
 
     let analyzer = Analyzer::default();
-    let (scopes, nodes, symbols) = analyzer.analyze(&root);
+    let (scopes, nodes, symbols, references) = analyzer.analyze(&root);
 
     // println!("scopes: {:?}", analyzer.scopes);
     // println!("symbols: {:#?}", analyzer.symbols);

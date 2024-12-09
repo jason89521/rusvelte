@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use rusvelte_analyzer::{symbol::BindingKind, ScopeFlags, ScopeId};
+use rusvelte_analyzer::{binding::BindingKind, ScopeFlags, ScopeId};
 use rusvelte_ast::visit::JsVisitMut;
 
 use rusvelte_ast::js_ast::*;

@@ -4,22 +4,24 @@ use oxc_syntax::symbol::SymbolId;
 use oxc_syntax::{node::NodeId, scope::ScopeId};
 use rusvelte_ast::ast::Root;
 use rusvelte_ast::ast_kind::AstKind;
+use rusvelte_ast::traits::extract_identifier::ExtractIdentifier;
+use rusvelte_ast::traits::unwrap_pattern::UnwrapPattern;
 use rusvelte_ast::visit::Visit;
 
+use crate::binding::{BindingFlags, BindingKind, BindingTable, DeclarationKind};
 use crate::node::AstNodes;
-use crate::reference::UnresolvedJsReference;
-use crate::symbol::{BindingKind, DeclarationKind, Symbols};
+use crate::reference::ReferenceTable;
 
 use super::Scopes;
 
 pub struct ScopeBuilder<'a> {
     pub scopes: Scopes,
     pub nodes: AstNodes<'a>,
-    pub symbols: Symbols,
+    pub binding_table: BindingTable,
+    pub reference_table: ReferenceTable,
     pub current_node_id: NodeId,
     pub current_scope_id: ScopeId,
-
-    pub unresolved_js_references: Vec<UnresolvedJsReference<'a>>,
+    pub updates: Vec<(ScopeId, BindingFlags, ReferenceId)>,
 }
 
 impl Default for ScopeBuilder<'_> {
@@ -30,10 +32,11 @@ impl Default for ScopeBuilder<'_> {
         Self {
             scopes,
             nodes: AstNodes::new(),
-            symbols: Symbols::default(),
+            binding_table: BindingTable::default(),
+            reference_table: ReferenceTable::default(),
             current_node_id: NodeId::new(0),
             current_scope_id,
-            unresolved_js_references: vec![],
+            updates: Vec::new(),
         }
     }
 }
@@ -41,22 +44,37 @@ impl Default for ScopeBuilder<'_> {
 pub struct ScopeBuilderReturn<'a> {
     pub scopes: Scopes,
     pub nodes: AstNodes<'a>,
-    pub symbols: Symbols,
+    pub binding_table: BindingTable,
+    pub reference_table: ReferenceTable,
 }
 
 impl<'a> ScopeBuilder<'a> {
     pub fn build(mut self, root: &Root<'a>) -> ScopeBuilderReturn<'a> {
         self.visit_root(root);
 
-        for reference in std::mem::take(&mut self.unresolved_js_references) {
-            let id = self.reference(reference.name, reference.node_id, reference.scope_id);
-            reference.ident.set_reference_id(id);
+        for reference in self.reference_table.unresolved_references_mut() {
+            let symbol_id = self
+                .scopes
+                .find_symbol_id(reference.scope_id(), reference.name());
+            reference.set_symbol_id(symbol_id);
+        }
+
+        for (scope_id, flags, reference_id) in self.updates.iter() {
+            let reference = self.reference_table.get_reference(*reference_id);
+            if let Some(binding) = self
+                .scopes
+                .find_symbol_id(*scope_id, reference.name())
+                .map(|symbol_id| self.binding_table.get_binding_mut(symbol_id))
+            {
+                binding.binding_flags |= *flags;
+            }
         }
 
         ScopeBuilderReturn {
             scopes: self.scopes,
             nodes: self.nodes,
-            symbols: self.symbols,
+            binding_table: self.binding_table,
+            reference_table: self.reference_table,
         }
     }
 
@@ -103,7 +121,7 @@ impl<'a> ScopeBuilder<'a> {
         scope_id: ScopeId,
     ) -> SymbolId {
         // TODO: validate identifier name
-        let symbol_id = self.symbols.create_symbol(
+        let symbol_id = self.binding_table.create_symbol(
             span,
             name,
             scope_id,
@@ -123,12 +141,46 @@ impl<'a> ScopeBuilder<'a> {
         scope_id: ScopeId,
     ) -> ReferenceId {
         let name: CompactStr = name.into();
+        let (reference_id, scope_id) = self.create_reference(node_id, scope_id, &name);
+        self.scopes.add_reference(scope_id, name, reference_id);
+        reference_id
+    }
+
+    fn create_reference(
+        &mut self,
+        node_id: NodeId,
+        scope_id: ScopeId,
+        name: &str,
+    ) -> (ReferenceId, ScopeId) {
         for scope_id in self.scopes.ancestors(scope_id) {
-            if let Some(symbol_id) = self.scopes.bindings[scope_id].get(&name) {
-                return self.symbols.create_reference(Some(*symbol_id), node_id);
+            if let Some(symbol_id) = self.scopes.bindings[scope_id].get(name) {
+                let reference_id = self.reference_table.create_reference(
+                    node_id,
+                    Some(*symbol_id),
+                    scope_id,
+                    name,
+                );
+                return (reference_id, scope_id);
             }
         }
 
-        self.symbols.create_reference(None, node_id)
+        let reference_id =
+            self.reference_table
+                .create_reference(self.current_node_id, None, scope_id, name);
+        (reference_id, scope_id)
+    }
+
+    pub fn extend_updates<'b, T: UnwrapPattern<'b>>(&mut self, pattern: &'b T) {
+        let updates = pattern.unwrap_pattern().into_iter().map_while(|item| {
+            let ident = item.extract_identifier()?;
+            let reference_id = ident.reference_id();
+            let binding_flags = if item.is_identifier_reference() {
+                BindingFlags::reassigned()
+            } else {
+                BindingFlags::mutated()
+            };
+            Some((self.current_scope_id, binding_flags, reference_id))
+        });
+        self.updates.extend(updates);
     }
 }

@@ -1,8 +1,7 @@
-use super::reference::Reference;
 use bitflags::bitflags;
 use oxc_index::IndexVec;
 use oxc_span::{CompactStr, Span};
-use oxc_syntax::{node::NodeId, reference::ReferenceId, scope::ScopeId};
+use oxc_syntax::{node::NodeId, scope::ScopeId};
 use rusvelte_ast::js_ast::VariableDeclarationKind;
 
 pub use oxc_syntax::symbol::SymbolId;
@@ -88,6 +87,8 @@ impl From<VariableDeclarationKind> for DeclarationKind {
 pub struct Binding {
     // VariableDeclarator
     node_id: NodeId,
+    #[allow(unused)]
+    scope_id: ScopeId,
 
     kind: BindingKind,
     #[allow(unused)]
@@ -98,9 +99,15 @@ pub struct Binding {
 }
 
 impl Binding {
-    pub fn new(node_id: NodeId, kind: BindingKind, declaration_kind: DeclarationKind) -> Self {
+    pub fn new(
+        node_id: NodeId,
+        scope_id: ScopeId,
+        kind: BindingKind,
+        declaration_kind: DeclarationKind,
+    ) -> Self {
         Self {
             node_id,
+            scope_id,
             kind,
             declaration_kind,
             is_called: false,
@@ -122,16 +129,13 @@ impl Binding {
 }
 
 #[derive(Debug, Default)]
-pub struct Symbols {
+pub struct BindingTable {
     names: IndexVec<SymbolId, CompactStr>,
     spans: IndexVec<SymbolId, Span>,
-    scope_ids: IndexVec<SymbolId, ScopeId>,
     declarations: IndexVec<SymbolId, Binding>,
-
-    references: IndexVec<ReferenceId, Reference>,
 }
 
-impl Symbols {
+impl BindingTable {
     pub fn create_symbol<T: Into<CompactStr>>(
         &mut self,
         span: Span,
@@ -143,9 +147,8 @@ impl Symbols {
     ) -> SymbolId {
         self.spans.push(span);
         self.names.push(name.into());
-        self.scope_ids.push(scope_id);
         self.declarations
-            .push(Binding::new(node_id, kind, declaration_kind))
+            .push(Binding::new(node_id, scope_id, kind, declaration_kind))
     }
 
     pub fn names(&self) -> &IndexVec<SymbolId, CompactStr> {
@@ -158,18 +161,6 @@ impl Symbols {
 
     pub fn get_binding(&self, symbol_id: SymbolId) -> &Binding {
         &self.declarations[symbol_id]
-    }
-
-    pub fn create_reference(
-        &mut self,
-        symbol_id: Option<SymbolId>,
-        node_id: NodeId,
-    ) -> ReferenceId {
-        self.references.push(Reference::new(node_id, symbol_id))
-    }
-
-    pub fn get_reference(&self, reference_id: ReferenceId) -> Reference {
-        self.references[reference_id]
     }
 
     pub fn get_name(&self, symbol_id: SymbolId) -> &str {
