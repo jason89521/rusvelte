@@ -16,7 +16,7 @@ pub struct Fragment<'a> {
     pub scope_id: Cell<Option<ScopeId>>,
 }
 
-impl<'a> Fragment<'a> {
+impl Fragment<'_> {
     pub fn metadata(&self) -> FragmentMetadata {
         self.metadata.get()
     }
