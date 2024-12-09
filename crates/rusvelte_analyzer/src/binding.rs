@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 use oxc_index::IndexVec;
-use oxc_span::{CompactStr, Span};
+use oxc_span::CompactStr;
 use oxc_syntax::{node::NodeId, scope::ScopeId};
 use rusvelte_ast::js_ast::VariableDeclarationKind;
 
@@ -85,27 +85,25 @@ impl From<VariableDeclarationKind> for DeclarationKind {
 
 #[derive(Debug)]
 pub struct Binding {
-    // VariableDeclarator
+    name: CompactStr,
     node_id: NodeId,
-    #[allow(unused)]
     scope_id: ScopeId,
-
     kind: BindingKind,
-    #[allow(unused)]
     declaration_kind: DeclarationKind,
-    #[allow(unused)]
     is_called: bool,
     pub binding_flags: BindingFlags,
 }
 
 impl Binding {
     pub fn new(
+        name: CompactStr,
         node_id: NodeId,
         scope_id: ScopeId,
         kind: BindingKind,
         declaration_kind: DeclarationKind,
     ) -> Self {
         Self {
+            name,
             node_id,
             scope_id,
             kind,
@@ -126,33 +124,45 @@ impl Binding {
     pub fn is_init_by_state(&self) -> bool {
         self.kind == BindingKind::State
     }
+
+    pub fn is_called(&self) -> bool {
+        self.is_called
+    }
+
+    pub fn scope_id(&self) -> ScopeId {
+        self.scope_id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn declaration_kind(&self) -> DeclarationKind {
+        self.declaration_kind
+    }
 }
 
 #[derive(Debug, Default)]
 pub struct BindingTable {
-    names: IndexVec<SymbolId, CompactStr>,
-    spans: IndexVec<SymbolId, Span>,
     declarations: IndexVec<SymbolId, Binding>,
 }
 
 impl BindingTable {
     pub fn create_symbol<T: Into<CompactStr>>(
         &mut self,
-        span: Span,
         name: T,
         scope_id: ScopeId,
         node_id: NodeId,
         kind: BindingKind,
         declaration_kind: DeclarationKind,
     ) -> SymbolId {
-        self.spans.push(span);
-        self.names.push(name.into());
-        self.declarations
-            .push(Binding::new(node_id, scope_id, kind, declaration_kind))
-    }
-
-    pub fn names(&self) -> &IndexVec<SymbolId, CompactStr> {
-        &self.names
+        self.declarations.push(Binding::new(
+            name.into(),
+            node_id,
+            scope_id,
+            kind,
+            declaration_kind,
+        ))
     }
 
     pub fn get_binding_mut(&mut self, symbol_id: SymbolId) -> &mut Binding {
@@ -164,6 +174,6 @@ impl BindingTable {
     }
 
     pub fn get_name(&self, symbol_id: SymbolId) -> &str {
-        &self.names[symbol_id]
+        &self.declarations[symbol_id].name
     }
 }

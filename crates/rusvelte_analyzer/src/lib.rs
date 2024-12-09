@@ -2,7 +2,7 @@ use binding::BindingTable;
 use node::AstNodes;
 use reference::ReferenceTable;
 use rusvelte_ast::ast::Root;
-use scope::{scope_builder::ScopeBuilderReturn, Scopes};
+use scope::{scope_builder::ScopeBuilderReturn, ScopeTable};
 
 pub use oxc_syntax::{
     node::NodeId,
@@ -22,7 +22,7 @@ impl Analyzer {
     pub fn analyze<'a>(
         self,
         root: &Root<'a>,
-    ) -> (Scopes, AstNodes<'a>, BindingTable, ReferenceTable) {
+    ) -> (ScopeTable, AstNodes<'a>, BindingTable, ReferenceTable) {
         let ScopeBuilderReturn {
             scopes,
             nodes,

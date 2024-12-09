@@ -5,7 +5,7 @@ use oxc_span::{SourceType, SPAN};
 use rusvelte_analyzer::{
     binding::{Binding, BindingTable},
     reference::ReferenceTable,
-    scope::Scopes,
+    scope::ScopeTable,
     ScopeId, SymbolId,
 };
 use rusvelte_ast::{
@@ -40,7 +40,7 @@ pub struct Transformer<'a> {
     ast: AstBuilder<'a>,
     allocator: &'a Allocator,
     hoisted: OxcVec<'a, Statement<'a>>,
-    scopes: Scopes,
+    scopes: ScopeTable,
     symbols: BindingTable,
     reference_table: ReferenceTable,
     current_scope_id: ScopeId,
@@ -50,7 +50,7 @@ pub struct Transformer<'a> {
 impl<'a> Transformer<'a> {
     pub fn new(
         allocator: &'a Allocator,
-        scopes: Scopes,
+        scopes: ScopeTable,
         symbols: BindingTable,
         reference_table: ReferenceTable,
     ) -> Self {

@@ -1,3 +1,6 @@
+use std::cell::Cell;
+
+use oxc_syntax::scope::ScopeId;
 use rusvelte_derive::{AstTree, OxcSpan};
 
 use oxc_allocator::Vec;
@@ -8,6 +11,24 @@ use super::{Block, Comment, Element, ExpressionTag, Tag, Text};
 pub struct Fragment<'a> {
     pub nodes: Vec<'a, FragmentNode<'a>>,
     #[ast_ignore]
+    pub metadata: Cell<FragmentMetadata>,
+    #[ast_ignore]
+    pub scope_id: Cell<Option<ScopeId>>,
+}
+
+impl<'a> Fragment<'a> {
+    pub fn metadata(&self) -> FragmentMetadata {
+        self.metadata.get()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FragmentMetadata {
+    /// Fragments declare their own scopes. A transparent fragment is one whose scope
+    /// is not represented by a scope in the resulting JavaScript (e.g. an element scope),
+    /// and should therefore delegate to parent scopes when generating unique identifiers
+    pub transparent: bool,
+    /// Whether or not we need to traverse into the fragment during mount/hydrate
     pub dynamic: bool,
 }
 

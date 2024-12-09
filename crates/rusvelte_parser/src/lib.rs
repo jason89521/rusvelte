@@ -84,7 +84,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
         self.context_stack.push(Context::root_context());
-        let fragment = self.parse_fragment()?;
+        let fragment = self.parse_fragment(false)?;
         let start = fragment.nodes.first().map_or(0, |node| {
             let mut start = node.span().start;
             let mut chars = self.source[start as usize..].chars();

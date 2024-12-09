@@ -1,4 +1,6 @@
-use oxc_span::{CompactStr, Span};
+use std::cell::Cell;
+
+use oxc_span::CompactStr;
 use oxc_syntax::reference::ReferenceId;
 use oxc_syntax::symbol::SymbolId;
 use oxc_syntax::{node::NodeId, scope::ScopeId};
@@ -12,10 +14,10 @@ use crate::binding::{BindingFlags, BindingKind, BindingTable, DeclarationKind};
 use crate::node::AstNodes;
 use crate::reference::ReferenceTable;
 
-use super::Scopes;
+use super::ScopeTable;
 
 pub struct ScopeBuilder<'a> {
-    pub scopes: Scopes,
+    pub scopes: ScopeTable,
     pub nodes: AstNodes<'a>,
     pub binding_table: BindingTable,
     pub reference_table: ReferenceTable,
@@ -26,7 +28,7 @@ pub struct ScopeBuilder<'a> {
 
 impl Default for ScopeBuilder<'_> {
     fn default() -> Self {
-        let scopes = Scopes::default();
+        let scopes = ScopeTable::default();
         let current_scope_id = scopes.root_scope_id();
 
         Self {
@@ -42,7 +44,7 @@ impl Default for ScopeBuilder<'_> {
 }
 
 pub struct ScopeBuilderReturn<'a> {
-    pub scopes: Scopes,
+    pub scopes: ScopeTable,
     pub nodes: AstNodes<'a>,
     pub binding_table: BindingTable,
     pub reference_table: ReferenceTable,
@@ -92,7 +94,6 @@ impl<'a> ScopeBuilder<'a> {
 
     pub fn declare(
         &mut self,
-        span: Span,
         name: &str,
         kind: BindingKind,
         declaration_kind: DeclarationKind,
@@ -101,7 +102,7 @@ impl<'a> ScopeBuilder<'a> {
         if let Some(_parent_scope_id) = self.scopes.get_parent_id(scope_id) {
             // TODO: check var & porous
             if declaration_kind == DeclarationKind::Import {
-                self.declare_in_scope(span, name, kind, declaration_kind, scope_id);
+                self.declare_in_scope(name, kind, declaration_kind, scope_id);
             }
         }
 
@@ -109,12 +110,11 @@ impl<'a> ScopeBuilder<'a> {
             // TODO: error
         }
 
-        self.declare_in_scope(span, name, kind, declaration_kind, scope_id)
+        self.declare_in_scope(name, kind, declaration_kind, scope_id)
     }
 
     fn declare_in_scope(
         &mut self,
-        span: Span,
         name: &str,
         kind: BindingKind,
         declaration_kind: DeclarationKind,
@@ -122,7 +122,6 @@ impl<'a> ScopeBuilder<'a> {
     ) -> SymbolId {
         // TODO: validate identifier name
         let symbol_id = self.binding_table.create_symbol(
-            span,
             name,
             scope_id,
             self.current_node_id,
@@ -182,5 +181,13 @@ impl<'a> ScopeBuilder<'a> {
             Some((self.current_scope_id, binding_flags, reference_id))
         });
         self.updates.extend(updates);
+    }
+
+    pub fn enter_scope_internal(&mut self, scope_id: &Cell<Option<ScopeId>>, porous: bool) {
+        let parent_scope_id = self.current_scope_id;
+        self.current_scope_id =
+            self.scopes
+                .add_scope(Some(parent_scope_id), self.current_node_id, porous);
+        scope_id.set(Some(self.current_scope_id));
     }
 }

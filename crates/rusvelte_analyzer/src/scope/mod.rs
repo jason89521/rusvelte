@@ -14,34 +14,63 @@ pub mod scope_builder;
 mod visit_js;
 mod visit_svelte;
 
+#[derive(Debug, Clone, Copy)]
+pub struct Scope {
+    parent_id: Option<ScopeId>,
+    node_id: NodeId,
+    porous: bool,
+}
+
+impl Scope {
+    pub fn new(parent_id: Option<ScopeId>, node_id: NodeId, porous: bool) -> Self {
+        Self {
+            parent_id,
+            node_id,
+            porous,
+        }
+    }
+
+    pub fn parent_id(&self) -> Option<ScopeId> {
+        self.parent_id
+    }
+
+    pub fn node_id(&self) -> NodeId {
+        self.node_id
+    }
+
+    pub fn porous(&self) -> bool {
+        self.porous
+    }
+}
+
 #[derive(Debug, Default)]
-pub struct Scopes {
-    parent_ids: IndexVec<ScopeId, Option<ScopeId>>,
-    child_ids: IndexVec<ScopeId, Vec<ScopeId>>,
-    node_ids: IndexVec<ScopeId, NodeId>,
+pub struct ScopeTable {
+    scopes: IndexVec<ScopeId, Scope>,
     bindings: IndexVec<ScopeId, Bindings>,
     references: IndexVec<ScopeId, References>,
     conflicts: HashSet<CompactStr>,
 }
 
-impl Scopes {
+impl ScopeTable {
     const ROOT_SCOPE_ID: ScopeId = ScopeId::new(0);
 
     pub fn root_scope_id(&self) -> ScopeId {
         Self::ROOT_SCOPE_ID
     }
 
-    pub fn add_scope(&mut self, parent_id: Option<ScopeId>, node_id: NodeId) -> ScopeId {
-        let scope_id = self.parent_ids.push(parent_id);
-        self.child_ids.push(vec![]);
-        self.node_ids.push(node_id);
+    pub fn add_scope(
+        &mut self,
+        parent_id: Option<ScopeId>,
+        node_id: NodeId,
+        porous: bool,
+    ) -> ScopeId {
+        self.scopes.push(Scope::new(parent_id, node_id, porous));
         self.bindings.push(HashMap::new());
-        self.references.push(HashMap::new());
-        scope_id
+        self.references.push(HashMap::new())
     }
 
     pub fn get_parent_id(&self, scope_id: ScopeId) -> Option<ScopeId> {
-        self.parent_ids[scope_id]
+        self.scopes[scope_id].parent_id
     }
 
     pub fn add_binding<T: Into<CompactStr>>(
@@ -66,7 +95,7 @@ impl Scopes {
     }
 
     pub fn ancestors(&self, scope_id: ScopeId) -> impl Iterator<Item = ScopeId> + '_ {
-        std::iter::successors(Some(scope_id), |&scope_id| self.parent_ids[scope_id])
+        std::iter::successors(Some(scope_id), |&scope_id| self.scopes[scope_id].parent_id)
     }
 
     pub fn find_symbol_id(&self, scope_id: ScopeId, name: &str) -> Option<SymbolId> {

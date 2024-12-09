@@ -1,4 +1,4 @@
-use std::{collections::HashSet, ops::Deref, sync::LazyLock};
+use std::{cell::Cell, collections::HashSet, ops::Deref, sync::LazyLock};
 
 use oxc_allocator::{Allocator, CloneIn, Vec};
 use oxc_span::Span;
@@ -82,6 +82,7 @@ impl<'a> ParseElementReturn<'a> {
             name,
             attributes,
             fragment,
+            scope_id: Cell::new(None),
         }))
     }
 
@@ -209,6 +210,7 @@ impl<'a> ParseElementReturn<'a> {
                 name,
                 attributes,
                 fragment,
+                scope_id: Cell::new(None),
             }),
         };
 
@@ -307,13 +309,13 @@ impl<'a> Parser<'a> {
         if self.eat('/') || is_void(name) {
             self.expect('>')?;
             let span = Span::new(start, self.offset);
-            let fragment = self.ast.fragment(self.ast.vec([]));
+            let fragment = self.ast.fragment(self.ast.vec([]), true);
             return ParseElementReturn::element(self.allocator, span, name, attributes, fragment);
         }
 
         self.expect('>')?;
         self.push_context(Context::element_context(name));
-        let fragment = self.parse_fragment()?;
+        let fragment = self.parse_fragment(true)?;
 
         let ctx = self.pop_context().expect("Expected self context");
         if ctx.auto_closed() {
