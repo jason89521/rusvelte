@@ -69,7 +69,6 @@ impl Reference {
 
 #[derive(Debug, Default)]
 pub struct ReferenceTable {
-    names: IndexVec<ReferenceId, CompactStr>,
     references: IndexVec<ReferenceId, Reference>,
 }
 
@@ -83,10 +82,6 @@ impl ReferenceTable {
     ) -> ReferenceId {
         self.references
             .push(Reference::new(name.into(), node_id, symbol_id, scope_id))
-    }
-
-    pub fn get_name(&self, reference_id: ReferenceId) -> &str {
-        &self.names[reference_id]
     }
 
     pub fn get_reference(&self, reference_id: ReferenceId) -> &Reference {

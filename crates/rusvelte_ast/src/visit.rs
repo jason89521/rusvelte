@@ -9,8 +9,6 @@ pub use oxc_ast::VisitMut as JsVisitMut;
 pub trait Visit<'a>: JsVisit<'a> {
     fn enter_svelte_node(&mut self, kind: SvelteAstKind<'a>) {}
     fn leave_svelte_node(&mut self, kind: SvelteAstKind<'a>) {}
-    fn enter_svelte_scope(&mut self) {}
-    fn leave_svelte_scope(&mut self) {}
 
     fn visit_root(&mut self, it: &Root<'a>) {
         walk_root(self, it);
@@ -84,6 +82,8 @@ pub trait Visit<'a>: JsVisit<'a> {
 }
 
 pub mod walk {
+    use oxc_syntax::scope::ScopeFlags;
+
     use super::*;
     pub fn walk_root<'a, V: Visit<'a>>(visitor: &mut V, it: &Root<'a>) {
         let kind = SvelteAstKind::Root(visitor.alloc(it));
@@ -99,10 +99,16 @@ pub mod walk {
     pub fn walk_fragment<'a, V: Visit<'a>>(visitor: &mut V, it: &Fragment<'a>) {
         let kind = SvelteAstKind::Fragment(visitor.alloc(it));
         visitor.enter_svelte_node(kind);
-        for node in it.nodes.iter() {
+        visitor.enter_scope(ScopeFlags::empty(), &it.scope_id);
+        walk_fragment_nodes(visitor, &it.nodes);
+        visitor.leave_scope();
+        visitor.leave_svelte_node(kind);
+    }
+
+    pub fn walk_fragment_nodes<'a, V: Visit<'a>>(visitor: &mut V, it: &[FragmentNode<'a>]) {
+        for node in it.iter() {
             visitor.visit_fragment_node(node);
         }
-        visitor.leave_svelte_node(kind);
     }
 
     pub fn walk_script<'a, V: Visit<'a>>(visitor: &mut V, it: &Script<'a>) {
@@ -148,7 +154,9 @@ pub mod walk {
     pub fn walk_regular_element<'a, V: Visit<'a>>(visitor: &mut V, it: &RegularElement<'a>) {
         let kind = SvelteAstKind::RegularElement(visitor.alloc(it));
         visitor.enter_svelte_node(kind);
+        visitor.enter_scope(ScopeFlags::empty(), &it.scope_id);
         visitor.visit_fragment(&it.fragment);
+        visitor.leave_scope();
         visitor.leave_svelte_node(kind);
     }
 

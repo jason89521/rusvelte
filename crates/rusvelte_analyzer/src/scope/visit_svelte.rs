@@ -19,7 +19,7 @@ impl<'a> Visit<'a> for ScopeBuilder<'a> {
         let kind = SvelteAstKind::Root(self.alloc(root));
 
         self.current_node_id = self.nodes.add_root_node(kind, self.current_scope_id);
-        self.current_scope_id = self.scopes.add_scope(None, self.current_node_id);
+        self.current_scope_id = self.scopes.add_scope(None, self.current_node_id, false);
         if let Some(module) = &root.module {
             self.visit_program(&module.content);
         }
@@ -35,5 +35,14 @@ impl<'a> Visit<'a> for ScopeBuilder<'a> {
     fn visit_bind_directive(&mut self, directive: &BindDirective<'a>) {
         walk_bind_directive(self, directive);
         self.extend_updates(&directive.expression);
+    }
+
+    fn visit_fragment(&mut self, fragment: &Fragment<'a>) {
+        let kind = SvelteAstKind::Fragment(self.alloc(fragment));
+        self.enter_svelte_node(kind);
+        self.enter_scope_internal(&fragment.scope_id, fragment.metadata().transparent);
+        walk_fragment_nodes(self, &fragment.nodes);
+        self.leave_scope();
+        self.leave_svelte_node(kind);
     }
 }

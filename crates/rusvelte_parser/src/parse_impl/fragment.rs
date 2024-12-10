@@ -42,7 +42,7 @@ enum ParseFragmentNodeReturn<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn parse_fragment(&mut self) -> Result<Fragment<'a>, ParserError> {
+    pub fn parse_fragment(&mut self, transparent: bool) -> Result<Fragment<'a>, ParserError> {
         let mut nodes = self.ast.vec([]);
         while self.offset_u() < self.source.len() && !self.match_str("</") {
             match self.parse_fragment_node()? {
@@ -50,7 +50,7 @@ impl<'a> Parser<'a> {
                     nodes.push(node);
                 }
                 ParseFragmentNodeReturn::ClosePrev | ParseFragmentNodeReturn::NextOrCloseBlock => {
-                    return Ok(self.ast.fragment(nodes))
+                    return Ok(self.ast.fragment(nodes, transparent))
                 }
                 ParseFragmentNodeReturn::Script(mut script) => {
                     script.leading_comment = self.find_leading_comment(&nodes);
@@ -88,7 +88,7 @@ impl<'a> Parser<'a> {
                 ParseFragmentNodeReturn::SvelteOptions => (),
             }
         }
-        Ok(self.ast.fragment(nodes))
+        Ok(self.ast.fragment(nodes, transparent))
     }
 
     fn parse_fragment_node(&mut self) -> Result<ParseFragmentNodeReturn<'a>, ParserError> {

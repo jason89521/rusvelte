@@ -24,7 +24,7 @@ impl UnwrapPatternItem<'_> {
 impl<'a> ExtractIdentifier<'a> for UnwrapPatternItem<'a> {
     fn extract_identifier(&self) -> Option<&IdentifierReference<'a>> {
         match self {
-            UnwrapPatternItem::IdentifierReference(x) => Some(x),
+            UnwrapPatternItem::IdentifierReference(x) => x.extract_identifier(),
             UnwrapPatternItem::StaticMemberExpression(x) => x.extract_identifier(),
             UnwrapPatternItem::ComputedMemberExpression(x) => x.extract_identifier(),
             UnwrapPatternItem::PrivateFieldExpression(x) => x.extract_identifier(),

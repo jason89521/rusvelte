@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use oxc_allocator::Vec;
 use oxc_span::Span;
 
@@ -6,10 +8,14 @@ use crate::ast::*;
 use super::AstBuilder;
 
 impl<'a> AstBuilder<'a> {
-    pub fn fragment(self, nodes: Vec<'a, FragmentNode<'a>>) -> Fragment<'a> {
+    pub fn fragment(self, nodes: Vec<'a, FragmentNode<'a>>, transparent: bool) -> Fragment<'a> {
         Fragment {
             nodes,
-            dynamic: false,
+            scope_id: Cell::new(None),
+            metadata: Cell::new(FragmentMetadata {
+                transparent,
+                dynamic: false,
+            }),
         }
     }
 

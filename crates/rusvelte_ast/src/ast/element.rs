@@ -1,5 +1,8 @@
+use std::cell::Cell;
+
 use oxc_ast::ast::Expression;
 use oxc_span::Span;
+use oxc_syntax::scope::ScopeId;
 use rusvelte_derive::{AstTree, OxcSpan};
 
 use super::{attribute::Attribute, Fragment};
@@ -27,6 +30,8 @@ pub struct RegularElement<'a> {
     pub name: &'a str,
     pub attributes: Vec<'a, Attribute<'a>>,
     pub fragment: Fragment<'a>,
+    #[ast_ignore]
+    pub scope_id: Cell<Option<ScopeId>>,
 }
 
 #[derive(Debug, AstTree, OxcSpan, Clone, Copy)]

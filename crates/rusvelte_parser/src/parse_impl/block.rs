@@ -55,7 +55,7 @@ impl<'a> Parser<'a> {
         self.expect('}')?;
 
         self.push_context(Context::block_context(IF_STR));
-        let consequent = self.parse_fragment()?;
+        let consequent = self.parse_fragment(false)?;
         let mut result = IfBlock {
             span: Span::empty(start),
             elseif: false,
@@ -86,6 +86,7 @@ impl<'a> Parser<'a> {
                     self.ast.fragment(
                         self.ast
                             .vec([FragmentNode::Block(Block::IfBlock(alternate))]),
+                        false,
                     ),
                 );
             } else {
@@ -93,7 +94,7 @@ impl<'a> Parser<'a> {
                 self.skip_whitespace();
                 self.expect('}')?;
                 // TODO: should push context?
-                let alternate = self.parse_fragment()?;
+                let alternate = self.parse_fragment(false)?;
                 result.alternate = Some(alternate);
             }
         }
@@ -191,7 +192,7 @@ impl<'a> Parser<'a> {
 
         self.expect('}')?;
         self.push_context(Context::Block { name: EACH_STR });
-        let body = self.parse_fragment()?;
+        let body = self.parse_fragment(false)?;
         let mut fallback = None;
         if self.eat_regex(&REGEX_START_NEXT_BLOCK).is_some() {
             if !self.eat_str("else") {
@@ -199,7 +200,7 @@ impl<'a> Parser<'a> {
             }
             self.skip_whitespace();
             self.expect('}')?;
-            fallback = Some(self.parse_fragment()?);
+            fallback = Some(self.parse_fragment(false)?);
         }
 
         self.pop_context();
@@ -257,11 +258,11 @@ impl<'a> Parser<'a> {
         self.expect('}')?;
         self.push_context(Context::Block { name: AWAIT_STR });
         if value.is_some() {
-            then = Some(self.parse_fragment()?);
+            then = Some(self.parse_fragment(false)?);
         } else if error.is_some() {
-            catch = Some(self.parse_fragment()?)
+            catch = Some(self.parse_fragment(false)?)
         } else {
-            pending = Some(self.parse_fragment()?)
+            pending = Some(self.parse_fragment(false)?)
         }
 
         let mut parse_next = |parser: &mut Self| {
@@ -279,7 +280,7 @@ impl<'a> Parser<'a> {
                     parser.expect('}')?;
                 }
 
-                then = Some(parser.parse_fragment()?)
+                then = Some(parser.parse_fragment(false)?)
             } else if parser.eat_str("catch") {
                 if catch.is_some() {
                     return Err(parser.error(ParserErrorKind::BlockDuplicateClause(
@@ -294,7 +295,7 @@ impl<'a> Parser<'a> {
                     parser.expect('}')?;
                 }
 
-                catch = Some(parser.parse_fragment()?)
+                catch = Some(parser.parse_fragment(false)?)
             } else {
                 return Err(parser.error(ParserErrorKind::ExpectedToken(
                     "{:then ...} or {:catch ...}".to_string(),
@@ -328,7 +329,7 @@ impl<'a> Parser<'a> {
         self.skip_whitespace();
         self.expect('}')?;
         self.push_context(Context::block_context(KEY_STR));
-        let fragment = self.parse_fragment()?;
+        let fragment = self.parse_fragment(false)?;
         self.pop_context();
 
         self.expect_close_block(KEY_STR)?;
@@ -365,7 +366,7 @@ impl<'a> Parser<'a> {
         self.expect('}')?;
 
         self.push_context(Context::block_context(SNIPPET_STR));
-        let body = self.parse_fragment()?;
+        let body = self.parse_fragment(false)?;
         self.pop_context();
         self.expect_close_block(SNIPPET_STR)?;
 
