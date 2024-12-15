@@ -19,6 +19,7 @@ impl<'a> AstBuilder<'a> {
             SPAN,
             Some(self.vec([specifier])),
             source,
+            None,
             NONE,
             ImportOrExportKind::Value,
         )
@@ -110,8 +111,8 @@ impl<'a> AstBuilder<'a> {
         );
         let body = self.builder.function_body(SPAN, self.vec([]), statements);
         self.builder.function(
-            FunctionType::FunctionDeclaration,
             SPAN,
+            FunctionType::FunctionDeclaration,
             Some(self.builder.binding_identifier(SPAN, name)),
             false,
             false,
@@ -185,6 +186,7 @@ impl<'a> AstBuilder<'a> {
             SPAN,
             None,
             self.string_literal(source),
+            None,
             NONE,
             ImportOrExportKind::Value,
         );

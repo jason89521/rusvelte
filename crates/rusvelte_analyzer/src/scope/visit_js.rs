@@ -112,13 +112,6 @@ impl<'a> JsVisit<'a> for ScopeBuilder<'a> {
         let kind = JsAstKind::Function(self.alloc(func));
         self.enter_node(kind);
 
-        let flags = {
-            let mut flags = flags;
-            if func.is_strict() {
-                flags |= ScopeFlags::StrictMode;
-            }
-            flags
-        };
         let binding_kind = BindingKind::Normal;
         if func.is_expression() {
             self.enter_scope(flags, &func.scope_id);
