@@ -21,10 +21,10 @@ impl<'a> Visit<'a> for ScopeBuilder<'a> {
         self.current_node_id = self.nodes.add_root_node(kind, self.current_scope_id);
         self.current_scope_id = self.scopes.add_scope(None, self.current_node_id, false);
         if let Some(module) = &root.module {
-            self.visit_program(&module.content);
+            self.visit_script(module);
         }
         if let Some(instance) = &root.instance {
-            self.visit_program(&instance.content);
+            self.visit_script(instance);
         }
 
         self.visit_fragment(&root.fragment);
@@ -40,7 +40,7 @@ impl<'a> Visit<'a> for ScopeBuilder<'a> {
     fn visit_fragment(&mut self, fragment: &Fragment<'a>) {
         let kind = SvelteAstKind::Fragment(self.alloc(fragment));
         self.enter_svelte_node(kind);
-        self.enter_scope_internal(&fragment.scope_id, fragment.metadata().transparent);
+        self.enter_scope_internal(&fragment.scope_id, fragment.metadata.borrow().transparent);
         walk_fragment_nodes(self, &fragment.nodes);
         self.leave_scope();
         self.leave_svelte_node(kind);

@@ -432,10 +432,10 @@ impl<'a> Parser<'a> {
                 let expression = self.parse_expression()?;
                 self.skip_whitespace();
                 self.expect('}')?;
-                flush(SequenceValue::ExpressionTag(ExpressionTag {
-                    span: Span::new(tag_start, self.offset),
+                flush(SequenceValue::ExpressionTag(self.ast.expression_tag(
+                    Span::new(tag_start, self.offset),
                     expression,
-                }));
+                )));
 
                 text_start = self.offset;
             } else {

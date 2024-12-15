@@ -1,7 +1,6 @@
 use std::fs;
 
-use oxc_syntax::node::NodeId;
-use rusvelte_analyzer::Analyzer;
+use rusvelte_analyzer::{Analyzer, CompileOptions};
 use rusvelte_parser::Parser;
 
 #[allow(unused)]
@@ -11,12 +10,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut parser = Parser::new(&source, &allocator);
     let root = parser.parse()?;
 
-    let analyzer = Analyzer::default();
-    let (scopes, nodes, symbols, references) = analyzer.analyze(&root);
+    let analyzer = Analyzer::new(CompileOptions::new("App".to_string()), &root);
+    let analysis = analyzer.analyze(&root);
 
     // println!("scopes: {:?}", analyzer.scopes);
     // println!("symbols: {:#?}", analyzer.symbols);
-    println!("{:#?}", nodes.get_node(NodeId::new(23)));
 
     Ok(())
 }

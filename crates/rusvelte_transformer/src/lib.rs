@@ -12,7 +12,7 @@ use rusvelte_ast::{
     ast::Root,
     ast_builder::AstBuilder,
     js_ast::{Program, Statement},
-    visit::JsVisitMut,
+    visit_mut::{JsVisitMut, VisitMut},
 };
 
 mod js;
@@ -21,6 +21,7 @@ mod svelte;
 struct TransformState<'a> {
     allocator: &'a Allocator,
     update: OxcVec<'a, Statement<'a>>,
+    should_hoist_function: bool,
 }
 
 impl<'a> TransformState<'a> {
@@ -28,6 +29,8 @@ impl<'a> TransformState<'a> {
         Self {
             allocator,
             update: OxcVec::new_in(allocator),
+            // always true for POC simplicity
+            should_hoist_function: true,
         }
     }
 
@@ -42,7 +45,7 @@ pub struct Transformer<'a> {
     hoisted: OxcVec<'a, Statement<'a>>,
     scopes: ScopeTable,
     symbols: BindingTable,
-    reference_table: ReferenceTable,
+    references: ReferenceTable,
     current_scope_id: ScopeId,
     state: TransformState<'a>,
 }
@@ -65,7 +68,7 @@ impl<'a> Transformer<'a> {
             ast,
             scopes,
             symbols,
-            reference_table,
+            references: reference_table,
             current_scope_id,
             state: TransformState::new(allocator),
         }

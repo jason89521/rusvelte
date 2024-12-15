@@ -1,25 +1,19 @@
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 
 use oxc_syntax::scope::ScopeId;
 use rusvelte_derive::{AstTree, OxcSpan};
 
 use oxc_allocator::Vec;
 
-use super::{Block, Comment, Element, ExpressionTag, Tag, Text};
+use super::{Block, Comment, Element, ExpressionTag, RegularElement, Tag, Text};
 
 #[derive(Debug, AstTree)]
 pub struct Fragment<'a> {
     pub nodes: Vec<'a, FragmentNode<'a>>,
     #[ast_ignore]
-    pub metadata: Cell<FragmentMetadata>,
+    pub metadata: RefCell<FragmentMetadata>,
     #[ast_ignore]
     pub scope_id: Cell<Option<ScopeId>>,
-}
-
-impl Fragment<'_> {
-    pub fn metadata(&self) -> FragmentMetadata {
-        self.metadata.get()
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -97,6 +91,18 @@ impl<'a> FragmentNode<'a> {
                 }
             }
             _ => false,
+        }
+    }
+
+    pub fn as_regular_element_mut(&mut self) -> Option<&mut RegularElement<'a>> {
+        if let Self::Element(element) = self {
+            if let Element::RegularElement(element) = element.as_mut() {
+                Some(element)
+            } else {
+                None
+            }
+        } else {
+            None
         }
     }
 }

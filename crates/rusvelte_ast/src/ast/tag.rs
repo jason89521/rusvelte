@@ -4,6 +4,8 @@ use oxc_ast::ast::{
 use oxc_span::Span;
 use rusvelte_derive::{AstTree, OxcSpan};
 
+use super::ExpressionMetadata;
+
 #[derive(Debug, AstTree, OxcSpan)]
 pub enum Tag<'a> {
     ExpressionTag(ExpressionTag<'a>),
@@ -23,6 +25,8 @@ impl Tag<'_> {
 pub struct ExpressionTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
+    #[ast_ignore]
+    pub expression_metadata: ExpressionMetadata,
 }
 
 impl<'a> ExpressionTag<'a> {

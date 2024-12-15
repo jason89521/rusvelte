@@ -17,8 +17,8 @@ impl<'a> AstNode<'a> {
 
 #[derive(Debug, Default)]
 pub struct AstNodes<'a> {
-    pub nodes: IndexVec<NodeId, AstNode<'a>>,
-    pub parent_ids: IndexVec<NodeId, Option<NodeId>>,
+    nodes: IndexVec<NodeId, AstNode<'a>>,
+    parent_ids: IndexVec<NodeId, Option<NodeId>>,
 }
 
 impl<'a> AstNodes<'a> {
@@ -46,7 +46,7 @@ impl<'a> AstNodes<'a> {
         node_id
     }
 
-    pub fn get_node(&self, node_id: NodeId) -> &AstNode<'a> {
+    pub fn node(&self, node_id: NodeId) -> &AstNode<'a> {
         &self.nodes[node_id]
     }
 
@@ -55,7 +55,9 @@ impl<'a> AstNodes<'a> {
     }
 
     pub fn parent_node(&self, node_id: NodeId) -> Option<&AstNode<'a>> {
-        self.parent_id(node_id)
-            .map(|node_id| self.get_node(node_id))
+        self.parent_id(node_id).map(|node_id| self.node(node_id))
+    }
+    pub fn ancestors(&self, node_id: NodeId) -> impl Iterator<Item = NodeId> + '_ {
+        std::iter::successors(Some(node_id), |&node_id| self.parent_ids[node_id])
     }
 }

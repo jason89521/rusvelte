@@ -155,6 +155,7 @@ pub mod walk {
         let kind = SvelteAstKind::RegularElement(visitor.alloc(it));
         visitor.enter_svelte_node(kind);
         visitor.enter_scope(ScopeFlags::empty(), &it.scope_id);
+        walk_attributes(visitor, &it.attributes);
         visitor.visit_fragment(&it.fragment);
         visitor.leave_scope();
         visitor.leave_svelte_node(kind);

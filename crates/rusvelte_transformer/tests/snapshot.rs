@@ -1,3 +1,5 @@
+use rusvelte_analyzer::{Analysis, Analyzer, CompileOptions};
+
 #[test]
 fn test() {
     insta::glob!("samples/**/input.svelte", |path| {
@@ -7,10 +9,15 @@ fn test() {
         let mut root = rusvelte_parser::Parser::new(&source, &allocator)
             .parse()
             .expect("Parse failed");
-        let (scopes, _, symbols, reference_table) =
-            rusvelte_analyzer::Analyzer::default().analyze(&root);
+        let analyzer = Analyzer::new(CompileOptions::new("App".to_string()), &root);
+        let Analysis {
+            scopes,
+            symbols,
+            references,
+            ..
+        } = analyzer.analyze(&root);
         let program =
-            rusvelte_transformer::Transformer::new(&allocator, scopes, symbols, reference_table)
+            rusvelte_transformer::Transformer::new(&allocator, scopes, symbols, references)
                 .client_transform(&mut root);
         let code = oxc_codegen::Codegen::new().build(&program).code;
         insta::with_settings!({snapshot_path => folder_path, snapshot_suffix => "", prepend_module_to_snapshot => false}, {

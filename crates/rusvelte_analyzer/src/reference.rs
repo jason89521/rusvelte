@@ -58,7 +58,7 @@ impl Reference {
     }
 
     pub fn identifier_reference<'a>(&self, nodes: &AstNodes<'a>) -> &IdentifierReference<'a> {
-        let node = nodes.get_node(self.node_id);
+        let node = nodes.node(self.node_id);
         if let AstKind::Js(JsAstKind::IdentifierReference(ident)) = node.kind {
             ident
         } else {

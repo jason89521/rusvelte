@@ -766,6 +766,7 @@ dependencies = [
  "oxc_syntax",
  "rusvelte_ast",
  "rusvelte_parser",
+ "rusvelte_utils",
 ]
 
 [[package]]
