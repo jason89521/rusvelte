@@ -2,8 +2,8 @@ use oxc_syntax::scope::{ScopeFlags, ScopeId};
 use rusvelte_ast::{
     ast_kind::{AstKind, JsAstKind, SvelteAstKind},
     js_ast::*,
+    js_walk::walk::*,
     visit::JsVisit,
-    walk::walk::*,
 };
 
 use crate::binding::BindingKind;
@@ -83,6 +83,8 @@ impl<'a> JsVisit<'a> for ScopeBuilder<'a> {
 
     fn visit_program(&mut self, program: &Program<'a>) {
         // Don't call enter_scope because we consider it is in the root scope
+        let kind = JsAstKind::Program(self.alloc(program));
+        self.enter_node(kind);
         program.set_scope_id(self.current_scope_id);
         if let Some(hashbang) = &program.hashbang {
             self.visit_hashbang(hashbang);
@@ -93,6 +95,7 @@ impl<'a> JsVisit<'a> for ScopeBuilder<'a> {
         }
 
         self.visit_statements(&program.body);
+        self.leave_node(kind);
     }
 
     fn visit_assignment_expression(&mut self, expr: &AssignmentExpression<'a>) {

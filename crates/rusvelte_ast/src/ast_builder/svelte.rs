@@ -1,6 +1,10 @@
-use std::cell::Cell;
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+};
 
 use oxc_allocator::Vec;
+use oxc_ast::ast::Expression;
 use oxc_span::Span;
 
 use crate::ast::*;
@@ -12,7 +16,7 @@ impl<'a> AstBuilder<'a> {
         Fragment {
             nodes,
             scope_id: Cell::new(None),
-            metadata: Cell::new(FragmentMetadata {
+            metadata: RefCell::new(FragmentMetadata {
                 transparent,
                 dynamic: false,
             }),
@@ -46,6 +50,28 @@ impl<'a> AstBuilder<'a> {
             namespace: None,
             css: None,
             preserve_whitespace: None,
+        }
+    }
+
+    pub fn expression_tag(self, span: Span, expression: Expression<'a>) -> ExpressionTag<'a> {
+        ExpressionTag {
+            span,
+            expression,
+            expression_metadata: Rc::new(RefCell::new(ExpressionMetadataInner::default())),
+        }
+    }
+
+    pub fn normal_attribute(
+        self,
+        span: Span,
+        name: &'a str,
+        value: AttributeValue<'a>,
+    ) -> NormalAttribute<'a> {
+        NormalAttribute {
+            span,
+            name,
+            value,
+            expression_metadata: Rc::new(RefCell::new(ExpressionMetadataInner::default())),
         }
     }
 }

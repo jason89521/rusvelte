@@ -4,7 +4,7 @@ use rusvelte_analyzer::{binding::BindingKind, ScopeFlags, ScopeId};
 use rusvelte_ast::visit::JsVisitMut;
 
 use rusvelte_ast::js_ast::*;
-use rusvelte_ast::walk::walk_mut::{walk_assignment_expression, walk_expression, walk_statements};
+use rusvelte_ast::js_walk::walk_mut::*;
 
 use crate::Transformer;
 
@@ -34,6 +34,15 @@ impl<'a> JsVisitMut<'a> for Transformer<'a> {
     fn visit_statements(&mut self, stmts: &mut oxc_allocator::Vec<'a, Statement<'a>>) {
         walk_statements(self, stmts);
         stmts.retain(|stmt| !matches!(stmt, Statement::EmptyStatement(_)));
+    }
+
+    fn visit_statement(&mut self, stmt: &mut Statement<'a>) {
+        walk_statement(self, stmt);
+        if matches!(stmt, Statement::FunctionDeclaration(_)) && self.state.should_hoist_function {
+            self.state.should_hoist_function = false;
+            let stmt = self.ast.move_statement(stmt);
+            self.hoisted.push(stmt);
+        }
     }
 
     fn visit_expression(&mut self, expr: &mut Expression<'a>) {
@@ -68,11 +77,18 @@ impl<'a> JsVisitMut<'a> for Transformer<'a> {
                 if binding.is_init_by_state() {
                     let name = self.symbols.get_name(symbol_id);
                     let right = self.ast.move_expression(&mut assignment_expr.right);
+                    let left = self.ast.expression_call_with_atom(
+                        "$.get",
+                        self.ast
+                            .vec([self.ast.expression_identifier_reference(name).into()]),
+                    );
                     let call_expr = self.ast.call_with_atom(
                         "$.set",
                         self.ast.vec([
                             self.ast.expression_identifier_reference(name).into(),
-                            right.into(),
+                            self.ast
+                                .build_assignment_value(assignment_expr.operator, left, right)
+                                .into(),
                         ]),
                     );
                     *expr = Expression::CallExpression(self.ast.alloc(call_expr));

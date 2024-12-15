@@ -1,8 +1,6 @@
 use oxc_ast::ast::{ChainElement, Expression};
 use oxc_span::{GetSpan, Span};
-use rusvelte_ast::ast::{
-    ConstTag, DebugTag, ExpressionTag, HtmlTag, RenderTag, RenderTagExpression, Tag,
-};
+use rusvelte_ast::ast::{ConstTag, DebugTag, HtmlTag, RenderTag, RenderTagExpression, Tag};
 
 use crate::{
     error::{ParserError, ParserErrorKind},
@@ -103,10 +101,9 @@ impl<'a> Parser<'a> {
             self.skip_whitespace();
             self.expect('}')?;
 
-            Ok(Tag::ExpressionTag(ExpressionTag {
-                span: Span::new(start, self.offset),
-                expression: expr,
-            }))
+            Ok(Tag::ExpressionTag(
+                self.ast.expression_tag(Span::new(start, self.offset), expr),
+            ))
         }
     }
 

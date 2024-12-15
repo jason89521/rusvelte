@@ -4,7 +4,7 @@ pub use oxc_ast::AstType as JsAstType;
 use crate::ast::*;
 
 // TODO: use codegen to generate this enum
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum SvelteAstType {
     Text,
     Fragment,
@@ -31,6 +31,22 @@ pub enum SvelteAstType {
     AwaitBlock,
     KeyBlock,
     SnippetBlock,
+    Root,
+    Script,
+    NormalAttribute,
+    AnimateDirective,
+    BindDirective,
+    ClassDirective,
+    LetDirective,
+    OnDirective,
+    StyleDirective,
+    TransitionDirective,
+    UseDirective,
+}
+
+pub enum AstType {
+    Svelte(SvelteAstType),
+    Js(JsAstType),
 }
 
 #[derive(Debug, Clone, Copy)]

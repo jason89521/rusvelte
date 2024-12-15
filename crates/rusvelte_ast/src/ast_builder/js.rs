@@ -34,10 +34,11 @@ impl<'a> AstBuilder<'a> {
             .call_expression(SPAN, callee, NONE, args, false)
     }
 
-    pub fn expression_call_with_atom<A>(self, callee: A, args: Vec<Argument<'a>>) -> Expression<'a>
-    where
-        A: IntoIn<'a, Atom<'a>>,
-    {
+    pub fn expression_call_with_atom(
+        self,
+        callee: &str,
+        args: Vec<Argument<'a>>,
+    ) -> Expression<'a> {
         Expression::CallExpression(self.alloc(self.call_with_atom(callee, args)))
     }
 
@@ -188,5 +189,26 @@ impl<'a> AstBuilder<'a> {
             ImportOrExportKind::Value,
         );
         Statement::ImportDeclaration(decl)
+    }
+
+    pub fn build_assignment_value(
+        self,
+        operator: AssignmentOperator,
+        left: Expression<'a>,
+        right: Expression<'a>,
+    ) -> Expression<'a> {
+        let operator = &operator.as_str()[..operator.as_str().len() - 1];
+        if operator.is_empty() {
+            right
+        } else {
+            let operator = match operator {
+                "+" => BinaryOperator::Addition,
+                "-" => BinaryOperator::Subtraction,
+                "*" => BinaryOperator::Multiplication,
+                "/" => BinaryOperator::Division,
+                _ => unreachable!(),
+            };
+            self.builder.expression_binary(SPAN, left, operator, right)
+        }
     }
 }

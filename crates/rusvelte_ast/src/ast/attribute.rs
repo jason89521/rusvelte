@@ -2,7 +2,7 @@ use oxc_ast::ast::Expression;
 use oxc_span::{Span, SPAN};
 use rusvelte_derive::{AstTree, OxcSpan};
 
-use super::{directive::Directive, ExpressionTag, Text};
+use super::{directive::Directive, ExpressionMetadata, ExpressionTag, Text};
 
 #[derive(Debug, AstTree, OxcSpan)]
 pub enum Attribute<'a> {
@@ -17,6 +17,31 @@ pub struct NormalAttribute<'a> {
     pub span: Span,
     pub name: &'a str,
     pub value: AttributeValue<'a>,
+    #[ast_ignore]
+    pub expression_metadata: ExpressionMetadata,
+}
+
+impl<'a> NormalAttribute<'a> {
+    pub fn is_event_attribute(&self) -> bool {
+        self.name.starts_with("on:") && self.value.is_expression_tag()
+    }
+
+    pub fn get_expression_tag_values(&self) -> std::vec::Vec<&ExpressionTag<'a>> {
+        match &self.value {
+            AttributeValue::ExpressionTag(expression_tag) => vec![expression_tag],
+            AttributeValue::Quoted(vec) => vec
+                .iter()
+                .filter_map(|v| {
+                    if let QuotedAttributeValue::ExpressionTag(expression_tag) = v {
+                        Some(expression_tag)
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+            AttributeValue::True => vec![],
+        }
+    }
 }
 
 #[derive(Debug, AstTree)]
@@ -60,6 +85,7 @@ impl<'a> Attribute<'a> {
         }
     }
 
+    /// Returns true if the attribute contains a single expression node.
     pub fn is_expression_attribute(&self) -> bool {
         if let Attribute::NormalAttribute(attr) = self {
             attr.value.is_expression_tag()
@@ -81,6 +107,15 @@ impl<'a> Attribute<'a> {
             Attribute::NormalAttribute(normal_attribute) => normal_attribute.name,
             Attribute::SpreadAttribute(_) => "",
             Attribute::Directive(directive) => directive.name(),
+        }
+    }
+
+    /// Returns true if the attribute starts with `on` and contains a single expression node.
+    pub fn is_event_attribute(&self) -> bool {
+        if let Self::NormalAttribute(attr) = self {
+            attr.is_event_attribute()
+        } else {
+            false
         }
     }
 }

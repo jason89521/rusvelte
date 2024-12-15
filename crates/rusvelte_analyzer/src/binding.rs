@@ -13,6 +13,7 @@ bitflags! {
         const Read = 1 << 0;
         const Reassigned = 1 << 1;
         const Mutated = 1 << 2;
+        const Called = 1 << 3;
         const Updated = Self::Reassigned.bits() | Self::Mutated.bits();
     }
 }
@@ -32,6 +33,22 @@ impl BindingFlags {
 
     pub const fn updated() -> Self {
         Self::Updated
+    }
+
+    pub const fn called() -> Self {
+        Self::Called
+    }
+
+    pub const fn is_mutated(&self) -> bool {
+        self.contains(Self::Mutated)
+    }
+
+    pub const fn is_reassigned(&self) -> bool {
+        self.contains(Self::Reassigned)
+    }
+
+    pub const fn is_called(&self) -> bool {
+        self.contains(Self::Called)
     }
 
     pub const fn is_read_only(&self) -> bool {
@@ -90,7 +107,6 @@ pub struct Binding {
     scope_id: ScopeId,
     kind: BindingKind,
     declaration_kind: DeclarationKind,
-    is_called: bool,
     pub binding_flags: BindingFlags,
 }
 
@@ -108,7 +124,6 @@ impl Binding {
             scope_id,
             kind,
             declaration_kind,
-            is_called: false,
             binding_flags: BindingFlags::None,
         }
     }
@@ -123,10 +138,6 @@ impl Binding {
 
     pub fn is_init_by_state(&self) -> bool {
         self.kind == BindingKind::State
-    }
-
-    pub fn is_called(&self) -> bool {
-        self.is_called
     }
 
     pub fn scope_id(&self) -> ScopeId {

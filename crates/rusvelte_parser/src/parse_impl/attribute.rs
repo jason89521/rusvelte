@@ -6,8 +6,8 @@ use oxc_span::{GetSpan, Span};
 use regex::Regex;
 
 use rusvelte_ast::ast::{
-    Attribute, AttributeValue, Directive, DirectiveKind, ExpressionTag, NormalAttribute,
-    QuotedAttributeValue, SpreadAttribute, StyleDirective, Text,
+    Attribute, AttributeValue, Directive, DirectiveKind, QuotedAttributeValue, SpreadAttribute,
+    StyleDirective, Text,
 };
 
 use crate::{
@@ -105,14 +105,15 @@ impl<'a> Parser<'a> {
             };
             self.skip_whitespace();
             self.expect('}')?;
-            return Ok(Some(Attribute::NormalAttribute(NormalAttribute {
-                span: Span::new(start, self.offset),
+
+            return Ok(Some(Attribute::NormalAttribute(self.ast.normal_attribute(
+                Span::new(start, self.offset),
                 name,
-                value: AttributeValue::ExpressionTag(ExpressionTag {
-                    span: identifier.span,
-                    expression: Expression::Identifier(Box::new_in(identifier, self.allocator)),
-                }),
-            })));
+                AttributeValue::ExpressionTag(self.ast.expression_tag(
+                    identifier.span,
+                    Expression::Identifier(Box::new_in(identifier, self.allocator)),
+                )),
+            ))));
         }
 
         let name = self.eat_until(&REGEX_TOKEN_ENDING_CHARACTER);
@@ -210,11 +211,11 @@ impl<'a> Parser<'a> {
             return Ok(Some(Attribute::Directive(directive)));
         }
 
-        Ok(Some(Attribute::NormalAttribute(NormalAttribute {
-            span: Span::new(start, end),
-            value,
+        Ok(Some(Attribute::NormalAttribute(self.ast.normal_attribute(
+            Span::new(start, end),
             name,
-        })))
+            value,
+        ))))
     }
 
     fn parse_static_attribute(&mut self) -> Result<Option<Attribute<'a>>, ParserError> {
@@ -264,11 +265,11 @@ impl<'a> Parser<'a> {
             ));
         }
 
-        Ok(Some(Attribute::NormalAttribute(NormalAttribute {
-            span: Span::new(start, self.offset),
+        Ok(Some(Attribute::NormalAttribute(self.ast.normal_attribute(
+            Span::new(start, self.offset),
             name,
             value,
-        })))
+        ))))
     }
 
     fn parse_attribute_value(&mut self) -> Result<AttributeValue<'a>, ParserError> {
