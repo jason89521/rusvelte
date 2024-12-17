@@ -699,7 +699,7 @@ checksum = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248"
 
 [[package]]
 name = "rusvelte_analyzer"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "bitflags",
  "oxc_allocator",
@@ -714,7 +714,7 @@ dependencies = [
 
 [[package]]
 name = "rusvelte_ast"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "htmlize",
  "oxc_allocator",
@@ -727,7 +727,7 @@ dependencies = [
 
 [[package]]
 name = "rusvelte_derive"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -736,7 +736,7 @@ dependencies = [
 
 [[package]]
 name = "rusvelte_parser"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "insta",
  "oxc_allocator",
@@ -755,7 +755,7 @@ dependencies = [
 
 [[package]]
 name = "rusvelte_transformer"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "insta",
  "oxc_allocator",
@@ -769,7 +769,7 @@ dependencies = [
 
 [[package]]
 name = "rusvelte_utils"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "oxc_span",
  "regex",
