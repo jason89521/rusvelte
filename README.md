@@ -2,21 +2,6 @@
 
 Svelte compiler written in Rust.
 
-## Todo
+## Motivation
 
-- [ ] Parser
-  - [ ] Root
-    - [x] css
-    - [ ] js
-    - [ ] options
-    - [ ] Fragment
-      - [ ] Element
-        - [ ] Regular element
-          - [x] name
-          - [ ] attributes
-      - [ ] Tag
-      - [x] Text
-        - [x] Raw
-        - [x] Decoded data
-- [ ] Analyzer
-- [ ] Transformer
+I am a frontend developer, but I want to learn Rust and apply it in the frontend domain, so I started this project.
