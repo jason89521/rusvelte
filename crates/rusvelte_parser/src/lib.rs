@@ -78,7 +78,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn offset_u(&self) -> usize {
+    fn offset_usize(&self) -> usize {
         self.offset as usize
     }
 
@@ -191,17 +191,15 @@ impl<'a> Parser<'a> {
     }
 
     pub fn remain(&self) -> &'a str {
-        &self.source[self.offset_u()..]
+        &self.source[self.offset_usize()..]
     }
 
     fn next(&mut self) -> Option<char> {
-        if self.offset_u() < self.source.len() {
-            let result = self.source[self.offset_u()..].chars().next();
-            self.offset += 1;
-            result
-        } else {
-            None
+        let result = self.remain().chars().next();
+        if let Some(ch) = result {
+            self.offset += ch.len_utf8() as u32;
         }
+        result
     }
 
     fn expect(&mut self, expected: char) -> Result<char, ParserError> {
@@ -247,18 +245,13 @@ impl<'a> Parser<'a> {
     }
 
     fn peek(&self) -> Option<char> {
-        let Self { source, .. } = self;
-        if self.offset_u() < source.len() {
-            self.source[self.offset_u()..].chars().next()
-        } else {
-            None
-        }
+        self.remain().chars().next()
     }
 
     fn eat(&mut self, ch: char) -> bool {
-        match &self.remain().chars().next() {
-            Some(c) if *c == ch => {
-                self.offset += 1;
+        match self.peek() {
+            Some(c) if c == ch => {
+                self.offset += c.len_utf8() as u32;
                 true
             }
             _ => false,
@@ -277,12 +270,12 @@ impl<'a> Parser<'a> {
     }
 
     fn eat_str(&mut self, s: &'a str) -> bool {
-        let end = self.offset_u() + s.len();
+        let end = self.offset_usize() + s.len();
         if end > self.source.len() {
             return false;
         }
 
-        if &self.source[self.offset_u()..end] == s {
+        if &self.source[self.offset_usize()..end] == s {
             self.offset = end as u32;
             true
         } else {
@@ -337,13 +330,13 @@ impl<'a> Parser<'a> {
 
     fn match_str(&self, s: &str) -> bool {
         let len = s.len();
-        let end = if self.offset_u() + len > self.source.len() {
+        let end = if self.offset_usize() + len > self.source.len() {
             self.source.len()
         } else {
-            self.offset_u() + len
+            self.offset_usize() + len
         };
 
-        &self.source[self.offset_u()..end] == s
+        &self.source[self.offset_usize()..end] == s
     }
 
     fn match_regex(&self, re: &regex::Regex) -> Option<&'a str> {

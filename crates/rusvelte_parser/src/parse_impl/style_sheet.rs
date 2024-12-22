@@ -60,7 +60,7 @@ impl<'a> Parser<'a> {
     fn parser_style_sheet_body(&mut self) -> Result<Vec<'a, StyleSheetChild<'a>>, ParserError> {
         let mut children = self.ast.vec([]);
         self.skip_comment_or_whitespace();
-        while self.offset_u() < self.source.len() {
+        while self.offset_usize() < self.source.len() {
             self.skip_comment_or_whitespace();
 
             if self
@@ -433,7 +433,7 @@ impl<'a> Parser<'a> {
             self.next();
         }
 
-        let result = &self.source[start as usize..self.offset_u()];
+        let result = &self.source[start as usize..self.offset_usize()];
         if result.is_empty() {
             return Err(ParserError::new(
                 Span::empty(start),
@@ -447,7 +447,7 @@ impl<'a> Parser<'a> {
     fn parse_css_value(&mut self) -> Result<&'a str, ParserError> {
         let mut in_url = false;
         let mut quote_mark: Option<char> = None;
-        let start = self.offset_u();
+        let start = self.offset_usize();
 
         // TODO
         // I don't know what the original svelte parser doing in this function
@@ -463,11 +463,11 @@ impl<'a> Parser<'a> {
                 '\'' | '"' if quote_mark.is_none() => {
                     quote_mark = Some(ch);
                 }
-                '(' if &self.source[self.offset_u() - 3..self.offset_u()] == "url" => {
+                '(' if &self.source[self.offset_usize() - 3..self.offset_usize()] == "url" => {
                     in_url = true;
                 }
                 ';' | '{' | '}' if !in_url && quote_mark.is_none() => {
-                    return Ok(self.source[start..self.offset_u()].trim());
+                    return Ok(self.source[start..self.offset_usize()].trim());
                 }
                 _ => (),
             }
@@ -490,14 +490,14 @@ impl<'a> Parser<'a> {
                 None
             }
         };
-        let start = self.offset_u();
+        let start = self.offset_usize();
         while let Some(ch) = self.peek() {
             if quote_mark.map_or_else(|| ch.is_whitespace() || ch == ']', |m| m == ch) {
                 if let Some(m) = quote_mark {
                     self.expect(m)?;
                 }
 
-                return Ok(self.source[start..self.offset_u()].trim());
+                return Ok(self.source[start..self.offset_usize()].trim());
             }
             self.next();
         }
