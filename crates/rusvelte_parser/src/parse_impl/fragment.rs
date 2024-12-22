@@ -44,7 +44,7 @@ enum ParseFragmentNodeReturn<'a> {
 impl<'a> Parser<'a> {
     pub fn parse_fragment(&mut self, transparent: bool) -> Result<Fragment<'a>, ParserError> {
         let mut nodes = self.ast.vec([]);
-        while self.offset_u() < self.source.len() && !self.match_str("</") {
+        while self.offset_usize() < self.source.len() && !self.match_str("</") {
             match self.parse_fragment_node()? {
                 ParseFragmentNodeReturn::Node(node) => {
                     nodes.push(node);
