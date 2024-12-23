@@ -22,7 +22,7 @@ impl Rusvelte {
         let allocator = Allocator::default();
         let mut parser = Parser::new(source, &allocator);
 
-        let root = parser.parse().unwrap();
+        let root = parser.parse().root;
 
         self.ast = root
             .serialize(&serde_wasm_bindgen::Serializer::json_compatible())

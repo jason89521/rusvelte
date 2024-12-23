@@ -8,7 +8,7 @@ fn test() {
         let allocator = oxc_allocator::Allocator::default();
         let mut root = rusvelte_parser::Parser::new(&source, &allocator)
             .parse()
-            .expect("Parse failed");
+            .root;
         let analyzer = Analyzer::new(CompileOptions::new("App".to_string()), &root);
         let Analysis {
             scopes,

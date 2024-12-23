@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let source = fs::read_to_string("input.svelte")?;
     let allocator = oxc_allocator::Allocator::default();
     let mut parser = Parser::new(&source, &allocator);
-    let mut root = parser.parse()?;
+    let mut root = parser.parse().root;
     let analyzer = Analyzer::new(CompileOptions::new("App".to_string()), &root);
     let Analysis {
         scopes,
