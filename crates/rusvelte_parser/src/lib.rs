@@ -9,7 +9,10 @@ use oxc_ast::{
 };
 use oxc_parser::Parser as OxcParser;
 use oxc_span::{GetSpan, SourceType, Span};
-use oxc_syntax::identifier::{is_identifier_part, is_identifier_start};
+use oxc_syntax::{
+    identifier::{is_identifier_part, is_identifier_start},
+    keyword::RESERVED_KEYWORDS,
+};
 use regex::Regex;
 use regex_pattern::REGEX_NON_WHITESPACE;
 use rusvelte_ast::span_offset::SpanOffset;
@@ -329,15 +332,20 @@ impl<'a> Parser<'a> {
         if identifier.is_empty() {
             Ok(None)
         } else {
-            // TODO: handle unexpected_reserved_word
-            Ok(Some((
-                identifier,
-                IdentifierReference {
-                    span: Span::new(start, self.offset),
-                    name: identifier.into(),
-                    reference_id: Cell::default(),
-                },
-            )))
+            if RESERVED_KEYWORDS.contains(identifier) {
+                Err(self.error(ParserErrorKind::UnexpectedReservedWord(
+                    identifier.to_string(),
+                )))
+            } else {
+                Ok(Some((
+                    identifier,
+                    IdentifierReference {
+                        span: Span::new(start, self.offset),
+                        name: identifier.into(),
+                        reference_id: Cell::default(),
+                    },
+                )))
+            }
         }
     }
 

@@ -151,6 +151,8 @@ pub enum ParserErrorKind {
     SvelteOptionsUnknownAttribute(String),
     #[error("<{0}> cannot have children")]
     SvelteMetaInvalidContent(String),
+    #[error("'{0}' is a reserved word in JavaScript and cannot be used here\nhttps://svelte.dev/e/unexpected_reserved_word")]
+    UnexpectedReservedWord(String),
 }
 
 impl Parser<'_> {
