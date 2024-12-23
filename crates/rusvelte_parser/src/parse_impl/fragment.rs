@@ -7,6 +7,7 @@ use oxc_span::{GetSpan, Span};
 use regex::Regex;
 use rusvelte_ast::ast::{
     Attribute, Comment, CustomElement, Fragment, FragmentNode, Script, ScriptContext, StyleSheet,
+    SvelteOptions,
 };
 use rusvelte_utils::{
     constants::{NAMESPACE_MATHML, NAMESPACE_SVG},
@@ -110,177 +111,7 @@ impl<'a> Parser<'a> {
                     fragment,
                 } => {
                     let mut options = self.ast.svelte_options(span);
-                    for attr in attributes.iter() {
-                        let span = attr.span();
-                        let attr = if let Attribute::NormalAttribute(attr) = attr {
-                            attr
-                        } else {
-                            return Err(ParserError {
-                                span,
-                                kind: ParserErrorKind::SvelteOptionsInvalidAttribute,
-                            });
-                        };
-                        match attr.name {
-                            "runes" => options.runes = Some(attr.value.get_boolean_value()),
-                            "tag" => {
-                                return Err(ParserError {
-                                    span,
-                                    kind: ParserErrorKind::SvelteOptionsDeprecatedTag,
-                                })
-                            }
-                            "customElement" => {
-                                let mut custom_element = CustomElement::default();
-                                if let Some(tag) = attr.value.as_raw_text() {
-                                    validate_tag(span, tag)?;
-                                    custom_element.tag = Some(tag);
-                                    options.custom_element = Some(custom_element);
-                                    continue;
-                                }
-                                let svelte_options_invalid_custom_element = ParserError {
-                                    span,
-                                    kind: ParserErrorKind::SvelteOptionsInvalidCustomElement,
-                                };
-                                let expr = attr
-                                    .value
-                                    .as_expression_tag()
-                                    .map(|expr_tag| &expr_tag.expression)
-                                    .ok_or(svelte_options_invalid_custom_element.clone())?;
-                                let value = if let Expression::ObjectExpression(expr) = expr {
-                                    expr
-                                } else {
-                                    return Err(svelte_options_invalid_custom_element.clone());
-                                };
-                                for prop in value.properties.iter() {
-                                    let prop = match prop {
-                                        ObjectPropertyKind::ObjectProperty(prop)
-                                            if !prop.computed
-                                                && prop.key.is_identifier()
-                                                && !prop.kind.is_accessor() =>
-                                        {
-                                            prop
-                                        }
-                                        _ => {
-                                            return Err(
-                                                svelte_options_invalid_custom_element.clone()
-                                            )
-                                        }
-                                    };
-
-                                    let prop_name = if let Some(name) = prop.key.name() {
-                                        name
-                                    } else {
-                                        return Err(svelte_options_invalid_custom_element);
-                                    };
-
-                                    match prop_name.as_ref() {
-                                        "tag" => {
-                                            if let Expression::StringLiteral(s) = &prop.value {
-                                                validate_tag(span, s.value.as_str())?;
-                                                custom_element.tag = Some(s.value.as_str());
-                                            } else {
-                                                return Err(ParserError {
-                                                    span,
-                                                    kind:
-                                                        ParserErrorKind::SvelteOptionsInvalidTagName,
-                                                });
-                                            }
-                                        }
-                                        "props" => {
-                                            if let Expression::ObjectExpression(expr) = &prop.value
-                                            {
-                                                // TODO: should check whether the key and value is valid
-                                                custom_element.props =
-                                                    Some(expr.as_ref().clone_in(self.allocator));
-                                            } else {
-                                                return Err(
-                                                    ParserError {
-                                                        span, kind: ParserErrorKind::SvelteOptionsInvalidCustomElementProps
-                                                    },
-                                                );
-                                            };
-                                        }
-                                        "shadow" => {
-                                            match &prop.value {
-                                                Expression::StringLiteral(s) if s.value == "open" || s.value == "none" => {
-                                                    custom_element.shadow = Some(s.value.as_str());
-                                                }
-                                                _ => return Err(ParserError {
-                                                    span, kind:ParserErrorKind::SvelteOptionsInvalidCustomElementShadow
-                                                })
-                                            }
-                                        }
-                                        "extend" => {
-                                            custom_element.extend =
-                                                Some(prop.value.clone_in(self.allocator))
-                                        }
-                                        _ => (),
-                                    }
-                                }
-
-                                options.custom_element = Some(custom_element)
-                            }
-                            "namespace" => {
-                                let err = ParserError {
-                                    span,
-                                    kind: ParserErrorKind::SvelteOptionsInvalidAttributeValue(
-                                        r#""html", "mathml" or "svg""#.to_string(),
-                                    ),
-                                };
-                                let value = attr.value.get_static_value().ok_or(err.clone())?;
-                                if value == NAMESPACE_SVG {
-                                    options.namespace = Some("svg");
-                                } else if value == NAMESPACE_MATHML {
-                                    options.namespace = Some("mathml");
-                                } else if value == "html" || value == "mathml" || value == "svg" {
-                                    options.namespace = Some(value);
-                                } else {
-                                    return Err(err);
-                                }
-                            }
-                            "css" => match attr.value.get_static_value() {
-                                Some(value) if value == "injected" => options.css = Some(value),
-                                _ => {
-                                    return Err(ParserError {
-                                        span,
-                                        kind: ParserErrorKind::SvelteOptionsInvalidAttributeValue(
-                                            "Injected".to_string(),
-                                        ),
-                                    })
-                                }
-                            },
-                            "immutable" => {
-                                options.immutable = if attr.value.get_static_value().is_some() {
-                                    Some(attr.value.get_boolean_value())
-                                } else {
-                                    None
-                                }
-                            }
-                            "preserveWhitespace" => {
-                                options.preserve_whitespace =
-                                    if attr.value.get_static_value().is_some() {
-                                        Some(attr.value.get_boolean_value())
-                                    } else {
-                                        None
-                                    }
-                            }
-                            "accessors" => {
-                                options.accessors = if attr.value.get_static_value().is_some() {
-                                    Some(attr.value.get_boolean_value())
-                                } else {
-                                    None
-                                }
-                            }
-                            name => {
-                                return Err(ParserError {
-                                    span,
-                                    kind: ParserErrorKind::SvelteOptionsUnknownAttribute(
-                                        name.to_string(),
-                                    ),
-                                })
-                            }
-                        }
-                    }
-
+                    validate_options_attributes(&mut options, &attributes, self.allocator)?;
                     if let Some(span) = disallow_children(&fragment) {
                         return Err(ParserError {
                             span,
@@ -346,4 +177,205 @@ fn validate_tag(span: Span, tag: &str) -> Result<(), ParserError> {
     } else {
         Ok(())
     }
+}
+
+fn validate_options_attributes<'a>(
+    options: &mut SvelteOptions<'a>,
+    attrs: &[Attribute<'a>],
+    allocator: &'a oxc_allocator::Allocator,
+) -> Result<(), ParserError> {
+    for attr in attrs.iter() {
+        let span = attr.span();
+        let Attribute::NormalAttribute(attr) = attr else {
+            return Err(ParserError {
+                span,
+                kind: ParserErrorKind::SvelteOptionsInvalidAttribute,
+            });
+        };
+        match attr.name {
+            "runes" => options.runes = Some(attr.value.get_boolean_value()),
+            "tag" => {
+                return Err(ParserError {
+                    span,
+                    kind: ParserErrorKind::SvelteOptionsDeprecatedTag,
+                })
+            }
+            "customElement" => {
+                let mut custom_element = CustomElement::default();
+                if let Some(tag) = attr.value.as_raw_text() {
+                    validate_tag(span, tag)?;
+                    custom_element.tag = Some(tag);
+                    options.custom_element = Some(custom_element);
+                    continue;
+                }
+                let invalid_custom_element = ParserError {
+                    span,
+                    kind: ParserErrorKind::SvelteOptionsInvalidCustomElement,
+                };
+                let expr = attr
+                    .value
+                    .as_expression_tag()
+                    .map(|expr_tag| &expr_tag.expression)
+                    .ok_or(invalid_custom_element.clone())?;
+                let Expression::ObjectExpression(value) = expr else {
+                    return Err(invalid_custom_element.clone());
+                };
+                for prop in value.properties.iter() {
+                    let ObjectPropertyKind::ObjectProperty(prop) = prop else {
+                        return Err(invalid_custom_element.clone());
+                    };
+                    let Some(prop_name) = prop.key.name() else {
+                        return Err(invalid_custom_element);
+                    };
+
+                    match prop_name.as_ref() {
+                        "tag" => {
+                            if let Expression::StringLiteral(s) = &prop.value {
+                                validate_tag(span, s.value.as_str())?;
+                                custom_element.tag = Some(s.value.as_str());
+                            } else {
+                                return Err(ParserError {
+                                    span,
+                                    kind: ParserErrorKind::SvelteOptionsInvalidTagName,
+                                });
+                            }
+                        }
+                        "props" => {
+                            let invalid_custom_element_props = ParserError {
+                                span,
+                                kind: ParserErrorKind::SvelteOptionsInvalidCustomElementProps,
+                            };
+                            let Expression::ObjectExpression(expr) = &prop.value else {
+                                return Err(invalid_custom_element_props.clone());
+                            };
+                            for property in expr.properties.iter() {
+                                let ObjectPropertyKind::ObjectProperty(property) = property else {
+                                    return Err(invalid_custom_element_props.clone());
+                                };
+                                let Expression::ObjectExpression(value) = &property.value else {
+                                    return Err(invalid_custom_element_props.clone());
+                                };
+                                for prop in value.properties.iter() {
+                                    let ObjectPropertyKind::ObjectProperty(prop) = prop else {
+                                        return Err(invalid_custom_element_props.clone());
+                                    };
+                                    let Some(prop_name) = prop.key.name() else {
+                                        return Err(invalid_custom_element_props.clone());
+                                    };
+
+                                    match prop_name.as_ref() {
+                                        "type" => {
+                                            let Expression::StringLiteral(s) = &prop.value else {
+                                                return Err(invalid_custom_element_props.clone());
+                                            };
+                                            if !matches!(
+                                                s.value.as_str(),
+                                                "String"
+                                                    | "Number"
+                                                    | "Boolean"
+                                                    | "Array"
+                                                    | "Object"
+                                            ) {
+                                                return Err(invalid_custom_element_props.clone());
+                                            }
+                                        }
+                                        "reflect"
+                                            if !matches!(
+                                                prop.value,
+                                                Expression::BooleanLiteral(_)
+                                            ) =>
+                                        {
+                                            return Err(invalid_custom_element_props.clone());
+                                        }
+                                        "attribute"
+                                            if !matches!(
+                                                prop.value,
+                                                Expression::StringLiteral(_)
+                                            ) =>
+                                        {
+                                            return Err(invalid_custom_element_props.clone());
+                                        }
+                                        _ => return Err(invalid_custom_element_props.clone()),
+                                    }
+                                }
+                            }
+                        }
+                        "shadow" => match &prop.value {
+                            Expression::StringLiteral(s)
+                                if s.value == "open" || s.value == "none" =>
+                            {
+                                custom_element.shadow = Some(s.value.as_str());
+                            }
+                            _ => {
+                                return Err(ParserError {
+                                    span,
+                                    kind: ParserErrorKind::SvelteOptionsInvalidCustomElementShadow,
+                                })
+                            }
+                        },
+                        "extend" => custom_element.extend = Some(prop.value.clone_in(allocator)),
+                        _ => (),
+                    }
+                }
+            }
+            "namespace" => {
+                let err = ParserError {
+                    span,
+                    kind: ParserErrorKind::SvelteOptionsInvalidAttributeValue(
+                        r#""html", "mathml" or "svg""#.to_string(),
+                    ),
+                };
+                let value = attr.value.get_static_value().ok_or(err.clone())?;
+                if value == NAMESPACE_SVG {
+                    options.namespace = Some("svg");
+                } else if value == NAMESPACE_MATHML {
+                    options.namespace = Some("mathml");
+                } else if value == "html" || value == "mathml" || value == "svg" {
+                    options.namespace = Some(value);
+                } else {
+                    return Err(err);
+                }
+            }
+            "css" => match attr.value.get_static_value() {
+                Some(value) if value == "injected" => options.css = Some(value),
+                _ => {
+                    return Err(ParserError {
+                        span,
+                        kind: ParserErrorKind::SvelteOptionsInvalidAttributeValue(
+                            "Injected".to_string(),
+                        ),
+                    })
+                }
+            },
+            "immutable" => {
+                options.immutable = if attr.value.get_static_value().is_some() {
+                    Some(attr.value.get_boolean_value())
+                } else {
+                    None
+                }
+            }
+            "preserveWhitespace" => {
+                options.preserve_whitespace = if attr.value.get_static_value().is_some() {
+                    Some(attr.value.get_boolean_value())
+                } else {
+                    None
+                }
+            }
+            "accessors" => {
+                options.accessors = if attr.value.get_static_value().is_some() {
+                    Some(attr.value.get_boolean_value())
+                } else {
+                    None
+                }
+            }
+            name => {
+                return Err(ParserError {
+                    span,
+                    kind: ParserErrorKind::SvelteOptionsUnknownAttribute(name.to_string()),
+                })
+            }
+        }
+    }
+
+    Ok(())
 }
