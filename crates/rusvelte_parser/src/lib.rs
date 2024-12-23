@@ -331,21 +331,19 @@ impl<'a> Parser<'a> {
         let identifier = &remain[..(self.offset - start) as usize];
         if identifier.is_empty() {
             Ok(None)
+        } else if RESERVED_KEYWORDS.contains(identifier) {
+            Err(self.error(ParserErrorKind::UnexpectedReservedWord(
+                identifier.to_string(),
+            )))
         } else {
-            if RESERVED_KEYWORDS.contains(identifier) {
-                Err(self.error(ParserErrorKind::UnexpectedReservedWord(
-                    identifier.to_string(),
-                )))
-            } else {
-                Ok(Some((
-                    identifier,
-                    IdentifierReference {
-                        span: Span::new(start, self.offset),
-                        name: identifier.into(),
-                        reference_id: Cell::default(),
-                    },
-                )))
-            }
+            Ok(Some((
+                identifier,
+                IdentifierReference {
+                    span: Span::new(start, self.offset),
+                    name: identifier.into(),
+                    reference_id: Cell::default(),
+                },
+            )))
         }
     }
 
