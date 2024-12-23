@@ -16,18 +16,14 @@ macro_rules! test_success {
                 let source = std::fs::read_to_string(path).unwrap();
                 let allocator = oxc_allocator::Allocator::default();
                 let mut parser = Parser::new(&source, &allocator);
-                let result = parser.parse();
-                match result {
-                    Ok(root) => {
-                        insta::assert_json_snapshot!(root);
-                    }
-                    Err(error) => {
-                        eprintln!("Failed file: {}", path.to_string_lossy());
-                        eprintln!("{}", error);
+                let ret = parser.parse();
+                if !ret.errors.is_empty() {
+                    eprintln!("Failed file: {}", path.to_string_lossy());
+                    eprintln!("{:?}", ret.errors);
 
-                        assert!(false);
-                    }
+                    assert!(false);
                 }
+                insta::assert_json_snapshot!(&ret.root);
             });
         }
     };

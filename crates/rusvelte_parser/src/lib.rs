@@ -51,6 +51,11 @@ pub struct Parser<'a> {
     ast: AstBuilder<'a>,
 }
 
+pub struct ParseReturn<'a> {
+    pub root: Root<'a>,
+    pub errors: Vec<ParserError>,
+}
+
 impl<'a> Parser<'a> {
     pub fn new(source: &'a str, allocator: &'a Allocator) -> Self {
         let source = source.trim_end();
@@ -82,10 +87,26 @@ impl<'a> Parser<'a> {
         self.offset as usize
     }
 
-    pub fn parse(&mut self) -> Result<Root<'a>, ParserError> {
+    pub fn parse(&mut self) -> ParseReturn<'a> {
         self.context_stack.push(Context::root_context());
-        let fragment = self.parse_fragment(false)?;
-        let start = fragment.nodes.first().map_or(0, |node| {
+        let mut root = Root {
+            fragment: self.ast.fragment(self.ast.vec([]), false),
+            css: None,
+            span: Span::empty(0),
+            module: None,
+            instance: None,
+            options: None,
+        };
+        root.fragment = match self.parse_fragment(false) {
+            Ok(f) => f,
+            Err(e) => {
+                return ParseReturn {
+                    root,
+                    errors: vec![e],
+                }
+            }
+        };
+        let start = root.fragment.nodes.first().map_or(0, |node| {
             let mut start = node.span().start;
             let mut chars = self.source[start as usize..].chars();
             while chars.next().map_or(false, char::is_whitespace) {
@@ -93,7 +114,7 @@ impl<'a> Parser<'a> {
             }
             start
         });
-        let end = fragment.nodes.iter().last().map_or(0, |node| {
+        let end = root.fragment.nodes.iter().last().map_or(0, |node| {
             let mut end = node.span().end;
             if end == 0 {
                 return end;
@@ -106,14 +127,16 @@ impl<'a> Parser<'a> {
         });
         self.context_stack.pop();
 
-        Ok(Root {
-            span: Span::new(start, end),
-            fragment,
-            instance: self.instance.take(),
-            module: self.module.take(),
-            css: self.css.take(),
-            options: self.options.take(),
-        })
+        root.span = Span::new(start, end);
+        root.instance = self.instance.take();
+        root.module = self.module.take();
+        root.css = self.css.take();
+        root.options = self.options.take();
+
+        ParseReturn {
+            root,
+            errors: vec![],
+        }
     }
 
     pub fn parse_expression(&mut self) -> Result<Expression<'a>, ParserError> {
