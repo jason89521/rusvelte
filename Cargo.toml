@@ -23,14 +23,14 @@ oxc_codegen = { git = "https://github.com/jason89521/oxc.git", branch = "rusvelt
 [workspace.dependencies]
 serde = { version = "1.0.214" }
 serde_json = { version = "1.0.132" }
-oxc_allocator = { version = "*" }
-oxc_ast = { version = "*", features = ["serialize"] }
-oxc_parser = { version = "*" }
-oxc_span = { version = "*" }
-oxc_syntax = { version = "*" }
-oxc_diagnostics = { version = "*" }
-oxc_ecmascript = { version = "*" }
-oxc_codegen = { version = "*" }
+oxc_allocator = { version = "0.44.0" }
+oxc_ast = { version = "0.44.0", features = ["serialize"] }
+oxc_parser = { version = "0.44.0" }
+oxc_span = { version = "0.44.0" }
+oxc_syntax = { version = "0.44.0" }
+oxc_diagnostics = { version = "0.44.0" }
+oxc_ecmascript = { version = "0.44.0" }
+oxc_codegen = { version = "0.44.0" }
 oxc_index = { version = "2.0.0" }
 thiserror = { version = "2.0.1" }
 htmlize = { version = "1.0.5" }
